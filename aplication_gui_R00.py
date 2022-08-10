@@ -1,6 +1,6 @@
 import PySimpleGUI as sg
-import time
 from Aplication_draw import Draw_Solder
+from Aplication_Att import Visualizar_att
 
 
 
@@ -48,15 +48,17 @@ def main_test():
             [sg.Column(layout =filete_propriedades,key="Propriedades", visible=False),graph_elem],
             [sg.Button('Ok'), sg.Button('Cancel'), sg.Button('Reset')]]
 
-    return sg.Window('Soldas',layout, finalize=True ,resizable=True)
+    return sg.Window('Soldas',layout, finalize=True)
 
-class Filete:
+class Pre_visualizacao():
     """
     Controla todos os desenhos/imagens que serão disponibilizadas no gui
     """
 
-    def __init__(self) -> None:
-        pass
+    def __init__(self, janela) -> None:
+
+        self.janela = janela
+
 
     def solda_em_campo(self):
         pass
@@ -75,25 +77,111 @@ class Filete:
 #dados
 keys_propriedades = ["-CAMPO"+str(i)+'-' for i in range(1,8)]
 text_filete = ['S. Campo','Continua','Ambos Lados','Intercalado','Todo Contorno','Filete','Continua']
-text_bisel = ['Maria', 'Jose','Adamastor','Cleusa','Cleverson','Douglas','Lemos']
+text_bisel = ['Maria', 'Jose','Adamastor','Cleusa','Todo Contorno','Douglas','Lemos']
 
 
 janela_um = main_test()
 while True:
+    
+
     window,event, values = sg.read_all_windows()
+    '''
+    toda a vez que um evento é disparado o while roda
+    '''
     print(event)
     if event == sg.WIN_CLOSED:
         break
 
-    #------------------------------------------------------
-    elif event == "Ok":
 
-        print(values)
+    #----------------------evento ok-------------------------------
+    elif event == "Ok":
+        #---------------------------ATT----------------------------
+        att = Visualizar_att()
+        if att.verificar(r'C:\Users\breno\Desktop\Projetos\Soldas\blocos'):
+            handle, ponto = att.bloco_selecionado()
+            att.deletar(handle)
+        else:
+            handle, ponto = 'N_att', 'N_att'
+
+        #--------------------------------------------------------------
+
         bloco_cad = Draw_Solder()
-        if values['-FILETE-']:
-            if values['-CAMPO5-']:
-                bloco_cad.inserir_bloco('Solda_filete_contorno')
-                bloco_cad.espessura(values['-ESP_B-'])
+        if values['-OESQ-']:
+            if values['-FILETE-']:
+                if values['-CAMPO5-']: #solda contorno
+                    if values['-CAMPO1-']: #acabamento em campo
+                        if values['-CAMPO3-']:
+                            solda_block = 'eSolda_filete_contorno_em_campo_amboslados'
+                        else:
+                            solda_block = 'eSolda_filete_contorno_em_campo'
+                    elif values['-CAMPO3-']: # ambos os lados
+                        solda_block = 'eSolda_filete_contorno_amboslados'
+                    else:
+                        #somente contorno
+                        solda_block = 'eSolda_filete_contorno'
+
+
+                elif values['-CAMPO1-']:
+                    if False:
+                        pass
+                    elif values['-CAMPO3-']:
+                        solda_block = 'eSolda_filete_em_campo__amboslados'
+                    else:
+                        #so acabamento em campo
+                        solda_block = 'eSolda_filete_em_campo'
+        
+
+
+            elif values['-BISEL-']:
+                if values['-IRETO-']:
+                    if values['-CAMPO5-']:
+                        solda_block = 'Solda_bisel_contorno_reto'
+                elif values['-ICONV-']:
+                    if values['-CAMPO5-']:
+                        solda_block = 'Solda_bisel_contorno_convexo' 
+                elif values['-ISA-']:
+                    if values['-CAMPO5-']:
+                        solda_block = 'Solda_bisel_contorno_semacabamento' 
+
+        elif values['-ODIR-']:
+            if values['-FILETE-']:
+                if values['-CAMPO5-']: #solda contorno
+                    if values['-CAMPO1-']: #acabamento em campo
+                        if values['-CAMPO3-']:
+                            solda_block = 'dSolda_filete_contorno_em_campo_amboslados'
+                        else:
+                            solda_block = 'dSolda_filete_contorno_em_campo'
+                    elif values['-CAMPO3-']: # ambos os lados
+                        solda_block = 'dSolda_filete_contorno_amboslados'
+                    else:
+                        #somente contorno
+                        solda_block = 'dSolda_filete_contorno'
+
+
+                elif values['-CAMPO1-']:
+                    if False:
+                        pass
+                    elif values['-CAMPO3-']:
+                        solda_block = 'dSolda_filete_em_campo__amboslados'
+                    else:
+                        #so acabamento em campo
+                        solda_block = 'dSolda_filete_em_campo'
+        
+
+
+            elif values['-BISEL-']:
+                if values['-IRETO-']:
+                    if values['-CAMPO5-']:
+                        solda_block = 'Solda_bisel_contorno_reto'
+                elif values['-ICONV-']:
+                    if values['-CAMPO5-']:
+                        solda_block = 'Solda_bisel_contorno_convexo' 
+                elif values['-ISA-']:
+                    if values['-CAMPO5-']:
+                        solda_block = 'Solda_bisel_contorno_semacabamento' 
+
+        bloco_cad.inserir_bloco(solda_block, ponto)
+        bloco_cad.espessura(values['-ESP_B-'])
         '''
     elif False:
         #jogar a janela para frente
