@@ -28,7 +28,7 @@ class Visualizar_att():
         '''
         #so esta se selecionando uma
         for entity in self.zw.doc.PickfirstSelectionSet:
-            return entity.Handle, entity.InsertionPoint
+            return entity.Handle, entity.InsertionPoint, entity.XScaleFactor
 
     def deletar(self, handle: str):
 

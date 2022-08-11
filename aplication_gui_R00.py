@@ -45,7 +45,7 @@ def main_test():
                                         sg.Radio('Convexo','Inf.',key='-ICONV-'),
                                         sg.Radio('Sem Acabamento', 'Inf.',key='-ISA-')]])
                                         ,
-                            sg.Column([[sg.Text(text='Espessura')],
+                            sg.Column([[sg.Text(text='Escala')],
                                         [sg.Radio('Manual', 'ESC',enable_events=True, key='-MANUAL-'),sg.Radio('Automatico','ESC',enable_events=True,key='-AUTO-',default=True)],
                                         [sg.Text(text='x'), sg.InputText('',key='-ESCX-',size=(5), disabled=True)],
                                         [sg.Text(text='y'), sg.InputText('',key='-ESCY-',size=(5), disabled=True)]
@@ -110,14 +110,17 @@ while True:
         #---------------------------ATT----------------------------
         att = Visualizar_att()
         if att.verificar(r'C:\Users\breno\Desktop\Projetos\Soldas\blocos'):
-            handle, ponto = att.bloco_selecionado()
+            handle, ponto, escala = att.bloco_selecionado()
             att.deletar(handle)
         else:
-            handle, ponto = 'N_att', 'N_att'
+            handle, ponto,escala = 'N_att', 'N_att', values['-ESCX-']
 
         #---------------------------ESCALA-----------------------------
 
-        bloco_cad.escala_atual = values['-ESCX-']
+        if values['-AUTO-']:
+            bloco_cad.escala_atual = escala
+        else:
+            bloco_cad.escala_atual = values['-ESCX-']
 
         #--------------------------------------------------------------
 
