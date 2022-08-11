@@ -1,50 +1,71 @@
 
-from cx_Freeze import Executable
-
-
 class Draw_Solder:
 
 
     def __init__(self) -> None:
 
         from pyzwcad import ZwCAD
-        from pyzwcad.types import APoint
-        import win32com.client
         
         self.zw = ZwCAD()
-        self.local_dos_blocos = r'C:\Users\breno\Desktop\Projetos\Soldas\blocos'
 
-        #ainda vou pensar como vou fazer isso
+        #local dos blocos
+        self.__local_dos_blocos = r'C:\Users\breno\Desktop\Projetos\Soldas\blocos'
+        #Número padrão para o calculo da escala automatica
+        self.__escala_padrao = 41.681469640756404
+        #Escala automatica
+        self.__escala_atual = (self.zw.doc.ActiveViewport.Height)/self.__escala_padrao
     
+    @property
+    def local_dos_blocos(self):
+        return self.__local_dos_blocos
+
+    @property
+    def escalas_padrao(self):
+        return self.__escala_padrao
+
+    @property
+    def escala_atual(self):
+        return self.__escala_atual
+
+    @local_dos_blocos.setter
+    def local_dos_blocos(self, novo_local):
+        self.__local_dos_blocos = novo_local
+        
+    @escala_atual.setter
+    def escala_atual(self,escala_nova):
+        self.__escala_atual = float(escala_nova)
+
     
-    def inserir_bloco(self,tipo: str, *args) -> Executable:
+    def inserir_bloco(self,tipo: str, *args):
         '''
         Insere o bloco do tipo especificado no autocad em exceção
 
         tipo = tipo da solda a ser inserida
         '''
         from pyzwcad.types import APoint
-        import os
+        from os.path import join
 
         #Objeto block
         block = self.zw.doc.ActiveLayout.Block
 
         #definição do local dos blocos
     
-        Path = os.path.join(self.local_dos_blocos,tipo +'.dwg')
+        Path = join(self.__local_dos_blocos,tipo +'.dwg')
         
         #definição ponto de inserção
         print(args[0])
         ponto = self.zw.doc.Utility.GetPoint() if args[0] =='N_att' else args[0]
 
+  
         #Inserção dos blocos
-        block.InsertBlock(APoint(ponto),Path,1,1,1,0)
+        block.InsertBlock(APoint(ponto),Path,self.__escala_atual,self.__escala_atual,1,0)
         #self.zw.app.Update
 
-    def espessura(self,exp: int, *args) -> Executable:
+    def espessura(self,exp: int, *args):
 
-        import win32com.client
-        acad = win32com.client.Dispatch("ZwCAD.Application")
+        from win32com.client import Dispatch
+        acad = Dispatch("ZwCAD.Application")
+
 
         #lista do handle (nomes) do ultimo documento adicionado
     
