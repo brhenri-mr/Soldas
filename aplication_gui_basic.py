@@ -85,11 +85,15 @@ keys_propriedades = ["-CAMPO"+str(i)+'-' for i in range(1,8)]
 text_filete = ['S. Campo','Continua','Ambos Lados','Intercalado','Todo Contorno','Filete','Continua']
 text_bisel = ['Maria', 'Jose','Adamastor','Cleusa','Todo Contorno','Douglas','Lemos']
 
+
+
+
+
 janela_um = main_test()
 
 
 while True:
-    
+
     window,event, values = sg.read_all_windows()
     '''
     toda a vez que um evento é disparado o while roda
@@ -110,7 +114,7 @@ while True:
         #---------------------------ATT----------------------------
         att = Visualizar_att()
         if att.verificar(r'C:\Users\breno\Desktop\Projetos\Soldas\blocos'):
-            handle, ponto, escala = att.bloco_selecionado()
+            handle, ponto, escala, name = att.bloco_selecionado()
             att.deletar(handle)
         else:
             handle, ponto,escala = 'N_att', 'N_att', values['-ESCX-']

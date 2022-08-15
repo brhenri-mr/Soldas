@@ -14,6 +14,8 @@ class Draw_Solder:
         self.__escala_padrao = 41.681469640756404
         #Escala automatica
         self.__escala_atual = (self.zw.doc.ActiveViewport.Height)/self.__escala_padrao
+        #handle
+        self.__handle = ''
     
     @property
     def local_dos_blocos(self):
@@ -55,10 +57,15 @@ class Draw_Solder:
         #definição ponto de inserção
         print(args[0])
         ponto = self.zw.doc.Utility.GetPoint() if args[0] =='N_att' else args[0]
+        ponto = APoint(ponto[0],ponto[1])
 
-  
+        print(ponto)
         #Inserção dos blocos
-        block.InsertBlock(APoint(ponto),Path,self.__escala_atual,self.__escala_atual,1,0)
+        block.InsertBlock(ponto,Path,self.__escala_atual,self.__escala_atual,1,0)
+
+        
+        print(block.Handle)
+        self.__handle = block.Handle
         #self.zw.app.Update
 
     def espessura(self,exp: int, *args):
@@ -71,6 +78,8 @@ class Draw_Solder:
     
         elemento_add_handle = list(self.zw.iter_objects('block'))[-1].handle 
 
+        print(elemento_add_handle)
+
         #Instancia do ultimo objeto adcionado no documento
         Entity = acad.ActiveDocument.HandleToObject(elemento_add_handle)
 
@@ -79,7 +88,12 @@ class Draw_Solder:
             if attr.TagString == "CORDAO":
                 attr.TextString = str(exp)
                 attr.Update()
-        
+    
+    def apagar_bloco(self, handle):
+        from win32com.client import Dispatch
+        acad = Dispatch("ZwCAD.Application")
+        acad.ActiveDocument.HandleToObject(handle).Delete()
+
             
                 
 

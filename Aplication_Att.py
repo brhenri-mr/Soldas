@@ -28,7 +28,7 @@ class Visualizar_att():
         '''
         #so esta se selecionando uma
         for entity in self.zw.doc.PickfirstSelectionSet:
-            return entity.Handle, entity.InsertionPoint, entity.XScaleFactor
+            return entity.Handle, entity.InsertionPoint, entity.XScaleFactor, entity.Name
 
     def deletar(self, handle: str):
 
@@ -36,15 +36,4 @@ class Visualizar_att():
         app = win32com.client.Dispatch("ZwCAD.Application")
         Entity = app.ActiveDocument.HandleToObject(handle)
         print(Entity.Erase())
-
-
-
-            
-                
-
-
-
-        
-        
-
 
