@@ -1,7 +1,6 @@
 import PySimpleGUI as sg
 from Aplication_draw import Draw_Solder
 from Aplication_Att import Visualizar_att
-from Aplication_eventos import evento_duplo_click
 
 class Pre_visualizacao():
     """
@@ -78,7 +77,7 @@ def main_test():
             [sg.Column(layout =filete_propriedades,key="Propriedades"),graph_elem],
             [sg.Button('Ok'), sg.Button('Cancel'), sg.Button('Reset')]]
 
-    return sg.Window('Soldas',layout, finalize=True)
+    return sg.Window('Solda duplo click',layout, finalize=True)
 
 def ler_log():
     with open("log.txt") as arquivo:
@@ -96,16 +95,18 @@ text_bisel = ['Maria', 'Jose','Adamastor','Cleusa','Todo Contorno','Douglas','Le
 
 
 janela_um = main_test()
+bloco_cad = Draw_Solder()
 
 
 while True:
 
+    print(bloco_cad.handle)
     window,event, values = sg.read_all_windows()
     '''
     toda a vez que um evento é disparado o while roda
     '''
     #-------------------Tipo dinamicos-----------------------------
-    bloco_cad = Draw_Solder()
+    #bloco_cad = Draw_Solder()
     window['-ESCX-'].Update(disabled=True,value=round(bloco_cad.escala_atual,1))
     window['-ESCY-'].Update(disabled=True,value=round(bloco_cad.escala_atual,1))
     #--------------------------------------------------------------
@@ -119,7 +120,12 @@ while True:
         #---------------------------ATT----------------------------
 
         parametros = ler_log()
-        handle, ponto,escala, nome = parametros['handle'], parametros['ponto'], parametros['escala'], parametros['nome']
+        ponto,escala, nome =  parametros['ponto'], parametros['escala'], parametros['nome']
+        if bloco_cad.handle == '':
+            handle = parametros['handle']
+        else:
+            handle = bloco_cad.handle
+
         print(handle,ponto,escala,nome)
         #---------------------------ESCALA-----------------------------
 

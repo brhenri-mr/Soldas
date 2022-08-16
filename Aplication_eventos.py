@@ -14,7 +14,6 @@ class ZwCADEvents(win32com.client.getevents("ZwCAD.Application")):
             #propriedade que controla o q ta acontecendo
             self.ok = True
             press('esc')
-            press('esc')
     
 
 ok = ZwCADEvents(win32com.client.Dispatch('ZwCAD.Application'))
@@ -45,3 +44,4 @@ def verificar_duplo_click():
         return visual.verificar(r'C:\Users\breno\Desktop\Projetos\Soldas\blocos') and ok.ok 
     except:
         pass
+

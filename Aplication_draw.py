@@ -29,6 +29,10 @@ class Draw_Solder:
     def escala_atual(self):
         return self.__escala_atual
 
+    @property
+    def handle(self):
+        return self.__handle
+
     @local_dos_blocos.setter
     def local_dos_blocos(self, novo_local):
         self.__local_dos_blocos = novo_local
@@ -36,6 +40,7 @@ class Draw_Solder:
     @escala_atual.setter
     def escala_atual(self,escala_nova):
         self.__escala_atual = float(escala_nova)
+    
 
     
     def inserir_bloco(self,tipo: str, *args):
@@ -63,9 +68,7 @@ class Draw_Solder:
         #Inserção dos blocos
         block.InsertBlock(ponto,Path,self.__escala_atual,self.__escala_atual,1,0)
 
-        
-        print(block.Handle)
-        self.__handle = block.Handle
+    
         #self.zw.app.Update
 
     def espessura(self,exp: int, *args):
@@ -76,12 +79,11 @@ class Draw_Solder:
 
         #lista do handle (nomes) do ultimo documento adicionado
     
-        elemento_add_handle = list(self.zw.iter_objects('block'))[-1].handle 
+        self.__handle = list(self.zw.iter_objects('block'))[-1].handle 
 
-        print(elemento_add_handle)
 
         #Instancia do ultimo objeto adcionado no documento
-        Entity = acad.ActiveDocument.HandleToObject(elemento_add_handle)
+        Entity = acad.ActiveDocument.HandleToObject(self.__handle)
 
         #Modificação dos atributos do bloco
         for attr in Entity.GetAttributes():

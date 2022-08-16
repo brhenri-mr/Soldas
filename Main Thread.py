@@ -1,14 +1,12 @@
 import threading
-import os
+from subprocess import call
+import sys
 from Aplication_eventos import verificar_duplo_click, evento_duplo_click
 
 
 def inicia_programa(nome_arquivo):
-    os.system('{}'.format(nome_arquivo))
+    call([sys.executable, '{}'.format(nome_arquivo)])
     # Ex: os.system('py -3.7 x.py')
-
-
-
 
 if __name__ == "__main__":
 
@@ -30,18 +28,12 @@ if __name__ == "__main__":
         if verificar_duplo_click():
             evento_duplo_click()
             processos[1].start()
-            processos[0]._stop
-
+            
         elif processos[1].is_alive():
             pass
-
-        elif processos[0].is_alive() and processos[1].is_alive():
-            break
         else:
             if processos[0].is_alive():
                 pass
-
             else:
-                processos[0].start()
-
+                break
 

@@ -1,6 +1,22 @@
-def ler_log():
-    with open("log.txt") as arquivo:
-        linha = arquivo.readlines()[0].split(',')
-    return({'handle':linha[0],'ponto':(linha[1],linha[2]),'escala':linha[3],'nome':linha[4]})
+import multiprocessing
+import time
 
-print(ler_log())
+def task():
+    while True:
+        print('Sleeping')
+    
+
+p= []
+
+if __name__ == "__main__": 
+
+    p.append(multiprocessing.Process(target = task))
+    p[-1].start()
+    time.sleep(2)
+    p[-1].terminate()
+    p.append(multiprocessing.Process(target = task))
+    for i in range(3):
+        print('to rodando')
+    p[-1].start()
+    time.sleep(1)
+    p[-1].terminate()
