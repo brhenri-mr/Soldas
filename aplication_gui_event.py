@@ -1,43 +1,22 @@
 import PySimpleGUI as sg
 from Aplication_draw import Draw_Solder
-from Aplication_Att import Visualizar_att
-
-class Pre_visualizacao():
-    """
-    Controla todos os desenhos/imagens que serão disponibilizadas no gui
-    """
-
-    def __init__(self, janela) -> None:
-
-        self.janela = janela
-
-
-    def solda_em_campo(self):
-        pass
-    def solda_continua(self):
-        pass
-    def solda_ambos_os_lados(self):
-        pass
-    def intercalado(self):
-        pass
-    def contorno(self):
-        pass
-    def solda_continua(self):
-        pass
+from Aplication_graph import Pre_visualizacao
 
 
 def main_test():
     #Criterio para ativação das propriedades
-    graph_elem = sg.Graph((200,150), (0, 200), (300, 0),
+    graph_elem = sg.Graph(canvas_size=(400, 400),
+                                graph_bottom_left=(0, 0),
+                                graph_top_right=(400, 400),
                                 enable_events=True,
                                 key='-GRAPH-',
                                 background_color='lightblue')
                                 
     filete_propriedades = [ [sg.Text('Orientação')],
-                            [sg.Radio('Direita','Ori.', key='-ODIR-', default=True), sg.Radio('Esquerda','Ori.', key='-OESQ-')],
+                            [sg.Radio('Direita','Ori.', key='-ODIR-', default=True, enable_events=True), sg.Radio('Esquerda','Ori.', key='-OESQ-', enable_events=True)],
                             [sg.Text('Acabamentos')],
                             [sg.Checkbox(text= "Solda em campo", size=(10, 1), default=False, key='-CAMPO1-', enable_events=True),sg.Checkbox(text="Solda Continua", size=(10,1), default=False, key='-CAMPO2-')],
-                            [sg.Checkbox(text="Ambos os lados", size=(10, 1), default=False, key='-CAMPO3-'),sg.Checkbox(text="Intercalado", size=(10,1), default=False, key='-CAMPO4-')],
+                            [sg.Checkbox(text="Ambos os lados", size=(10, 1), default=False, key='-CAMPO3-', enable_events=True),sg.Checkbox(text="Intercalado", size=(10,1), default=False, key='-CAMPO4-')],
                             [sg.Checkbox(text="Solda em todo contorno", size=(10,1), default=False, key='-CAMPO5-', enable_events=True), sg.Checkbox(text="Solda em todo contorno", size=(10,1), default=False, key='-CAMPO6-', enable_events=True)],
                             [sg.Checkbox(text="Filete", size=(10, 1), default=False, key='-CAMPO7-'),sg.Checkbox(text="Solda Continua", size=(10,1), default=False, key='-CAMPO8-')],
                             [sg.Column([[sg.Text(text='Informações adicionais')],
@@ -86,16 +65,15 @@ def ler_log():
 
 
 
-#dados
-keys_propriedades = ["-CAMPO"+str(i)+'-' for i in range(1,8)]
-text_filete = ['S. Campo','Continua','Ambos Lados','Intercalado','Todo Contorno','Filete','Continua']
-text_bisel = ['Maria', 'Jose','Adamastor','Cleusa','Todo Contorno','Douglas','Lemos']
-
-
-
-
 janela_um = main_test()
 bloco_cad = Draw_Solder()
+parametros = ler_log()
+id = {'solda_em_campo':'','ambos_os_lados':'','contorno':''}
+
+
+grafico = Pre_visualizacao(janela_um.Element("-GRAPH-"))
+grafico.solda_desenhada(parametros['nome'])
+
 
 
 while True:
@@ -119,7 +97,6 @@ while True:
     elif event == "Ok":
         #---------------------------ATT----------------------------
 
-        parametros = ler_log()
         ponto,escala, nome =  parametros['ponto'], parametros['escala'], parametros['nome']
         if bloco_cad.handle == '':
             handle = parametros['handle']
@@ -230,11 +207,54 @@ while True:
         window['-ESCX-'].Update(disabled=True,value=round(bloco_cad.escala_atual,1))
         window['-ESCY-'].Update(disabled=True,value=round(bloco_cad.escala_atual,1))
 
-    #--------------------------------------------------------
+    #--------------------------Orientação----------------------
+
+    elif event == '-ODIR-':
+        [window[campos].Update(value=False) for campos in ['-CAMPO1-', '-CAMPO2-', '-CAMPO3-', '-CAMPO4-', '-CAMPO5-', '-CAMPO6-', '-CAMPO7-']]
+        grafico.deletar()
+        if values['-FILETE-']:
+            grafico.filete()
+
+    elif event == '-OESQ-':
+        [window[campos].Update(value=False) for campos in ['-CAMPO1-', '-CAMPO2-', '-CAMPO3-', '-CAMPO4-', '-CAMPO5-', '-CAMPO6-', '-CAMPO7-']]
+        grafico.deletar()
+        if values['-FILETE-']:
+            grafico.filete()
+ 
+    #-------------------------Desenho---------------------------
+
+    elif event == '-FILETE-':
+        grafico.filete()
+    elif event == '-CAMPO1-':
+        if values['-CAMPO1-']:
+            id['solda_em_campo'] = grafico.solda_em_campo(values['-ODIR-'])
+        else:
+            grafico.apagar(id['solda_em_campo'])
+            pass
+    elif event == '-CAMPO2-':
+        pass
+    elif event == '-CAMPO3-':
+        if values['-CAMPO3-']:
+             id['ambos_os_lados'] = grafico.solda_ambos_os_lados()
+        else:
+            grafico.apagar(id['ambos_os_lados'])
+    elif event == '-CAMPO4-':
+        pass
+    elif event == '-CAMPO5-':
+        if values['-CAMPO5-']:
+           id['contorno'] = grafico.contorno(values['-ODIR-'])
+        else:
+            grafico.apagar(id['contorno'])
+    elif event == '-CAMPO6-':
+        pass
+    elif event == '-CAMPO7-':
+        pass
+ 
     else:
 
         '''
         Mudanças das propriedades por escolha do tipo de solda
         '''
         ...
+    
     

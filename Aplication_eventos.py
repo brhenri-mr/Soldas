@@ -29,7 +29,7 @@ def evento_duplo_click():
                 ponto_um,ponto_dois = ponto[0],ponto[1]
                 with open("log.txt",'w') as arquivo:
                     arquivo.write(f"{handle},{ponto_um},{ponto_dois},{escala},{name}")
-                print('?')
+                print('\033[92mBloco obtido com sucesso!!!\033[92m')
                 press('esc')
                 press('esc')
     
@@ -45,3 +45,4 @@ def verificar_duplo_click():
     except:
         pass
 
+evento_duplo_click()
