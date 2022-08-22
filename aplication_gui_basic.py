@@ -2,6 +2,8 @@ import PySimpleGUI as sg
 from Aplication_draw import Draw_Solder
 from Aplication_Att import Visualizar_att
 from Aplication_graph import Pre_visualizacao
+from pyzwcad import ZwCAD
+from win32com.client import Dispatch
 
 def main_test():
     #Criterio para ativação das propriedades
@@ -56,7 +58,7 @@ def main_test():
             [sg.Column(layout =filete_propriedades,key="Propriedades"),graph_elem],
             [sg.Button('Ok'), sg.Button('Cancel'), sg.Button('Reset')]]
 
-    return sg.Window('Soldas',layout, finalize=True)
+    return sg.Window('Soldas',layout, finalize=True, icon=r'C:\Users\breno\Desktop\Projetos\Soldas\soldering_iron-48_46707.ico', titlebar_icon='soldering_iron-48_46707.ico')
 
 
 #dados
@@ -65,6 +67,8 @@ id = {'solda_em_campo':'','ambos_os_lados':'','contorno':''}
 
 #Tipo estaticos
 janela_um = main_test()
+zw = ZwCAD()
+acad = Dispatch("ZwCAD.Application")
 
 
 while True:
@@ -74,7 +78,13 @@ while True:
     toda a vez que um evento é disparado o while roda
     '''
     #-------------------Tipo dinamicos-----------------------------
-    bloco_cad = Draw_Solder()
+    try:
+        bloco_cad = Draw_Solder(zw,acad)
+
+    except:
+        sg.Popup('Erro ao tentar encontrar um ZwCAD')
+        break
+    
     grafico = Pre_visualizacao(window['-GRAPH-'])
     window['-ESCX-'].Update(disabled=True,value=round(bloco_cad.escala_atual,1))
     window['-ESCY-'].Update(disabled=True,value=round(bloco_cad.escala_atual,1))

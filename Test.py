@@ -1,5 +1,11 @@
-import PySimpleGUI as sg
+from pyzwcad import ZwCAD
+from os.path import join
 
+ZwCAD.doc.close()
+
+
+
+'''
 layout = [
     [
         sg.Graph(
@@ -11,7 +17,7 @@ layout = [
     ]
 ]
 
-window = sg.Window("rect on image", layout)
+window = sg.Window("rect on image", layout, icon="soldering_iron-48_46707.ico")
 window.Finalize()
 
 graph = window.Element("graph")
@@ -28,3 +34,4 @@ while True:
     event, values = window.Read()
     if event is None:
         break
+'''

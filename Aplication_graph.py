@@ -58,7 +58,7 @@ class Pre_visualizacao():
             c = (280,200)
         else:
             c = (100,200)
-        id = self.janela.draw_circle(c, 10 ,line_color='red')
+        id = self.janela.draw_circle(c, 17.5 ,line_color='red')
         return id
 
     def solda_continua(self, orientacao):
@@ -81,28 +81,31 @@ class Pre_visualizacao():
         '''
         Desenha a solda do autocad no programa
         '''
+        id = {'filete':[],'contorno':[],'amboslados':[],'campo':[]}
 
         if 'd' == nome[0]:
             if 'filete' in nome:
-                self.filete()
+                id['filete'].append(self.filete())
             elif 'bisel' in nome:
                 pass
             if 'contorno' in nome:
-                self.contorno(True)
+                id['contorno'].append(self.contorno(True))
             if 'amboslados' in nome:
-                self.solda_ambos_os_lados()
+                id['amboslados'].append(self.solda_ambos_os_lados())
             if 'campo' in nome:
-                self.solda_em_campo(True)
+                id['campo'].append(self.solda_em_campo(True))
 
         elif 'e' == nome[0]:
             if 'filete' in nome:
-                self.filete()
+                id['filete'].append(self.filete())
             elif 'bisel' in nome:
                 pass
             if 'contorno' in nome:
-                self.contorno(False)
+                id['contorno'].append(self.contorno(False))
             if 'amboslados' in nome:
-                self.solda_ambos_os_lados()
+                id['amboslados'].append(self.solda_ambos_os_lados())
             if 'campo' in nome:
-                self.solda_em_campo(False)
+                id['campo'].append(self.solda_em_campo(False))
+
+        return id
     

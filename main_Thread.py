@@ -9,7 +9,7 @@ def inicia_programa(nome_arquivo):
     # Ex: os.system('py -3.7 x.py')
 
 if __name__ == "__main__":
-
+    print('?')
     arquivos = [r'C:\Users\breno\Desktop\Projetos\Soldas\aplication_gui_basic.py',
                 r'C:\Users\breno\Desktop\Projetos\Soldas\aplication_gui_event.py']
 

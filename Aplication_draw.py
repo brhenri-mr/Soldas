@@ -1,12 +1,10 @@
 
 class Draw_Solder:
 
+    def __init__(self,zw, acad):
 
-    def __init__(self) -> None:
-
-        from pyzwcad import ZwCAD
-        
-        self.zw = ZwCAD()
+        self.acad = acad
+        self.zw = zw
 
         #local dos blocos
         self.__local_dos_blocos = r'C:\Users\breno\Desktop\Projetos\Soldas\blocos'
@@ -67,23 +65,20 @@ class Draw_Solder:
         print(ponto)
         #Inserção dos blocos
         block.InsertBlock(ponto,Path,self.__escala_atual,self.__escala_atual,1,0)
+        
+        self.__handle = block.Item(block.count-1).handle
 
     
         #self.zw.app.Update
 
     def espessura(self,exp: int, *args):
 
-        from win32com.client import Dispatch
-        acad = Dispatch("ZwCAD.Application")
-
-
-        #lista do handle (nomes) do ultimo documento adicionado
-    
-        self.__handle = list(self.zw.iter_objects('block'))[-1].handle 
-
 
         #Instancia do ultimo objeto adcionado no documento
-        Entity = acad.ActiveDocument.HandleToObject(self.__handle)
+        if args[0] != None:
+            pass
+        else:
+            Entity = self.acad.ActiveDocument.HandleToObject(self.__handle)
 
         #Modificação dos atributos do bloco
         for attr in Entity.GetAttributes():
@@ -92,9 +87,8 @@ class Draw_Solder:
                 attr.Update()
     
     def apagar_bloco(self, handle):
-        from win32com.client import Dispatch
-        acad = Dispatch("ZwCAD.Application")
-        acad.ActiveDocument.HandleToObject(handle).Delete()
+
+        self.acad.ActiveDocument.HandleToObject(handle).Delete()
 
             
                 

@@ -1,6 +1,9 @@
+from asyncio import Handle
 import PySimpleGUI as sg
 from Aplication_draw import Draw_Solder
 from Aplication_graph import Pre_visualizacao
+from pyzwcad import ZwCAD
+from win32com.client import Dispatch
 
 
 def main_test():
@@ -56,7 +59,7 @@ def main_test():
             [sg.Column(layout =filete_propriedades,key="Propriedades"),graph_elem],
             [sg.Button('Ok'), sg.Button('Cancel'), sg.Button('Reset')]]
 
-    return sg.Window('Solda duplo click',layout, finalize=True)
+    return sg.Window('Solda duplo click',layout, finalize=True,)
 
 def ler_log():
     with open("log.txt") as arquivo:
@@ -66,15 +69,17 @@ def ler_log():
 
 
 janela_um = main_test()
-bloco_cad = Draw_Solder()
+zw = ZwCAD()
+acad = Dispatch("ZwCAD.Application")
+bloco_cad = Draw_Solder(zw,acad)
 parametros = ler_log()
 id = {'solda_em_campo':'','ambos_os_lados':'','contorno':''}
 
 
 grafico = Pre_visualizacao(janela_um.Element("-GRAPH-"))
-grafico.solda_desenhada(parametros['nome'])
+sid = grafico.solda_desenhada(parametros['nome'])
 
-
+print(sid)
 
 while True:
 
@@ -111,7 +116,7 @@ while True:
         else:
             bloco_cad.escala_atual = values['-ESCX-']
 
-        #--------------------------------------------------------------
+        #----------------------------INSERIR-------------------------------
 
         if values['-OESQ-']:
             if values['-FILETE-']:
@@ -189,7 +194,7 @@ while True:
 
         bloco_cad.apagar_bloco(handle)
         bloco_cad.inserir_bloco(solda_block, ponto)
-        bloco_cad.espessura(values['-ESP_B-'])
+        bloco_cad.espessura(values['-ESP_B-'],handle)
         '''
     elif False:
         #jogar a janela para frente
@@ -224,13 +229,25 @@ while True:
     #-------------------------Desenho---------------------------
 
     elif event == '-FILETE-':
-        grafico.filete()
+        if values['-FILETE-']:
+            grafico.filete()
+        else:
+            if isinstance(sid['filete'],None):
+                grafico.pagar(id['filete'])
+            else:
+                grafico.pagar(sid['filete'])
+                sid['filete'] = None
     elif event == '-CAMPO1-':
         if values['-CAMPO1-']:
             id['solda_em_campo'] = grafico.solda_em_campo(values['-ODIR-'])
         else:
-            grafico.apagar(id['solda_em_campo'])
-            pass
+            print(sid['campo'])
+            if sid['campo'] == None:
+                grafico.apagar(id['solda_em_campo'])
+            else:
+                grafico.apagar(1)
+                sid['campo'] = None
+
     elif event == '-CAMPO2-':
         pass
     elif event == '-CAMPO3-':

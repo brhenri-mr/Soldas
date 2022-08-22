@@ -44,5 +44,3 @@ def verificar_duplo_click():
         return visual.verificar(r'C:\Users\breno\Desktop\Projetos\Soldas\blocos') and ok.ok 
     except:
         pass
-
-evento_duplo_click()
