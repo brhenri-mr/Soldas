@@ -1,9 +1,9 @@
-from asyncio import Handle
 import PySimpleGUI as sg
 from Aplication_draw import Draw_Solder
 from Aplication_graph import Pre_visualizacao
 from pyzwcad import ZwCAD
 from win32com.client import Dispatch
+from datetime import datetime
 
 
 def main_test():
@@ -64,24 +64,45 @@ def main_test():
 def ler_log():
     with open("log.txt") as arquivo:
         linha = arquivo.readlines()[0].split(',')
-    return({'handle':linha[0],'ponto':[float(linha[1]),float(linha[2])],'escala':float(linha[3]),'nome':linha[4]})
+    return({'handle':linha[0],'ponto':[float(linha[1]),float(linha[2])],'escala':float(linha[3]),'nome':linha[4], 'time_m':linha[5], 'time_s':linha[6], 'time':linha[7]})
 
 
 
-janela_um = main_test()
 zw = ZwCAD()
 acad = Dispatch("ZwCAD.Application")
 bloco_cad = Draw_Solder(zw,acad)
-parametros = ler_log()
+tempo_utilizado = '' 
 id = {'solda_em_campo':'','ambos_os_lados':'','contorno':''}
 
 
-grafico = Pre_visualizacao(janela_um.Element("-GRAPH-"))
-sid = grafico.solda_desenhada(parametros['nome'])
 
-print(sid)
+#fazer marca o campo qunado a janela abre
+#for campo in zip(''[f'-CAMPO{i}-' for i in range(1,6)]):
+    #if 
+    #janela_um.Element(campo).Update(value=True)
+
+
+
+
 
 while True:
+
+    while True:
+        #estou verificando que a ultima vez que o log foi utilizado se foi recente para que possa aparecer a janela de modificação
+        try:
+            parametros = ler_log()
+            if int(parametros['time_m']) - datetime.now().minute <=1 and int(parametros['time_s']) - datetime.now().second <=2 :
+                if parametros['time'] != tempo_utilizado:
+                    janela_um = main_test()
+                    grafico = Pre_visualizacao(janela_um.Element("-GRAPH-"))
+                    sid = grafico.solda_desenhada(parametros['nome'])
+                    tempo_utilizado =  parametros['time']
+                    break
+            else:
+                pass
+        except:
+            pass
+
 
     print(bloco_cad.handle)
     window,event, values = sg.read_all_windows()
@@ -96,7 +117,7 @@ while True:
 
     print(event)
     if event == sg.WIN_CLOSED:
-        break
+        window.close()
 
     #----------------------evento ok-------------------------------
     elif event == "Ok":

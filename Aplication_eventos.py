@@ -21,6 +21,7 @@ ok = ZwCADEvents(win32com.client.Dispatch('ZwCAD.Application'))
 
 def evento_duplo_click():
     from pyautogui import press
+    from datetime import datetime
     visual = Visualizar_att()
     while True:
         try:
@@ -28,7 +29,7 @@ def evento_duplo_click():
                 handle, ponto, escala, name = visual.bloco_selecionado()
                 ponto_um,ponto_dois = ponto[0],ponto[1]
                 with open("log.txt",'w') as arquivo:
-                    arquivo.write(f"{handle},{ponto_um},{ponto_dois},{escala},{name}")
+                    arquivo.write(f"{handle},{ponto_um},{ponto_dois},{escala},{name},{datetime.now().minute},{datetime.now().second},{datetime.now()}")
                 print('\033[92mBloco obtido com sucesso!!!\033[92m')
                 press('esc')
                 press('esc')
