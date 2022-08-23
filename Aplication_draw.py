@@ -75,10 +75,7 @@ class Draw_Solder:
 
 
         #Instancia do ultimo objeto adcionado no documento
-        if args[0] != None:
-            pass
-        else:
-            Entity = self.acad.ActiveDocument.HandleToObject(self.__handle)
+        Entity = self.acad.ActiveDocument.HandleToObject(args[0] if len(args) != 0 else self.__handle)
 
         #Modificação dos atributos do bloco
         for attr in Entity.GetAttributes():

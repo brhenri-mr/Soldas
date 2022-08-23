@@ -72,6 +72,7 @@ zw = ZwCAD()
 acad = Dispatch("ZwCAD.Application")
 bloco_cad = Draw_Solder(zw,acad)
 tempo_utilizado = '' 
+bloco_obtido = True
 id = {'solda_em_campo':'','ambos_os_lados':'','contorno':''}
 
 
@@ -84,10 +85,9 @@ id = {'solda_em_campo':'','ambos_os_lados':'','contorno':''}
 
 
 
-
 while True:
 
-    while True:
+    while bloco_obtido:
         #estou verificando que a ultima vez que o log foi utilizado se foi recente para que possa aparecer a janela de modificação
         try:
             parametros = ler_log()
@@ -97,6 +97,7 @@ while True:
                     grafico = Pre_visualizacao(janela_um.Element("-GRAPH-"))
                     sid = grafico.solda_desenhada(parametros['nome'])
                     tempo_utilizado =  parametros['time']
+                    bloco_obtido = False
                     break
             else:
                 pass
@@ -118,6 +119,7 @@ while True:
     print(event)
     if event == sg.WIN_CLOSED:
         window.close()
+        bloco_obtido = True
 
     #----------------------evento ok-------------------------------
     elif event == "Ok":
