@@ -126,10 +126,9 @@ while True:
         #---------------------------ATT----------------------------
 
         ponto,escala, nome =  parametros['ponto'], parametros['escala'], parametros['nome']
-        if bloco_cad.handle == '':
-            handle = parametros['handle']
-        else:
-            handle = bloco_cad.handle
+   
+        handle = parametros['handle']
+
 
         print(handle,ponto,escala,nome)
         #---------------------------ESCALA-----------------------------
@@ -217,7 +216,7 @@ while True:
 
         bloco_cad.apagar_bloco(handle)
         bloco_cad.inserir_bloco(solda_block, ponto)
-        bloco_cad.espessura(values['-ESP_B-'],handle)
+        bloco_cad.espessura(values['-ESP_B-'],bloco_cad.handle)
         '''
     elif False:
         #jogar a janela para frente
