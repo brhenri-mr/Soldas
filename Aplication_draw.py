@@ -87,6 +87,9 @@ class Draw_Solder:
 
         self.acad.ActiveDocument.HandleToObject(handle).Delete()
 
+
+    
+
             
                 
 

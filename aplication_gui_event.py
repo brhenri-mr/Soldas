@@ -6,7 +6,7 @@ from win32com.client import Dispatch
 from datetime import datetime
 
 
-def main_test():
+def main_test(filete=False,campo=False, contorno=False,direita=False,esquerda=False,amboslados=False):
     #Criterio para ativação das propriedades
     graph_elem = sg.Graph(canvas_size=(400, 400),
                                 graph_bottom_left=(0, 0),
@@ -16,11 +16,11 @@ def main_test():
                                 background_color='lightblue')
                                 
     filete_propriedades = [ [sg.Text('Orientação')],
-                            [sg.Radio('Direita','Ori.', key='-ODIR-', default=True, enable_events=True), sg.Radio('Esquerda','Ori.', key='-OESQ-', enable_events=True)],
+                            [sg.Radio('Direita','Ori.', key='-ODIR-', default=direita, enable_events=True), sg.Radio('Esquerda','Ori.', key='-OESQ-', enable_events=True, default=esquerda)],
                             [sg.Text('Acabamentos')],
-                            [sg.Checkbox(text= "Solda em campo", size=(10, 1), default=False, key='-CAMPO1-', enable_events=True),sg.Checkbox(text="Solda Continua", size=(10,1), default=False, key='-CAMPO2-')],
-                            [sg.Checkbox(text="Ambos os lados", size=(10, 1), default=False, key='-CAMPO3-', enable_events=True),sg.Checkbox(text="Intercalado", size=(10,1), default=False, key='-CAMPO4-')],
-                            [sg.Checkbox(text="Solda em todo contorno", size=(10,1), default=False, key='-CAMPO5-', enable_events=True), sg.Checkbox(text="Solda em todo contorno", size=(10,1), default=False, key='-CAMPO6-', enable_events=True)],
+                            [sg.Checkbox(text= "Solda em campo", size=(10, 1), default=campo, key='-CAMPO1-', enable_events=True),sg.Checkbox(text="Solda Continua", size=(10,1), default=False, key='-CAMPO2-')],
+                            [sg.Checkbox(text="Ambos os lados", size=(10, 1), default=amboslados, key='-CAMPO3-', enable_events=True),sg.Checkbox(text="Intercalado", size=(10,1), default=False, key='-CAMPO4-')],
+                            [sg.Checkbox(text="Solda em todo contorno", size=(10,1), default=contorno, key='-CAMPO5-', enable_events=True), sg.Checkbox(text="Solda em todo contorno", size=(10,1), default=False, key='-CAMPO6-', enable_events=True)],
                             [sg.Checkbox(text="Filete", size=(10, 1), default=False, key='-CAMPO7-'),sg.Checkbox(text="Solda Continua", size=(10,1), default=False, key='-CAMPO8-')],
                             [sg.Column([[sg.Text(text='Informações adicionais')],
                                         [sg.Radio('Reto','Inf.', key='-IRETO-'),
@@ -38,7 +38,7 @@ def main_test():
     #sg.theme('DarkRed1')
     layout = [  [sg.Text('Tipo de solda', justification='center')],
             [sg.Column([[
-                sg.Radio('Filete','Prop.',enable_events=True, key='-FILETE-'),
+                sg.Radio('Filete','Prop.',enable_events=True, key='-FILETE-', default=filete),
                 sg.Radio('Topo','Prop.',enable_events=True, key='-TOPO-'), 
                 sg.Radio('V','Prop.' ,enable_events=True, key='-V-'),
                 sg.Radio('V Curvo','Prop.' ,enable_events=True, key='-V CURVO-'),
@@ -62,10 +62,50 @@ def main_test():
     return sg.Window('Solda duplo click',layout, finalize=True,)
 
 def ler_log():
-    with open("log.txt") as arquivo:
-        linha = arquivo.readlines()[0].split(',')
-    return({'handle':linha[0],'ponto':[float(linha[1]),float(linha[2])],'escala':float(linha[3]),'nome':linha[4], 'time_m':linha[5], 'time_s':linha[6], 'time':linha[7]})
+    try:
+        with open("log.txt",'r') as arquivo:
+            linha = arquivo.readlines()[-1].split(',')
+            
+        return({'handle':linha[0],'ponto':[float(linha[1]),float(linha[2])],'escala':float(linha[3]),'nome':linha[4], 'time':datetime.strptime(linha[5],"%m/%d/%Y %H:%M:%S:%f")})
+    except:
+        pass
 
+ 
+
+def solda_desenhada(nome):
+
+        '''
+        Desenha a solda do autocad no programa
+        '''
+        id = {'filete':False,'contorno':False,'amboslados':False,'campo':False,'direita':False,'esquerda':False}
+
+        if 'd' == nome[0]:
+            id['direita']=True
+            if 'filete' in nome:
+                id['filete']=True
+            elif 'bisel' in nome:
+                pass
+            if 'contorno' in nome:
+                id['contorno']=True
+            if 'amboslados' in nome:
+                id['amboslados']=True
+            if 'campo' in nome:
+                id['campo']=True
+
+        elif 'e' == nome[0]:
+            id['esquerda']=True
+            if 'filete' in nome:
+                id['filete']=True
+            elif 'bisel' in nome:
+                pass
+            if 'contorno' in nome:
+                id['contorno']=True
+            if 'amboslados' in nome:
+                id['amboslados']=True
+            if 'campo' in nome:
+                id['campo']=True
+
+        return id
 
 
 zw = ZwCAD()
@@ -84,25 +124,37 @@ id = {'solda_em_campo':'','ambos_os_lados':'','contorno':''}
 
 
 
-
 while True:
 
     while bloco_obtido:
         #estou verificando que a ultima vez que o log foi utilizado se foi recente para que possa aparecer a janela de modificação
-        try:
+
             parametros = ler_log()
-            if int(parametros['time_m']) - datetime.now().minute <=1 and int(parametros['time_s']) - datetime.now().second <=2 :
+            print((datetime.now()-parametros['time']).total_seconds())
+            if (datetime.now()-parametros['time']).total_seconds() <=0.4 :
                 if parametros['time'] != tempo_utilizado:
-                    janela_um = main_test()
+                    #inicializando a janela
+                    codigo = solda_desenhada(parametros['nome'])
+                    janela_um = main_test(
+                        filete=codigo['filete'],
+                        campo=codigo['campo'], 
+                        contorno=codigo['contorno'],
+                        direita=codigo['direita'],
+                        esquerda=codigo['esquerda'],
+                        amboslados=codigo['amboslados']
+                    )
+                    
                     grafico = Pre_visualizacao(janela_um.Element("-GRAPH-"))
+                    #parametros
                     sid = grafico.solda_desenhada(parametros['nome'])
                     tempo_utilizado =  parametros['time']
                     bloco_obtido = False
                     break
             else:
                 pass
-        except:
-            pass
+   
+      
+        
 
 
     print(bloco_cad.handle)
@@ -217,6 +269,9 @@ while True:
         bloco_cad.apagar_bloco(handle)
         bloco_cad.inserir_bloco(solda_block, ponto)
         bloco_cad.espessura(values['-ESP_B-'],bloco_cad.handle)
+        #finalizar a janela
+        window.close()
+        bloco_obtido = True
         '''
     elif False:
         #jogar a janela para frente
