@@ -62,13 +62,10 @@ def main_test(filete=False,campo=False, contorno=False,direita=False,esquerda=Fa
     return sg.Window('Solda duplo click',layout, finalize=True,)
 
 def ler_log():
-    try:
         with open("log.txt",'r') as arquivo:
-            linha = arquivo.readlines()[-1].split(',')
-            
+            linha = arquivo.readlines()[-1][:-2].split(',')
         return({'handle':linha[0],'ponto':[float(linha[1]),float(linha[2])],'escala':float(linha[3]),'nome':linha[4], 'time':datetime.strptime(linha[5],"%m/%d/%Y %H:%M:%S:%f")})
-    except:
-        pass
+
 
  
 
@@ -130,7 +127,6 @@ while True:
         #estou verificando que a ultima vez que o log foi utilizado se foi recente para que possa aparecer a janela de modificação
 
             parametros = ler_log()
-            print((datetime.now()-parametros['time']).total_seconds())
             if (datetime.now()-parametros['time']).total_seconds() <=0.4 :
                 if parametros['time'] != tempo_utilizado:
                     #inicializando a janela
@@ -152,7 +148,7 @@ while True:
                     break
             else:
                 pass
-   
+
       
         
 

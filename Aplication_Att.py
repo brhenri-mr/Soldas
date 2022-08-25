@@ -16,9 +16,11 @@ class Visualizar_att():
         #Lista de blocos que pertecem ao programa
         blocos_possiveis = os.listdir(local_blocos)
         #Verificando a necessidade de atualização
-        for entity in args[0] if len(args)>0 else self.zw.doc.PickfirstSelectionSet:
-            if (entity.Name+'.dwg') in blocos_possiveis:
-                return True
+        for t in range(1):
+            for entity in args[0] if len(args)>0 else self.zw.doc.PickfirstSelectionSet:
+                print(entity.Name)
+                if (entity.Name+'.dwg') in blocos_possiveis:
+                    return True
         return False
 
     def bloco_selecionado(self,*args):
@@ -41,6 +43,7 @@ class Visualizar_att():
         from pyautogui import press
         from datetime import datetime
         objeto = self.zw.doc.PickfirstSelectionSet
+        print(self.verificar(r'C:\Users\breno\Desktop\Projetos\Soldas\blocos', objeto))
         if self.verificar(r'C:\Users\breno\Desktop\Projetos\Soldas\blocos', objeto):
             handle, ponto, escala, name = self.bloco_selecionado(objeto)
             ponto_um,ponto_dois = ponto[0],ponto[1]

@@ -20,7 +20,6 @@ class ZwCADEvents(win32com.client.getevents("ZwCAD.Application")):
 
 ok = ZwCADEvents(win32com.client.Dispatch('ZwCAD.Application'))
 
-
 def verificar_duplo_click():
 
     visual = Visualizar_att()
@@ -31,4 +30,4 @@ def verificar_duplo_click():
             return True
         return False
     except:
-        pass
+        return False
