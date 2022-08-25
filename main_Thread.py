@@ -37,6 +37,6 @@ if __name__ == "__main__":
     
         if verificar_duplo_click():
             p.evento_duplo_click()
-        if processos[0].is_alive():
+        if not processos[0].is_alive():
             break
 
