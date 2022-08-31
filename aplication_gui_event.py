@@ -110,6 +110,7 @@ acad = Dispatch("ZwCAD.Application")
 bloco_cad = Draw_Solder(zw,acad)
 tempo_utilizado = '' 
 bloco_obtido = True
+base = 'FILETE'
 id = {'solda_em_campo':'','ambos_os_lados':'','contorno':''}
 
 
@@ -256,11 +257,16 @@ while True:
                     if values['-CAMPO5-']:
                         solda_block = 'Solda_bisel_contorno_reto'
                 elif values['-ICONV-']:
-                    if values['-CAMPO5-']:
-                        solda_block = 'Solda_bisel_contorno_convexo' 
-                elif values['-ISA-']:
-                    if values['-CAMPO5-']:
-                        solda_block = 'Solda_bisel_contorno_semacabamento' 
+                    if values['-ODIR-']:
+                        if values['-CAMPO5-'] : #contorno
+                            if values['-CAMPO1-'] and values['-CAMPO3-']: 
+                                solda_block = 'dSolda_bisel_contorno_convexo_em_campo_amboslados'
+                            elif values['-CAMPO1-']: 
+                                solda_block = 'dSolda_bisel_contorno_convexo_em_campo'
+                            elif values['-CAMPO3-']: 
+                                solda_block = 'dSolda_bisel_convexo_em_campo_amboslados'
+                            else:
+                                solda_block = 'dSolda_bisel_contorno_convexo' 
 
         bloco_cad.apagar_bloco(handle)
         bloco_cad.inserir_bloco(solda_block, ponto)
@@ -302,30 +308,30 @@ while True:
     #-------------------------Desenho---------------------------
 
     elif event == '-FILETE-':
-        if values['-FILETE-']:
-            grafico.filete()
-        else:
-            if isinstance(sid['filete'],None):
-                grafico.pagar(id['filete'])
-            else:
-                grafico.pagar(sid['filete'])
-                sid['filete'] = None
+
+        grafico.deletar()
+        grafico.filete()
+        base = 'FILETE'
+            
+  
+    elif event == '-BISEL-':
+
+        grafico.deletar()
+        grafico.bisel()
+        base = 'BISEL'
+
+
     elif event == '-CAMPO1-':
         if values['-CAMPO1-']:
             id['solda_em_campo'] = grafico.solda_em_campo(values['-ODIR-'])
         else:
-            print(sid['campo'])
-            if sid['campo'] == None:
-                grafico.apagar(id['solda_em_campo'])
-            else:
-                grafico.apagar(1)
-                sid['campo'] = None
-
+            grafico.apagar(id['solda_em_campo'])
+            pass
     elif event == '-CAMPO2-':
         pass
     elif event == '-CAMPO3-':
         if values['-CAMPO3-']:
-             id['ambos_os_lados'] = grafico.solda_ambos_os_lados()
+             id['ambos_os_lados'] = grafico.solda_ambos_os_lados(base)
         else:
             grafico.apagar(id['ambos_os_lados'])
     elif event == '-CAMPO4-':
@@ -339,8 +345,20 @@ while True:
         pass
     elif event == '-CAMPO7-':
         pass
- 
-    else:
+
+
+    elif event == '-IRETO-' and base == 'BISEL':
+        print(values['-CAMPO3-'])
+        id['acabamento'] = grafico.acabamento_reto(values['-CAMPO3-'])
+
+    elif event == '-ICONV-' and base == 'BISEL':
+
+        id['acabamento'] = grafico.acabamento_convexo(values['-CAMPO3-'])
+   
+    elif event == '-ISA-' and base == 'BISEL':
+
+        pass
+   
 
         '''
         Mudanças das propriedades por escolha do tipo de solda

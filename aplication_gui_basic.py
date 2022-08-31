@@ -182,8 +182,19 @@ while True:
                     if values['-CAMPO5-']:
                         solda_block = 'Solda_bisel_contorno_reto'
                 elif values['-ICONV-']:
-                    if values['-CAMPO5-']:
-                        solda_block = 'Solda_bisel_contorno_convexo' 
+                    if values['-ODIR-']:
+                        if values['-CAMPO5-'] : #contorno
+                            if values['-CAMPO1-'] and values['-CAMPO3-']: 
+                                solda_block = 'dSolda_bisel_contorno_convexo_em_campo_amboslados'
+                            elif values['-CAMPO1-']: 
+                                solda_block = 'dSolda_bisel_contorno_convexo_em_campo'
+                            elif values['-CAMPO3-']: 
+                                solda_block = 'dSolda_bisel_convexo_em_campo_amboslados'
+                            else:
+                                solda_block = 'dSolda_bisel_contorno_convexo'
+                             
+        
+
                 elif values['-ISA-']:
                     if values['-CAMPO5-']:
                         solda_block = 'Solda_bisel_contorno_semacabamento' 

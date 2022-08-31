@@ -113,24 +113,26 @@ class Pre_visualizacao():
         if 'd' == nome[0]:
             if 'filete' in nome:
                 id['filete'].append(self.filete())
+                b= 'FILETE'
             elif 'bisel' in nome:
                 pass
             if 'contorno' in nome:
                 id['contorno'].append(self.contorno(True))
             if 'amboslados' in nome:
-                id['amboslados'].append(self.solda_ambos_os_lados())
+                id['amboslados'].append(self.solda_ambos_os_lados(b))
             if 'campo' in nome:
                 id['campo'].append(self.solda_em_campo(True))
 
         elif 'e' == nome[0]:
             if 'filete' in nome:
                 id['filete'].append(self.filete())
+                b= 'FILETE'
             elif 'bisel' in nome:
                 pass
             if 'contorno' in nome:
                 id['contorno'].append(self.contorno(False))
             if 'amboslados' in nome:
-                id['amboslados'].append(self.solda_ambos_os_lados())
+                id['amboslados'].append(self.solda_ambos_os_lados(b))
             if 'campo' in nome:
                 id['campo'].append(self.solda_em_campo(False))
 
