@@ -43,8 +43,9 @@ class Visualizar_att():
         from pyautogui import press
         from datetime import datetime
         objeto = self.zw.doc.PickfirstSelectionSet
-        print(self.verificar(r'C:\Users\breno\Desktop\Projetos\Soldas\blocos', objeto))
-        if self.verificar(r'C:\Users\breno\Desktop\Projetos\Soldas\blocos', objeto):
+        v  = self.verificar(r'C:\Users\breno\Desktop\Projetos\Soldas\blocos', objeto)
+        print(v)
+        if v:
             handle, ponto, escala, name = self.bloco_selecionado(objeto)
             ponto_um,ponto_dois = ponto[0],ponto[1]
             with open("log.txt",'a') as arquivo:

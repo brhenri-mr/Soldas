@@ -4,6 +4,7 @@ from subprocess import call
 import sys
 from Aplication_Att import Visualizar_att
 from Aplication_eventos import verificar_duplo_click
+from time import sleep
 
 
 
@@ -37,6 +38,8 @@ if __name__ == "__main__":
     
         if verificar_duplo_click():
             p.evento_duplo_click()
+            sleep(0.25)
+
         if not processos[0].is_alive():
             break
 

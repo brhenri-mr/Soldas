@@ -17,6 +17,30 @@ class Pre_visualizacao():
         
         return id
     
+    def bisel(self):
+        id = self.janela.draw_lines([(100,200),(280,200),(190,200),(190,151.5),(190,200),(190+48.5,151.5)], color='red')
+        return id
+    
+    def acabamento_reto(self,cri):
+        
+
+        if cri:
+            id1 = self.janela.draw_lines([(185,250.5),(195+48.5,250.5)],color='red')
+        else:
+            id1= ''
+        id2 = self.janela.draw_lines([(185,148.5),(195+48.5,148.5)],color='red')
+
+        return [id1,id2]
+
+    def acabamento_convexo(self,cri):
+        if cri:
+           id1 = self.janela.draw_arc((135,259),(225+48.5,151),70,50,style='arc',arc_color='red')
+        else:
+            id1 = ''
+        id2 = self.janela.draw_arc((135,195),(225+48.5,143.5),70,245,style='arc',arc_color='red')
+
+        return [id1,id2]
+
     def solda_em_campo(self, orientacao):
         '''
         orientacao = orientação dos detalhes no desenho, por padrão se adota que
@@ -40,9 +64,12 @@ class Pre_visualizacao():
     def solda_continua(self, orientacao):
         pass
 
-    def solda_ambos_os_lados(self):
-   
-        id = self.janela.draw_lines([(190,200),(190,248.5),(190,248.5),(248.5,200)], color='red')
+    def solda_ambos_os_lados(self,cri):
+        
+        if cri == 'FILETE':
+            id = self.janela.draw_lines([(190,200),(190,248.5),(190,248.5),(248.5,200)], color='red')
+        elif cri == 'BISEL':
+            id = self.janela.draw_lines([(190,200),(190,248.5),(190,200),(190+48.5,248.5)], color='red')
 
         return id
       

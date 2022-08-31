@@ -22,9 +22,9 @@ def main_test():
                             [sg.Checkbox(text="Solda em todo contorno", size=(10,1), default=False, key='-CAMPO5-', enable_events=True), sg.Checkbox(text="Solda em todo contorno", size=(10,1), default=False, key='-CAMPO6-', enable_events=True)],
                             [sg.Checkbox(text="Filete", size=(10, 1), default=False, key='-CAMPO7-'),sg.Checkbox(text="Solda Continua", size=(10,1), default=False, key='-CAMPO8-')],
                             [sg.Column([[sg.Text(text='Informações adicionais')],
-                                        [sg.Radio('Reto','Inf.', key='-IRETO-'),
-                                        sg.Radio('Convexo','Inf.',key='-ICONV-'),
-                                        sg.Radio('Sem Acabamento', 'Inf.',key='-ISA-')]])
+                                        [sg.Radio('Reto','Inf.', key='-IRETO-', enable_events=True),
+                                        sg.Radio('Convexo','Inf.',key='-ICONV-', enable_events=True),
+                                        sg.Radio('Sem Acabamento', 'Inf.',key='-ISA-', enable_events=True)]])
                                         ,
                             sg.Column([[sg.Text(text='Escala')],
                                         [sg.Radio('Manual', 'ESC',enable_events=True, key='-MANUAL-'),sg.Radio('Automatico','ESC',enable_events=True,key='-AUTO-',default=True)],
@@ -62,10 +62,11 @@ def main_test():
 
 
 #dados
-id = {'solda_em_campo':'','ambos_os_lados':'','contorno':''}
+id = {'solda_em_campo':'','ambos_os_lados':'','contorno':'','acabamento':''}
 
 
 #Tipo estaticos
+base = 'FILETE' #variavel para auxiliar no desenho
 janela_um = main_test()
 zw = ZwCAD()
 acad = Dispatch("ZwCAD.Application")
@@ -223,7 +224,19 @@ while True:
     #-------------------------Desenho---------------------------
 
     elif event == '-FILETE-':
+
+        grafico.deletar()
         grafico.filete()
+        base = 'FILETE'
+            
+  
+    elif event == '-BISEL-':
+
+        grafico.deletar()
+        grafico.bisel()
+        base = 'BISEL'
+
+
     elif event == '-CAMPO1-':
         if values['-CAMPO1-']:
             id['solda_em_campo'] = grafico.solda_em_campo(values['-ODIR-'])
@@ -234,7 +247,7 @@ while True:
         pass
     elif event == '-CAMPO3-':
         if values['-CAMPO3-']:
-             id['ambos_os_lados'] = grafico.solda_ambos_os_lados()
+             id['ambos_os_lados'] = grafico.solda_ambos_os_lados(base)
         else:
             grafico.apagar(id['ambos_os_lados'])
     elif event == '-CAMPO4-':
@@ -248,6 +261,21 @@ while True:
         pass
     elif event == '-CAMPO7-':
         pass
+
+
+    elif event == '-IRETO-' and base == 'BISEL':
+        print(values['-CAMPO3-'])
+        id['acabamento'] = grafico.acabamento_reto(values['-CAMPO3-'])
+
+    elif event == '-ICONV-' and base == 'BISEL':
+
+        id['acabamento'] = grafico.acabamento_convexo(values['-CAMPO3-'])
+   
+    elif event == '-ISA-' and base == 'BISEL':
+
+        pass
+   
+   
  
     else:
 
