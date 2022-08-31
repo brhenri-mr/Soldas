@@ -1,24 +1,26 @@
 """
 Preve perceber se o úsuario pretende atualizar algum bloco
 """
+import os
+from pyzwcad import ZwCAD
+import win32com.client
+from pyautogui import press
+from datetime import datetime
 
 class Visualizar_att():
 
     def __init__(self) -> None:
-        from pyzwcad import ZwCAD
 
         self.zw = ZwCAD()
 
     def verificar(self,local_blocos,*args):
-        import os
-        from pyzwcad import ZwCAD
+
 
         #Lista de blocos que pertecem ao programa
         blocos_possiveis = os.listdir(local_blocos)
         #Verificando a necessidade de atualização
         for t in range(1):
             for entity in args[0] if len(args)>0 else self.zw.doc.PickfirstSelectionSet:
-                print(entity.Name)
                 if (entity.Name+'.dwg') in blocos_possiveis:
                     return True
         return False
@@ -34,14 +36,12 @@ class Visualizar_att():
 
     def deletar(self, handle: str):
 
-        import win32com.client
         app = win32com.client.Dispatch("ZwCAD.Application")
         Entity = app.ActiveDocument.HandleToObject(handle)
         print(Entity.Erase())
 
     def evento_duplo_click(self):
-        from pyautogui import press
-        from datetime import datetime
+
         objeto = self.zw.doc.PickfirstSelectionSet
         v  = self.verificar(r'C:\Users\breno\Desktop\Projetos\Soldas\blocos', objeto)
         print(v)

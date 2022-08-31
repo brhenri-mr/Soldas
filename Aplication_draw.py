@@ -1,4 +1,7 @@
 
+from pyzwcad.types import APoint
+from os.path import join
+
 class Draw_Solder:
 
     def __init__(self,zw, acad):
@@ -47,9 +50,6 @@ class Draw_Solder:
 
         tipo = tipo da solda a ser inserida
         '''
-        from pyzwcad.types import APoint
-        from os.path import join
-
         #Objeto block
         block = self.zw.doc.ActiveLayout.Block
 

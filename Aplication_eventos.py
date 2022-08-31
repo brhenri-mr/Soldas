@@ -1,11 +1,12 @@
 
-import win32com.client
+from win32com.client import getevents,Dispatch
 from Aplication_Att import Visualizar_att
+from pyautogui import press
 
-class ZwCADEvents(win32com.client.getevents("ZwCAD.Application")):
 
+class ZwCADEvents(getevents("ZwCAD.Application")):
+    
     def OnBeginCommand(self, cmdName):
-        from pyautogui import press
 
         print ("Beginning command " + str(cmdName) + "...")
 
@@ -18,14 +19,12 @@ class ZwCADEvents(win32com.client.getevents("ZwCAD.Application")):
             self.ok = False
     
 
-ok = ZwCADEvents(win32com.client.Dispatch('ZwCAD.Application'))
+ok = ZwCADEvents(Dispatch('ZwCAD.Application'))
 
 def verificar_duplo_click():
-
     visual = Visualizar_att()
     try:
-        condicao = visual.verificar(r'C:\Users\breno\Desktop\Projetos\Soldas\blocos') and ok.ok
-        if condicao:
+        if visual.verificar(r'C:\Users\breno\Desktop\Projetos\Soldas\blocos') and ok.ok:
             ok.ok = False
             return True
         return False
