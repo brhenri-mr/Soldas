@@ -22,7 +22,12 @@ class Pre_visualizacao():
         return id
     
     def acabamento_reto(self,cri):
-        
+        '''
+        Desenha o acabamento de tipo reto para soldas bisel
+
+        cri = criterio que especifica se a solda é ambos os lados
+        cri: bool
+        '''
 
         if cri:
             id1 = self.janela.draw_lines([(185,250.5),(195+48.5,250.5)],color='red')
@@ -33,6 +38,12 @@ class Pre_visualizacao():
         return [id1,id2]
 
     def acabamento_convexo(self,cri):
+        '''
+        Desenha o acabamento de tipo Convexo para soldas bisel
+
+        cri = criterio que especifica se a solda é ambos os lados
+        cri: bool
+        '''
         if cri:
            id1 = self.janela.draw_arc((135,259),(225+48.5,151),70,50,style='arc',arc_color='red')
         else:
@@ -45,6 +56,7 @@ class Pre_visualizacao():
         '''
         orientacao = orientação dos detalhes no desenho, por padrão se adota que
         orientação verdadeira é direita
+        orientacao: bool
         '''
 
         if orientacao:
@@ -64,22 +76,47 @@ class Pre_visualizacao():
     def solda_continua(self, orientacao):
         pass
 
-    def solda_ambos_os_lados(self,cri):
+    def solda_ambos_os_lados(self,nome):
+
+        '''
+        Desenha o tipo ambos os lados para solda
+
+        nome = nome do tipo base da solda
+        nome: str
+        '''
         
-        if cri == 'FILETE':
+        if nome == 'FILETE':
             id = self.janela.draw_lines([(190,200),(190,248.5),(190,248.5),(248.5,200)], color='red')
-        elif cri == 'BISEL':
+        elif nome == 'BISEL':
             id = self.janela.draw_lines([(190,200),(190,248.5),(190,200),(190+48.5,248.5)], color='red')
 
         return id
       
-    def intercalado(self):
-        pass
+    def intercalado(self,id_old):
+        '''
+        Desenha solda com intercalada
+
+        id_old = id da antiga solda base do desenho
+        id_old: str
+        '''
+
+        self.apagar(id_old)
+        id = self.janela.draw_lines([(100,200),(280,200),
+                  (165,200),(165,151.5),
+                  (165,151.5),(222.5,200),
+                  (190,200),(190,248.5),
+                  (190,248.5),(248.5,200)
+                  ], color='red')
+
+        return id
 
     def contorno(self, orientacao):
         '''
         orientacao = orientação dos detalhes no desenho, por padrão se adota que
         orientação verdadeira é direita
+
+        orientacao = direção que ira se aplicar todo o contorno, direita ou esquerda
+        orientação: bool
         '''
         if orientacao:
             c = (280,200)
@@ -90,6 +127,31 @@ class Pre_visualizacao():
 
     def solda_continua(self, orientacao):
         pass
+
+    def espessura(self,exps,base):
+        '''
+        Insere no desenho de pré-visualização as espessuras de solda
+        
+        exps = espessura que ira se usar nas soldas 
+        exps: int or list
+
+        base = Desenho base no qual se pretender colocar a espessura(bisel, filete)
+        base: str
+        '''
+
+        if base=='Intercalado':
+
+            pontos = [(155 - (len(exps[0])-1),175.75),(178- (len(exps[1])-1)*2,224.25)]
+
+        elif base =='Amboslados':
+            pontos = [(178-(len(exps[0])-1)*2,175.75),(178-(len(exps[1])-1)*2,224.25)]
+
+        else:
+            pontos = [(178-(len(exps[0])-1)*2,175.75)]
+
+        id = [self.janela.draw_text(exp,ponto, color='yellow',font=2.5) for exp,ponto in zip(exps,pontos)]
+
+        return id
 
     def apagar(self,id):
         '''
@@ -107,6 +169,9 @@ class Pre_visualizacao():
 
         '''
         Desenha a solda do autocad no programa
+
+        nome = nome do arquivo da solda 
+        nome: str
         '''
         id = {'filete':[],'contorno':[],'amboslados':[],'campo':[]}
 

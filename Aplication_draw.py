@@ -71,17 +71,22 @@ class Draw_Solder:
     
         #self.zw.app.Update
 
-    def espessura(self,exp: int, *args):
-
-
+    def espessura(self,exp: int or list, *args):
+        
+        i=0
         #Instancia do ultimo objeto adcionado no documento
         Entity = self.acad.ActiveDocument.HandleToObject(args[0] if len(args) != 0 else self.__handle)
 
         #Modificação dos atributos do bloco
         for attr in Entity.GetAttributes():
             if attr.TagString == "CORDAO":
-                attr.TextString = str(exp)
+                if isinstance(exp,list):
+                    input = exp[i]
+                else:
+                    input = exp
+                attr.TextString = str(input)
                 attr.Update()
+                i +=1
     
     def apagar_bloco(self, handle):
 

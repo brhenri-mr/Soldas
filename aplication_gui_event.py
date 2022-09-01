@@ -8,7 +8,7 @@ from datetime import datetime
 
 def main_test(filete=False,campo=False, contorno=False,direita=False,esquerda=False,amboslados=False):
     #Criterio para ativação das propriedades
-    graph_elem = sg.Graph(canvas_size=(400, 400),
+    graph_elem = sg.Graph(canvas_size=(300, 300),
                                 graph_bottom_left=(0, 0),
                                 graph_top_right=(400, 400),
                                 enable_events=True,
@@ -16,23 +16,23 @@ def main_test(filete=False,campo=False, contorno=False,direita=False,esquerda=Fa
                                 background_color='lightblue')
                                 
     filete_propriedades = [ [sg.Text('Orientação')],
-                            [sg.Radio('Direita','Ori.', key='-ODIR-', default=direita, enable_events=True), sg.Radio('Esquerda','Ori.', key='-OESQ-', enable_events=True, default=esquerda)],
+                            [sg.Radio('Direita','Ori.', key='-ODIR-', default=True, enable_events=True), sg.Radio('Esquerda','Ori.', key='-OESQ-',enable_events=True)],
                             [sg.Text('Acabamentos')],
-                            [sg.Checkbox(text= "Solda em campo", size=(10, 1), default=campo, key='-CAMPO1-', enable_events=True),sg.Checkbox(text="Solda Continua", size=(10,1), default=False, key='-CAMPO2-')],
-                            [sg.Checkbox(text="Ambos os lados", size=(10, 1), default=amboslados, key='-CAMPO3-', enable_events=True),sg.Checkbox(text="Intercalado", size=(10,1), default=False, key='-CAMPO4-')],
-                            [sg.Checkbox(text="Solda em todo contorno", size=(10,1), default=contorno, key='-CAMPO5-', enable_events=True), sg.Checkbox(text="Solda em todo contorno", size=(10,1), default=False, key='-CAMPO6-', enable_events=True)],
-                            [sg.Checkbox(text="Filete", size=(10, 1), default=False, key='-CAMPO7-'),sg.Checkbox(text="Solda Continua", size=(10,1), default=False, key='-CAMPO8-')],
+                            [sg.Checkbox(text= "Solda em campo", size=(15, 1), default=False, key='-CAMPO1-', enable_events=True),sg.Checkbox(text="Solda Continua", size=(15,1), default=False, key='-CAMPO2-')],
+                            [sg.Checkbox(text="Ambos os lados", size=(15, 1), default=False, key='-CAMPO3-', enable_events=True),sg.Checkbox(text="Intercalado", size=(15,1), default=False, key='-CAMPO4-', enable_events=True)],
+                            [sg.Checkbox(text="Solda em todo contorno", size=(10,1), default=False, key='-CAMPO5-', enable_events=True)],
                             [sg.Column([[sg.Text(text='Informações adicionais')],
-                                        [sg.Radio('Reto','Inf.', key='-IRETO-'),
-                                        sg.Radio('Convexo','Inf.',key='-ICONV-'),
-                                        sg.Radio('Sem Acabamento', 'Inf.',key='-ISA-')]])
-                                        ,
-                            sg.Column([[sg.Text(text='Escala')],
+                                        [sg.Radio('Reto','Inf.', key='-IRETO-', enable_events=True),
+                                        sg.Radio('Convexo','Inf.',key='-ICONV-', enable_events=True),
+                                        sg.Radio('Sem Acabamento', 'Inf.',key='-ISA-', enable_events=True)]])],
+                                        
+                            [sg.Column([[sg.Text(text='Escala')],
                                         [sg.Radio('Manual', 'ESC',enable_events=True, key='-MANUAL-'),sg.Radio('Automatico','ESC',enable_events=True,key='-AUTO-',default=True)],
                                         [sg.Text(text='x'), sg.InputText('',key='-ESCX-',size=(5), disabled=True)],
                                         [sg.Text(text='y'), sg.InputText('',key='-ESCY-',size=(5), disabled=True)]
                                         ])]
                             ]
+
 
 
     #sg.theme('DarkRed1')
@@ -48,8 +48,8 @@ def main_test(filete=False,campo=False, contorno=False,direita=False,esquerda=Fa
             [
                 sg.Column([
                         [sg.Text('Espessura(mm)')],
-                        [sg.Text('a='),sg.InputText('',key='-ESP_A-',size=(20))],
-                        [sg.Text('b='),sg.InputText('', key='-ESP_B-',size=(20))]
+                        [sg.Text('a='),sg.InputText('',key='-ESP_A-',size=(20), enable_events=True)],
+                        [sg.Text('b='),sg.InputText('', key='-ESP_B-',size=(20),  enable_events=True)]
                         ], 
                         element_justification='l'),
                 sg.Column([
@@ -111,7 +111,7 @@ bloco_cad = Draw_Solder(zw,acad)
 tempo_utilizado = '' 
 bloco_obtido = True
 base = 'FILETE'
-id = {'solda_em_campo':'','ambos_os_lados':'','contorno':''}
+id = {'Base':'','solda_em_campo':'','ambos_os_lados':'','contorno':'','acabamento':'','intercalado':'','expB':''}
 
 
 
@@ -294,23 +294,23 @@ while True:
     #--------------------------Orientação----------------------
 
     elif event == '-ODIR-':
-        [window[campos].Update(value=False) for campos in ['-CAMPO1-', '-CAMPO2-', '-CAMPO3-', '-CAMPO4-', '-CAMPO5-', '-CAMPO6-', '-CAMPO7-']]
+        [window[campos].Update(value=False) for campos in ['-CAMPO1-', '-CAMPO2-', '-CAMPO3-', '-CAMPO4-', '-CAMPO5-']]
         grafico.deletar()
         if values['-FILETE-']:
-            grafico.filete()
+            id['Base'] = grafico.filete()
 
     elif event == '-OESQ-':
-        [window[campos].Update(value=False) for campos in ['-CAMPO1-', '-CAMPO2-', '-CAMPO3-', '-CAMPO4-', '-CAMPO5-', '-CAMPO6-', '-CAMPO7-']]
+        [window[campos].Update(value=False) for campos in ['-CAMPO1-', '-CAMPO2-', '-CAMPO3-', '-CAMPO4-', '-CAMPO5-']]
         grafico.deletar()
         if values['-FILETE-']:
-            grafico.filete()
+            id['Base'] = grafico.filete()
  
     #-------------------------Desenho---------------------------
 
     elif event == '-FILETE-':
 
         grafico.deletar()
-        grafico.filete()
+        id['Base'] = grafico.filete()
         base = 'FILETE'
             
   
@@ -320,6 +320,14 @@ while True:
         grafico.bisel()
         base = 'BISEL'
 
+    elif event == '-ESP_B-' or event=='-ESP_A-':
+        grafico.apagar(id['expB'])
+        if values['-CAMPO4-']: #intercalador
+            id['expB'] = grafico.espessura([values['-ESP_B-'],values['-ESP_A-']],'Intercalado')
+        elif values['-CAMPO3-']: #anbos os lados
+            id['expB'] = grafico.espessura([values['-ESP_B-'],values['-ESP_A-']],'Amboslados')
+        else:
+            id['expB'] = grafico.espessura([values['-ESP_B-']],'Filete')
 
     elif event == '-CAMPO1-':
         if values['-CAMPO1-']:
@@ -331,11 +339,27 @@ while True:
         pass
     elif event == '-CAMPO3-':
         if values['-CAMPO3-']:
-             id['ambos_os_lados'] = grafico.solda_ambos_os_lados(base)
+            id['ambos_os_lados'] = grafico.solda_ambos_os_lados(base)
+            grafico.apagar(id['expB'])
+            id['expB'] = grafico.espessura([values['-ESP_B-'],values['-ESP_A-']],'Amboslados')
         else:
             grafico.apagar(id['ambos_os_lados'])
+            grafico.apagar(id['expB'])
+            id['expB'] = grafico.espessura([values['-ESP_B-']],'Filete')
+
     elif event == '-CAMPO4-':
-        pass
+        if values['-CAMPO4-']:
+            id['intercalado'] = grafico.intercalado(id['Base'])
+            #redesenhar as espessuras
+            grafico.apagar(id['expB'])
+            id['expB'] = grafico.espessura([values['-ESP_B-'],values['-ESP_A-']],'Intercalado')
+        else:
+            #aparemente não existe bisel intercalado
+            grafico.apagar(id['intercalado'])
+            id['Base'] = grafico.filete()
+            grafico.apagar(id['expB'])
+            id['expB'] = grafico.espessura([values['-ESP_B-'],values['-ESP_A-']],'Filete')
+
     elif event == '-CAMPO5-':
         if values['-CAMPO5-']:
            id['contorno'] = grafico.contorno(values['-ODIR-'])
@@ -360,9 +384,11 @@ while True:
         pass
    
 
+   
+ 
+    else:
+
         '''
         Mudanças das propriedades por escolha do tipo de solda
         '''
         ...
-    
-    
