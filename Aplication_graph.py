@@ -10,17 +10,48 @@ class Pre_visualizacao():
 
     def filete(self):
         '''
-        desenha uma solda filete básica 
+        Desenha uma solda filete básica 
 
         '''
-        id = self.janela.draw_lines([(100,200),(280,200),(190,200),(190,151.5),(190,151.5),(248.5,200)],color='red')
-        
-        return id
+        return self.janela.draw_lines([(100,200),(280,200),(190,200),(190,151.5),(190,151.5),(248.5,200)],color='red')
     
     def bisel(self):
-        id = self.janela.draw_lines([(100,200),(280,200),(190,200),(190,151.5),(190,200),(190+48.5,151.5)], color='red')
-        return id
+
+        return self.janela.draw_lines([(100,200),(280,200),(190,200),(190,151.5),(190,200),(190+48.5,151.5)], color='red')
+
+    def v(self):
+        '''
+        Desenha uma solda v basica
+        '''
+
+        return self.janela.draw_lines([  
+                                    (100,200),(280,200),
+                                    (190,200),(190+48.5,151.5),
+                                    (190,200),(190-48.5,151.5)], color='red')
+
+
+    def v_curvo(self):
+        '''
+        Desenha uma solda v curva basica
+        '''
+        
+        id1 = self.janela.draw_arc((195,247),(295,147),90,180,style ='arc' ,arc_color='red')
+        id2 = self.janela.draw_arc((85,250),(185,150),-90,0,style ='arc' ,arc_color='red')
+        id3 = self.janela.draw_lines([(100,200),(280,200)], color='red')
+
+        return [id1,id2,id3]
     
+    def topo(self):
+        '''
+        Desenha uma solda topo básica
+        '''
+
+
+        id1 = self.janela.draw_lines([(100,200),(280,200),(175,200),(175,151.5)],color='red')
+        id2 = self.janela.draw_line((205,200),(205,151.5),color='red')
+    
+        return [id1,id2]
+
     def acabamento_reto(self,cri):
         '''
         Desenha o acabamento de tipo reto para soldas bisel
@@ -86,11 +117,16 @@ class Pre_visualizacao():
         '''
         
         if nome == 'FILETE':
-            id = self.janela.draw_lines([(190,200),(190,248.5),(190,248.5),(248.5,200)], color='red')
+            return  self.janela.draw_lines([(190,200),(190,248.5),(190,248.5),(248.5,200)], color='red')
         elif nome == 'BISEL':
-            id = self.janela.draw_lines([(190,200),(190,248.5),(190,200),(190+48.5,248.5)], color='red')
+            return  self.janela.draw_lines([(190,200),(190,248.5),(190,200),(190+48.5,248.5)], color='red')
+        elif nome == 'TOPO':
+            id1 = self.janela.draw_line((175,200),(175,248.5),color='red')
+            id2 = self.janela.draw_line((205,200),(205,248.5),color='red')
+            return [id1,id2]
+        elif nome =='V':
+            return self.janela.draw_lines([(190,200),(190+48.5,248.5),(190,200),(190-48.5,248.5)], color='red')
 
-        return id
       
     def intercalado(self,id_old):
         '''
@@ -101,14 +137,13 @@ class Pre_visualizacao():
         '''
 
         self.apagar(id_old)
-        id = self.janela.draw_lines([(100,200),(280,200),
+
+        return self.janela.draw_lines([(100,200),(280,200),
                   (165,200),(165,151.5),
                   (165,151.5),(222.5,200),
                   (190,200),(190,248.5),
                   (190,248.5),(248.5,200)
                   ], color='red')
-
-        return id
 
     def contorno(self, orientacao):
         '''
@@ -122,8 +157,8 @@ class Pre_visualizacao():
             c = (280,200)
         else:
             c = (100,200)
-        id = self.janela.draw_circle(c, 17.5 ,line_color='red')
-        return id
+
+        return self.janela.draw_circle(c, 17.5 ,line_color='red')
 
     def solda_continua(self, orientacao):
         pass
@@ -149,9 +184,7 @@ class Pre_visualizacao():
         else:
             pontos = [(178-(len(exps[0])-1)*2,175.75)]
 
-        id = [self.janela.draw_text(exp,ponto, color='yellow',font=2.5) for exp,ponto in zip(exps,pontos)]
-
-        return id
+        return [self.janela.draw_text(exp,ponto, color='yellow',font=2.5) for exp,ponto in zip(exps,pontos)]
 
     def apagar(self,id):
         '''

@@ -5,8 +5,7 @@ from pyzwcad import ZwCAD
 from win32com.client import Dispatch
 from datetime import datetime
 
-
-def main_test(filete=False,campo=False, contorno=False,direita=False,esquerda=False,amboslados=False):
+def main_test(filete=False,campo=False, contorno=False,direita=True,esquerda=False,amboslados=False):
     #Criterio para ativação das propriedades
     graph_elem = sg.Graph(canvas_size=(300, 300),
                                 graph_bottom_left=(0, 0),
@@ -16,11 +15,11 @@ def main_test(filete=False,campo=False, contorno=False,direita=False,esquerda=Fa
                                 background_color='lightblue')
                                 
     filete_propriedades = [ [sg.Text('Orientação')],
-                            [sg.Radio('Direita','Ori.', key='-ODIR-', default=True, enable_events=True), sg.Radio('Esquerda','Ori.', key='-OESQ-',enable_events=True)],
+                            [sg.Radio('Direita','Ori.', key='-ODIR-', default=direita, enable_events=True), sg.Radio('Esquerda','Ori.', key='-OESQ-',default=esquerda,enable_events=True)],
                             [sg.Text('Acabamentos')],
-                            [sg.Checkbox(text= "Solda em campo", size=(15, 1), default=False, key='-CAMPO1-', enable_events=True),sg.Checkbox(text="Solda Continua", size=(15,1), default=False, key='-CAMPO2-')],
-                            [sg.Checkbox(text="Ambos os lados", size=(15, 1), default=False, key='-CAMPO3-', enable_events=True),sg.Checkbox(text="Intercalado", size=(15,1), default=False, key='-CAMPO4-', enable_events=True)],
-                            [sg.Checkbox(text="Solda em todo contorno", size=(10,1), default=False, key='-CAMPO5-', enable_events=True)],
+                            [sg.Checkbox(text= "Solda em campo", size=(15, 1), default=campo, key='-CAMPO1-', enable_events=True),sg.Checkbox(text="Solda Continua", size=(15,1), default=False, key='-CAMPO2-')],
+                            [sg.Checkbox(text="Ambos os lados", size=(15, 1), default=amboslados, key='-CAMPO3-', enable_events=True),sg.Checkbox(text="Intercalado", size=(15,1), default=False, key='-CAMPO4-', enable_events=True)],
+                            [sg.Checkbox(text="Solda em todo contorno", size=(10,1), default=contorno, key='-CAMPO5-', enable_events=True)],
                             [sg.Column([[sg.Text(text='Informações adicionais')],
                                         [sg.Radio('Reto','Inf.', key='-IRETO-', enable_events=True),
                                         sg.Radio('Convexo','Inf.',key='-ICONV-', enable_events=True),
@@ -32,8 +31,6 @@ def main_test(filete=False,campo=False, contorno=False,direita=False,esquerda=Fa
                                         [sg.Text(text='y'), sg.InputText('',key='-ESCY-',size=(5), disabled=True)]
                                         ])]
                             ]
-
-
 
     #sg.theme('DarkRed1')
     layout = [  [sg.Text('Tipo de solda', justification='center')],
@@ -65,9 +62,6 @@ def ler_log():
         with open("log.txt",'r') as arquivo:
             linha = arquivo.readlines()[-1][:-2].split(',')
         return({'handle':linha[0],'ponto':[float(linha[1]),float(linha[2])],'escala':float(linha[3]),'nome':linha[4], 'time':datetime.strptime(linha[5],"%m/%d/%Y %H:%M:%S:%f")})
-
-
- 
 
 def solda_desenhada(nome):
 
@@ -104,7 +98,6 @@ def solda_desenhada(nome):
 
         return id
 
-
 zw = ZwCAD()
 acad = Dispatch("ZwCAD.Application")
 bloco_cad = Draw_Solder(zw,acad)
@@ -112,15 +105,6 @@ tempo_utilizado = ''
 bloco_obtido = True
 base = 'FILETE'
 id = {'Base':'','solda_em_campo':'','ambos_os_lados':'','contorno':'','acabamento':'','intercalado':'','expB':''}
-
-
-
-#fazer marca o campo qunado a janela abre
-#for campo in zip(''[f'-CAMPO{i}-' for i in range(1,6)]):
-    #if 
-    #janela_um.Element(campo).Update(value=True)
-
-
 
 while True:
 
@@ -150,10 +134,6 @@ while True:
             else:
                 pass
 
-      
-        
-
-
     print(bloco_cad.handle)
     window,event, values = sg.read_all_windows()
     '''
@@ -177,7 +157,6 @@ while True:
         ponto,escala, nome =  parametros['ponto'], parametros['escala'], parametros['nome']
    
         handle = parametros['handle']
-
 
         print(handle,ponto,escala,nome)
         #---------------------------ESCALA-----------------------------
@@ -319,6 +298,21 @@ while True:
         grafico.deletar()
         grafico.bisel()
         base = 'BISEL'
+    
+    elif event == '-V-':
+        grafico.deletar()
+        id['Base'] = grafico.v()
+        base = 'V'
+
+    elif event == '-V_CURVO-':
+        grafico.deletar()
+        id['Base'] = grafico.v_curvo()
+        base = 'V_CURVO'
+
+    elif event == '-TOPO-':
+        grafico.deletar()
+        id['Base'] = grafico.topo()
+        base = 'TOPO'
 
     elif event == '-ESP_B-' or event=='-ESP_A-':
         grafico.apagar(id['expB'])
@@ -371,18 +365,16 @@ while True:
         pass
 
 
-    elif event == '-IRETO-' and base == 'BISEL':
-        print(values['-CAMPO3-'])
+    elif event == '-IRETO-' and (base == 'BISEL'or base =='TOPO'):
+        grafico.apagar(id['acabamento'])
         id['acabamento'] = grafico.acabamento_reto(values['-CAMPO3-'])
 
-    elif event == '-ICONV-' and base == 'BISEL':
-
+    elif event == '-ICONV-' and (base == 'BISEL'or base =='TOPO'):
+        grafico.apagar(id['acabamento'])
         id['acabamento'] = grafico.acabamento_convexo(values['-CAMPO3-'])
    
-    elif event == '-ISA-' and base == 'BISEL':
-
-        pass
-   
+    elif event == '-ISA-' and (base == 'BISEL'or base =='TOPO'):
+        grafico.apagar(id['acabamento'])
 
    
  

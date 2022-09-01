@@ -39,9 +39,9 @@ def main_test():
                 sg.Radio('Filete','Prop.',enable_events=True, key='-FILETE-'),
                 sg.Radio('Topo','Prop.',enable_events=True, key='-TOPO-'), 
                 sg.Radio('V','Prop.' ,enable_events=True, key='-V-'),
-                sg.Radio('V Curvo','Prop.' ,enable_events=True, key='-V CURVO-'),
+                sg.Radio('V Curvo','Prop.' ,enable_events=True, key='-V_CURVO-'),
                 sg.Radio('Bisel','Prop.' ,enable_events=True, key='-BISEL-'),
-                sg.Radio('U','Prop.' ,enable_events=True, key='-U-'),
+                sg.Radio('Bisel Curvo','Prop.' ,enable_events=True, key='-BISEL_CURVO-'),
                 sg.Radio('J','Prop.' ,enable_events=True, key='-J-')]])],
             [
                 sg.Column([
@@ -128,7 +128,6 @@ while True:
                         #somente contorno
                         solda_block = 'eSolda_filete_contorno'
 
-
                 elif values['-CAMPO1-']:
                     if False:
                         pass
@@ -138,8 +137,6 @@ while True:
                         #so acabamento em campo
                         solda_block = 'eSolda_filete_em_campo'
         
-
-
             elif values['-BISEL-']:
                 if values['-IRETO-']:
                     if values['-CAMPO5-']:
@@ -150,6 +147,9 @@ while True:
                 elif values['-ISA-']:
                     if values['-CAMPO5-']:
                         solda_block = 'Solda_bisel_contorno_semacabamento' 
+            
+            elif values['-V-']:
+                pass
 
         elif values['-ODIR-']:
             if values['-FILETE-']:
@@ -200,7 +200,7 @@ while True:
                         solda_block = 'Solda_bisel_contorno_semacabamento' 
 
         bloco_cad.inserir_bloco(solda_block, ponto)
-        bloco_cad.espessura(values['-ESP_B-'])
+        bloco_cad.espessura([values['-ESP_B-'],values['-ESP_A-']])
         '''
     elif False:
         #jogar a janela para frente
@@ -239,13 +239,27 @@ while True:
         grafico.deletar()
         id['Base'] = grafico.filete()
         base = 'FILETE'
-            
   
     elif event == '-BISEL-':
 
         grafico.deletar()
         grafico.bisel()
         base = 'BISEL'
+    
+    elif event == '-V-':
+        grafico.deletar()
+        id['Base'] = grafico.v()
+        base = 'V'
+
+    elif event == '-V_CURVO-':
+        grafico.deletar()
+        id['Base'] = grafico.v_curvo()
+        base = 'V_CURVO'
+
+    elif event == '-TOPO-':
+        grafico.deletar()
+        id['Base'] = grafico.topo()
+        base = 'TOPO'
 
     elif event == '-ESP_B-' or event=='-ESP_A-':
         grafico.apagar(id['expB'])
@@ -298,21 +312,17 @@ while True:
         pass
 
 
-    elif event == '-IRETO-' and base == 'BISEL':
-        print(values['-CAMPO3-'])
+    elif event == '-IRETO-' and (base == 'BISEL'or base =='TOPO'):
+        grafico.apagar(id['acabamento'])
         id['acabamento'] = grafico.acabamento_reto(values['-CAMPO3-'])
 
-    elif event == '-ICONV-' and base == 'BISEL':
-
+    elif event == '-ICONV-' and (base == 'BISEL'or base =='TOPO'):
+        grafico.apagar(id['acabamento'])
         id['acabamento'] = grafico.acabamento_convexo(values['-CAMPO3-'])
    
-    elif event == '-ISA-' and base == 'BISEL':
-
-        pass
+    elif event == '-ISA-' and (base == 'BISEL'or base =='TOPO'):
+        grafico.apagar(id['acabamento'])
    
-
-   
- 
     else:
 
         '''

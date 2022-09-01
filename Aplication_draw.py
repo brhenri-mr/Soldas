@@ -80,7 +80,7 @@ class Draw_Solder:
         #Modificação dos atributos do bloco
         for attr in Entity.GetAttributes():
             if attr.TagString == "CORDAO":
-                if isinstance(exp,list):
+                if len(exp)>1:
                     input = exp[i]
                 else:
                     input = exp
