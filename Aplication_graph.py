@@ -205,36 +205,26 @@ class Pre_visualizacao():
         '''
         Desenha a solda do autocad no programa
 
-        nome = nome do arquivo da solda 
-        nome: str
+        nome = parametros da solda
+        nome: dict
         '''
-        id = {'filete':[],'contorno':[],'amboslados':[],'campo':[]}
+     
+        if nome['direita']:
+            ori = True
+        elif nome['esquerda']:
+            ori=False
 
-        if 'd' == nome[0]:
-            if 'filete' in nome:
-                id['filete'].append(self.filete())
-                b= 'FILETE'
-            elif 'bisel' in nome:
-                pass
-            if 'contorno' in nome:
-                id['contorno'].append(self.contorno(True))
-            if 'amboslados' in nome:
-                id['amboslados'].append(self.solda_ambos_os_lados(b))
-            if 'campo' in nome:
-                id['campo'].append(self.solda_em_campo(True))
+        if nome['filete']:
+            self.filete()
+            b= 'FILETE'
+        elif nome['bisel']:
+            self.bisel()
+            b='BISEL'
+        if nome['contorno']:
+            self.contorno(ori)
+        if nome['amboslados']:
+            self.solda_ambos_os_lados(b)
+        if nome['campo']:
+            self.solda_em_campo(ori)
 
-        elif 'e' == nome[0]:
-            if 'filete' in nome:
-                id['filete'].append(self.filete())
-                b= 'FILETE'
-            elif 'bisel' in nome:
-                pass
-            if 'contorno' in nome:
-                id['contorno'].append(self.contorno(False))
-            if 'amboslados' in nome:
-                id['amboslados'].append(self.solda_ambos_os_lados(b))
-            if 'campo' in nome:
-                id['campo'].append(self.solda_em_campo(False))
-
-        return id
     

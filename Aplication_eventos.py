@@ -24,7 +24,7 @@ ok = ZwCADEvents(Dispatch('ZwCAD.Application'))
 def verificar_duplo_click():
     visual = Visualizar_att()
     try:
-        if visual.verificar(r'C:\Users\breno\Desktop\Projetos\Soldas\blocos') and ok.ok:
+        if visual.verificar() and ok.ok:
             ok.ok = False
             return True
         return False

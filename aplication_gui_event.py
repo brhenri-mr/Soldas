@@ -6,7 +6,7 @@ from pyzwcad import ZwCAD
 from win32com.client import Dispatch
 from datetime import datetime
 
-def main_test(filete=False,campo=False, contorno=False,direita=True,esquerda=False,amboslados=False):
+def main_test(filete=False,campo=False, contorno=False,direita=True,esquerda=False,amboslados=False,inter=False,bisel=False,topo=False):
     #Criterio para ativação das propriedades
     sg.theme('SystemDefaultForReal')
     graph_elem = sg.Graph(canvas_size=(300, 300),
@@ -20,7 +20,7 @@ def main_test(filete=False,campo=False, contorno=False,direita=True,esquerda=Fal
                             [sg.Radio('Direita','Ori.', key='-ODIR-', default=direita, enable_events=True), sg.Radio('Esquerda','Ori.', key='-OESQ-',default=esquerda,enable_events=True)],
                             [sg.Text('Acabamentos')],
                             [sg.Checkbox(text= "Solda em campo", size=(15, 1), default=campo, key='-CAMPO1-', enable_events=True),sg.Checkbox(text="Solda Continua", size=(15,1), default=False, key='-CAMPO2-')],
-                            [sg.Checkbox(text="Ambos os lados", size=(15, 1), default=amboslados, key='-CAMPO3-', enable_events=True),sg.Checkbox(text="Intercalado", size=(15,1), default=False, key='-CAMPO4-', enable_events=True)],
+                            [sg.Checkbox(text="Ambos os lados", size=(15, 1), default=amboslados, key='-CAMPO3-', enable_events=True),sg.Checkbox(text="Intercalado", size=(15,1), default=inter, key='-CAMPO4-', enable_events=True)],
                             [sg.Checkbox(text="Solda em todo contorno", size=(10,1), default=contorno, key='-CAMPO5-', enable_events=True)],
                             [sg.Column([[sg.Text(text='Informações adicionais')],
                                         [sg.Radio('Reto','Inf.', key='-IRETO-', enable_events=True),
@@ -37,11 +37,11 @@ def main_test(filete=False,campo=False, contorno=False,direita=True,esquerda=Fal
     layout = [  [sg.Text('Tipo de solda', justification='center')],
             [sg.Column([[
                 sg.Radio('Filete','Prop.',enable_events=True, key='-FILETE-', default=filete),
-                sg.Radio('Topo','Prop.',enable_events=True, key='-TOPO-'), 
+                sg.Radio('Topo','Prop.',enable_events=True, key='-TOPO-',default=topo), 
                 sg.Radio('V','Prop.' ,enable_events=True, key='-V-'),
-                sg.Radio('V Curvo','Prop.' ,enable_events=True, key='-V CURVO-'),
-                sg.Radio('Bisel','Prop.' ,enable_events=True, key='-BISEL-'),
-                sg.Radio('U','Prop.' ,enable_events=True, key='-U-'),
+                sg.Radio('V Curvo','Prop.' ,enable_events=True, key='-V_CURVO-'),
+                sg.Radio('Bisel','Prop.' ,enable_events=True, key='-BISEL-', default=bisel),
+                sg.Radio('Bisel Curvo','Prop.' ,enable_events=True, key='-BISEL_CURVO-'),
                 sg.Radio('J','Prop.' ,enable_events=True, key='-J-')]])],
             [
                 sg.Column([
@@ -69,33 +69,23 @@ def solda_desenhada(nome):
         '''
         Desenha a solda do autocad no programa
         '''
-        id = {'filete':False,'contorno':False,'amboslados':False,'campo':False,'direita':False,'esquerda':False}
+        id = {
+            'filete':False,
+            'contorno':False,
+            'amboslados':False,
+            'campo':False,
+            'direita':False,
+            'esquerda':False,
+            'bisel':False,
+            'reto':False,
+            'convexo':False,
+            'inter':False,
+            'topo':False
+            }
 
-        if 'd' == nome[0]:
-            id['direita']=True
-            if 'filete' in nome:
-                id['filete']=True
-            elif 'bisel' in nome:
-                pass
-            if 'contorno' in nome:
-                id['contorno']=True
-            if 'amboslados' in nome:
-                id['amboslados']=True
-            if 'campo' in nome:
-                id['campo']=True
-
-        elif 'e' == nome[0]:
-            id['esquerda']=True
-            if 'filete' in nome:
-                id['filete']=True
-            elif 'bisel' in nome:
-                pass
-            if 'contorno' in nome:
-                id['contorno']=True
-            if 'amboslados' in nome:
-                id['amboslados']=True
-            if 'campo' in nome:
-                id['campo']=True
+        for key in id.keys():
+            if key in nome:
+                id[key] =True
 
         return id
 
@@ -119,7 +109,6 @@ while True:
 
     while bloco_obtido:
         #estou verificando que a ultima vez que o log foi utilizado se foi recente para que possa aparecer a janela de modificação
-
             parametros = ler_log()
             if (datetime.now()-parametros['time']).total_seconds() <=0.4 :
                 if parametros['time'] != tempo_utilizado:
@@ -127,18 +116,20 @@ while True:
                     codigo = solda_desenhada(parametros['nome'])
                     janela_um = main_test(
                         filete=codigo['filete'],
+                        bisel=codigo['bisel'],
                         campo=codigo['campo'], 
                         contorno=codigo['contorno'],
                         direita=codigo['direita'],
                         esquerda=codigo['esquerda'],
-                        amboslados=codigo['amboslados']
+                        amboslados=codigo['amboslados'],
+                        inter=codigo['inter']
                     )
-                    
                     grafico = Pre_visualizacao(janela_um.Element("-GRAPH-"))
                     #parametros
-                    sid = grafico.solda_desenhada(parametros['nome'])
+                    sid = grafico.solda_desenhada(codigo)
                     tempo_utilizado =  parametros['time']
                     bloco_obtido = False
+
                     break
             else:
                 pass

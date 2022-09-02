@@ -46,7 +46,7 @@ class Visualizar_att():
     def evento_duplo_click(self):
 
         objeto = self.zw.doc.PickfirstSelectionSet
-        v  = self.verificar(r'C:\Users\breno\Desktop\Projetos\Soldas\blocos', objeto)
+        v  = self.verificar(objeto)
         print(v)
         if v:
             handle, ponto, escala, name = self.bloco_selecionado(objeto)
