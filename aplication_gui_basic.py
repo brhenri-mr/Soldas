@@ -1,5 +1,5 @@
 import PySimpleGUI as sg
-from Aplication_draw import Draw_Solder
+from Aplication_draw import Draw_Solder, Solder
 from Aplication_Att import Visualizar_att
 from Aplication_graph import Pre_visualizacao
 from pyzwcad import ZwCAD
@@ -7,6 +7,7 @@ from win32com.client import Dispatch
 
 def main_test():
     #Criterio para ativação das propriedades
+    sg.theme('SystemDefaultForReal')
     graph_elem = sg.Graph(canvas_size=(300, 300),
                                 graph_bottom_left=(0, 0),
                                 graph_top_right=(400, 400),
@@ -33,7 +34,6 @@ def main_test():
                             ]
 
 
-    #sg.theme('DarkRed1')
     layout = [  [sg.Text('Tipo de solda', justification='center')],
             [sg.Column([[
                 sg.Radio('Filete','Prop.',enable_events=True, key='-FILETE-'),
@@ -56,7 +56,6 @@ def main_test():
                                                     ],
             [sg.Column(layout =filete_propriedades,key="Propriedades"),graph_elem],
             [sg.Button('Ok'), sg.Button('Cancel'), sg.Button('Reset')]]
-
     return sg.Window('Soldas',layout, finalize=True, icon=r'C:\Users\breno\Desktop\Projetos\Soldas\soldering_iron-48_46707.ico', titlebar_icon='soldering_iron-48_46707.ico')
 
 
@@ -69,7 +68,8 @@ base = 'FILETE' #variavel para auxiliar no desenho
 janela_um = main_test()
 zw = ZwCAD()
 acad = Dispatch("ZwCAD.Application")
-
+arquivo_nome = Solder()
+grafico = Pre_visualizacao(janela_um['-GRAPH-'])
 
 while True:
 
@@ -86,7 +86,6 @@ while True:
         sg.Popup('Erro ao tentar encontrar um ZwCAD')
         break
     
-    grafico = Pre_visualizacao(window['-GRAPH-'])
     window['-ESCX-'].Update(disabled=True,value=round(bloco_cad.escala_atual,1))
     window['-ESCY-'].Update(disabled=True,value=round(bloco_cad.escala_atual,1))
     #--------------------------------------------------------------
@@ -96,9 +95,10 @@ while True:
 
     #----------------------evento ok-------------------------------
     elif event == "Ok":
+        bloco_arquivo = arquivo_nome.tipo(values)
         #---------------------------ATT----------------------------
         att = Visualizar_att()
-        if att.verificar(r'C:\Users\breno\Desktop\Projetos\Soldas\blocos'):
+        if att.verificar():
             handle, ponto, escala, name = att.bloco_selecionado()
             att.deletar(handle)
         else:
@@ -111,102 +111,13 @@ while True:
         else:
             bloco_cad.escala_atual = values['-ESCX-']
 
-        #--------------------------------------------------------------
-
-        if values['-OESQ-']:
-            if values['-FILETE-']:
-
-                if values['-CAMPO5-']: #solda contorno
-                    if values['-CAMPO1-']: #acabamento em campo
-                        if values['-CAMPO3-']:
-                            solda_block = 'eSolda_filete_contorno_em_campo_amboslados'
-                        else:
-                            solda_block = 'eSolda_filete_contorno_em_campo'
-                    elif values['-CAMPO3-']: # ambos os lados
-                        solda_block = 'eSolda_filete_contorno_amboslados'
-                    else:
-                        #somente contorno
-                        solda_block = 'eSolda_filete_contorno'
-
-                elif values['-CAMPO1-']:
-                    if False:
-                        pass
-                    elif values['-CAMPO3-']:
-                        solda_block = 'eSolda_filete_em_campo__amboslados'
-                    else:
-                        #so acabamento em campo
-                        solda_block = 'eSolda_filete_em_campo'
+        #---------------------------INSERIR---------------------------
+        if att.verificar_arquivo(bloco_arquivo):
+            bloco_cad.inserir_bloco(bloco_arquivo, ponto)
+            bloco_cad.espessura([values['-ESP_B-'],values['-ESP_A-']])
+        else:
+            sg.popup('Bloco Não Disponível')
         
-            elif values['-BISEL-']:
-                if values['-IRETO-']:
-                    if values['-CAMPO5-']:
-                        solda_block = 'Solda_bisel_contorno_reto'
-                elif values['-ICONV-']:
-                    if values['-CAMPO5-']:
-                        solda_block = 'Solda_bisel_contorno_convexo' 
-                elif values['-ISA-']:
-                    if values['-CAMPO5-']:
-                        solda_block = 'Solda_bisel_contorno_semacabamento' 
-            
-            elif values['-V-']:
-                pass
-
-        elif values['-ODIR-']:
-            if values['-FILETE-']:
-                if values['-CAMPO5-']: #solda contorno
-                    if values['-CAMPO1-']: #acabamento em campo
-                        if values['-CAMPO3-']:
-                            solda_block = 'dSolda_filete_contorno_em_campo_amboslados'
-                        else:
-                            solda_block = 'dSolda_filete_contorno_em_campo'
-                    elif values['-CAMPO3-']: # ambos os lados
-                        solda_block = 'dSolda_filete_contorno_amboslados'
-                    else:
-                        #somente contorno
-                        solda_block = 'dSolda_filete_contorno'
-
-
-                elif values['-CAMPO1-']:
-                    if False:
-                        pass
-                    elif values['-CAMPO3-']:
-                        solda_block = 'dSolda_filete_em_campo__amboslados'
-                    else:
-                        #so acabamento em campo
-                        solda_block = 'dSolda_filete_em_campo'
-        
-
-
-            elif values['-BISEL-']:
-                if values['-IRETO-']:
-                    if values['-CAMPO5-']:
-                        solda_block = 'Solda_bisel_contorno_reto'
-                elif values['-ICONV-']:
-                    if values['-ODIR-']:
-                        if values['-CAMPO5-'] : #contorno
-                            if values['-CAMPO1-'] and values['-CAMPO3-']: 
-                                solda_block = 'dSolda_bisel_contorno_convexo_em_campo_amboslados'
-                            elif values['-CAMPO1-']: 
-                                solda_block = 'dSolda_bisel_contorno_convexo_em_campo'
-                            elif values['-CAMPO3-']: 
-                                solda_block = 'dSolda_bisel_convexo_em_campo_amboslados'
-                            else:
-                                solda_block = 'dSolda_bisel_contorno_convexo'
-                             
-        
-
-                elif values['-ISA-']:
-                    if values['-CAMPO5-']:
-                        solda_block = 'Solda_bisel_contorno_semacabamento' 
-
-        bloco_cad.inserir_bloco(solda_block, ponto)
-        bloco_cad.espessura([values['-ESP_B-'],values['-ESP_A-']])
-        '''
-    elif False:
-        #jogar a janela para frente
-        #remarcar os campos e deletar o ultimo campo adicionada
-        pass
-        '''
     #-------------------------EScala---------------------------
     
         #deixou o programa lento essa historia de pegar o valor da escala atual
@@ -322,7 +233,10 @@ while True:
    
     elif event == '-ISA-' and (base == 'BISEL'or base =='TOPO'):
         grafico.apagar(id['acabamento'])
-   
+    
+    #------------------------grafico--------------------------
+    elif event == '-GRAPH-':
+        pass
     else:
 
         '''

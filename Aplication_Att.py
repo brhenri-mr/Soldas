@@ -12,18 +12,21 @@ class Visualizar_att():
     def __init__(self) -> None:
 
         self.zw = ZwCAD()
-
-    def verificar(self,local_blocos,*args):
-
-
+        raiz = r'C:\Users\breno\Desktop\Projetos\Soldas\blocos'
         #Lista de blocos que pertecem ao programa
-        blocos_possiveis = os.listdir(local_blocos)
+        self.blocos_possiveis = os.listdir(raiz)
+
+    def verificar(self,*args):
+
         #Verificando a necessidade de atualização
         for t in range(1):
             for entity in args[0] if len(args)>0 else self.zw.doc.PickfirstSelectionSet:
-                if (entity.Name+'.dwg') in blocos_possiveis:
+                if (entity.Name+'.dwg') in self.blocos_possiveis:
                     return True
         return False
+    
+    def verificar_arquivo(self,nome):
+        return True if nome+'.dwg' in self.blocos_possiveis else False
 
     def bloco_selecionado(self,*args):
         '''

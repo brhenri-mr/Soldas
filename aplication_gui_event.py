@@ -1,12 +1,14 @@
 import PySimpleGUI as sg
-from Aplication_draw import Draw_Solder
+from Aplication_draw import Draw_Solder, Solder
 from Aplication_graph import Pre_visualizacao
+from Aplication_Att import Visualizar_att
 from pyzwcad import ZwCAD
 from win32com.client import Dispatch
 from datetime import datetime
 
 def main_test(filete=False,campo=False, contorno=False,direita=True,esquerda=False,amboslados=False):
     #Criterio para ativação das propriedades
+    sg.theme('SystemDefaultForReal')
     graph_elem = sg.Graph(canvas_size=(300, 300),
                                 graph_bottom_left=(0, 0),
                                 graph_top_right=(400, 400),
@@ -32,7 +34,6 @@ def main_test(filete=False,campo=False, contorno=False,direita=True,esquerda=Fal
                                         ])]
                             ]
 
-    #sg.theme('DarkRed1')
     layout = [  [sg.Text('Tipo de solda', justification='center')],
             [sg.Column([[
                 sg.Radio('Filete','Prop.',enable_events=True, key='-FILETE-', default=filete),
@@ -98,9 +99,17 @@ def solda_desenhada(nome):
 
         return id
 
-zw = ZwCAD()
+#Zwcad
+
 acad = Dispatch("ZwCAD.Application")
+
+#classes
+zw = ZwCAD()
 bloco_cad = Draw_Solder(zw,acad)
+arquivo_nome  = Solder()
+att = Visualizar_att()
+
+#Parametro adicionais
 tempo_utilizado = '' 
 bloco_obtido = True
 base = 'FILETE'
@@ -152,6 +161,7 @@ while True:
 
     #----------------------evento ok-------------------------------
     elif event == "Ok":
+        bloco_arquivo = arquivo_nome.tipo(values)
         #---------------------------ATT----------------------------
 
         ponto,escala, nome =  parametros['ponto'], parametros['escala'], parametros['nome']
@@ -167,92 +177,16 @@ while True:
             bloco_cad.escala_atual = values['-ESCX-']
 
         #----------------------------INSERIR-------------------------------
-
-        if values['-OESQ-']:
-            if values['-FILETE-']:
-                if values['-CAMPO5-']: #solda contorno
-                    if values['-CAMPO1-']: #acabamento em campo
-                        if values['-CAMPO3-']:
-                            solda_block = 'eSolda_filete_contorno_em_campo_amboslados'
-                        else:
-                            solda_block = 'eSolda_filete_contorno_em_campo'
-                    elif values['-CAMPO3-']: # ambos os lados
-                        solda_block = 'eSolda_filete_contorno_amboslados'
-                    else:
-                        #somente contorno
-                        solda_block = 'eSolda_filete_contorno'
-
-
-                elif values['-CAMPO1-']:
-                    if False:
-                        pass
-                    elif values['-CAMPO3-']:
-                        solda_block = 'eSolda_filete_em_campo__amboslados'
-                    else:
-                        #so acabamento em campo
-                        solda_block = 'eSolda_filete_em_campo'
-        
-
-
-            elif values['-BISEL-']:
-                if values['-IRETO-']:
-                    if values['-CAMPO5-']:
-                        solda_block = 'Solda_bisel_contorno_reto'
-                elif values['-ICONV-']:
-                    if values['-CAMPO5-']:
-                        solda_block = 'Solda_bisel_contorno_convexo' 
-                elif values['-ISA-']:
-                    if values['-CAMPO5-']:
-                        solda_block = 'Solda_bisel_contorno_semacabamento' 
-
-        elif values['-ODIR-']:
-            if values['-FILETE-']:
-                if values['-CAMPO5-']: #solda contorno
-                    if values['-CAMPO1-']: #acabamento em campo
-                        if values['-CAMPO3-']:
-                            solda_block = 'dSolda_filete_contorno_em_campo_amboslados'
-                        else:
-                            solda_block = 'dSolda_filete_contorno_em_campo'
-                    elif values['-CAMPO3-']: # ambos os lados
-                        solda_block = 'dSolda_filete_contorno_amboslados'
-                    else:
-                        #somente contorno
-                        solda_block = 'dSolda_filete_contorno'
-
-
-                elif values['-CAMPO1-']:
-                    if False:
-                        pass
-                    elif values['-CAMPO3-']:
-                        solda_block = 'dSolda_filete_em_campo__amboslados'
-                    else:
-                        #so acabamento em campo
-                        solda_block = 'dSolda_filete_em_campo'
-        
-
-
-            elif values['-BISEL-']:
-                if values['-IRETO-']:
-                    if values['-CAMPO5-']:
-                        solda_block = 'Solda_bisel_contorno_reto'
-                elif values['-ICONV-']:
-                    if values['-ODIR-']:
-                        if values['-CAMPO5-'] : #contorno
-                            if values['-CAMPO1-'] and values['-CAMPO3-']: 
-                                solda_block = 'dSolda_bisel_contorno_convexo_em_campo_amboslados'
-                            elif values['-CAMPO1-']: 
-                                solda_block = 'dSolda_bisel_contorno_convexo_em_campo'
-                            elif values['-CAMPO3-']: 
-                                solda_block = 'dSolda_bisel_convexo_em_campo_amboslados'
-                            else:
-                                solda_block = 'dSolda_bisel_contorno_convexo' 
-
-        bloco_cad.apagar_bloco(handle)
-        bloco_cad.inserir_bloco(solda_block, ponto)
-        bloco_cad.espessura(values['-ESP_B-'],bloco_cad.handle)
-        #finalizar a janela
-        window.close()
-        bloco_obtido = True
+        if att.verificar_arquivo(bloco_arquivo):
+            bloco_cad.apagar_bloco(handle)
+            bloco_cad.inserir_bloco(bloco_arquivo, ponto)
+            bloco_cad.espessura(values['-ESP_B-'],bloco_cad.handle)
+            #finalizar a janela
+            window.close()
+            bloco_obtido = True
+        else:
+            sg.popup('Bloco Não Disponível')
+       
         '''
     elif False:
         #jogar a janela para frente

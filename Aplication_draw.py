@@ -44,7 +44,8 @@ class Draw_Solder:
     
 
     
-    def inserir_bloco(self,tipo: str, *args):
+    def inserir_bloco(self,tipo, *args):
+
         '''
         Insere o bloco do tipo especificado no autocad em exceção
 
@@ -64,9 +65,11 @@ class Draw_Solder:
 
         print(ponto)
         #Inserção dos blocos
+ 
         block.InsertBlock(ponto,Path,self.__escala_atual,self.__escala_atual,1,0)
         
         self.__handle = block.Item(block.count-1).handle
+        
 
     
         #self.zw.app.Update
@@ -94,7 +97,53 @@ class Draw_Solder:
 
 
     
+class Solder():
 
-            
-                
+    def __init__(self) -> None:
+        pass
+
+    def tipo(self,v):
+        '''
+        Faz a codificação do nome da solda pelo tipo de dados inserido pelo usuário
+        values = dicionario dos valores inseridos no gui
+        valeus: dict
+        '''
+        #dados
+        base = ['-FILETE-','-TOPO-','-V-','-V_CURVO-','-BISEL-','-BISEL_CURVO-','-J-']
+        ori = ['-OESQ-','-ODIR-']
+        prop = ['-CAMPO5-','-CAMPO1-','-CAMPO3-','-CAMPO4-']
+        acabamento = ['-IRETO-','-ICONV-','-ISA-']
+
+        subs = {
+            '-FILETE-':'Solda_filete',
+            '-TOPO-':'Solda_topo',
+            '-V-':'Solda_v',
+            '-V_CURVO-':'Solda_v_curvo',
+            '-BISEL-':'Solda_bisel',
+            '-BISEL_CURVO-':'Solda_biel_curvo',
+            '-J-':'Solda_j',
+            '-OESQ-':'e',
+            '-ODIR-':'d',
+            '-CAMPO1-':'campo',
+            '-CAMPO3-':'amboslados',
+            '-CAMPO4-':'inter',
+            '-CAMPO5-':'contorno',
+            '-IRETO-':'reto',
+            '-ICONV-':'convexo',
+            '-ISA-':''
+        }
+
+        #incremento
+        solda_block = ''
+
+        for dado in [base,ori,prop,acabamento]:
+            for parametro in dado:
+                if v[parametro]:
+                    if parametro in acabamento and 'filete' in solda_block:
+                        break
+                    else:
+                        solda_block = solda_block + subs[parametro]+'_'
+                    if parametro not in parametro:
+                        break
+        return solda_block
 

@@ -7,6 +7,7 @@ class Pre_visualizacao():
     def __init__(self, janela) -> None:
 
         self.janela = janela
+        janela.draw_image(filename='background2.png', location=(0,400))
 
     def filete(self):
         '''
@@ -197,6 +198,7 @@ class Pre_visualizacao():
         Deleta toda a imagem que já foi gerada
         '''
         self.janela.erase()
+        self.janela.draw_image(filename='background2.png', location=(0,400))
     
     def solda_desenhada(self,nome):
 

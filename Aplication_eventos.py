@@ -1,5 +1,5 @@
 
-from win32com.client import getevents,Dispatch
+from win32com.client import getevents, Dispatch
 from Aplication_Att import Visualizar_att
 from pyautogui import press
 
