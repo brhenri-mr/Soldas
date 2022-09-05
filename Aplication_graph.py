@@ -19,6 +19,15 @@ class Pre_visualizacao():
     def bisel(self):
 
         return self.janela.draw_lines([(100,200),(280,200),(190,200),(190,151.5),(190,200),(190+48.5,151.5)], color='red')
+    
+    def bisel_curvo(self):
+        '''
+        Desenha uma solda bisel curava básica
+        '''
+        id1 = self.janela.draw_lines([(100,200),(280,200),(190,200),(190,151.5)], color='red')
+        id3 =  self.janela.draw_lines([(190,200),(190,151.5)], color='red')
+        id2 = self.janela.draw_arc((195,250),(295,147),90,180,style ='arc' ,arc_color='red')
+        return [id1,id2,id3]
 
     def v(self):
         '''
@@ -104,6 +113,12 @@ class Pre_visualizacao():
         id_2 = self.janela.draw_polygon([(x,263),(x_flag,254.93),(x,246.86)],fill_color='red',line_color='red')
 
         return [id_1,id_2]
+    
+    def reforco(self):
+        '''
+        Desenha o detalhe de reforco tipo cordao
+        '''
+        return self.janela.draw_lines([(190,200),(190,74),(190+48.5,74+48.5),(190,74+48.5)],color='red')
 
     def solda_continua(self, orientacao):
         pass
@@ -127,6 +142,14 @@ class Pre_visualizacao():
             return [id1,id2]
         elif nome =='V':
             return self.janela.draw_lines([(190,200),(190+48.5,248.5),(190,200),(190-48.5,248.5)], color='red')
+        elif nome == 'BISEL_CURVO':
+            id1 = self.janela.draw_line((190,200),(190,248.5),color='red')
+            id2 = self.janela.draw_arc((195,250),(295,147),90,90,style ='arc' ,arc_color='red')
+            return [id1,id2]
+        elif nome  == 'V_CURVO':
+            id1 = self.janela.draw_arc((195,247),(295,147),90,90,style ='arc' ,arc_color='red')
+            id2 = self.janela.draw_arc((85,250),(185,150),-90,90,style ='arc' ,arc_color='red') 
+            return [id1,id2]
 
       
     def intercalado(self,id_old):

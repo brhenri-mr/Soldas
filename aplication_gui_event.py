@@ -21,7 +21,8 @@ def main_test(filete=False,campo=False, contorno=False,direita=True,esquerda=Fal
                             [sg.Text('Acabamentos')],
                             [sg.Checkbox(text= "Solda em campo", size=(15, 1), default=campo, key='-CAMPO1-', enable_events=True),sg.Checkbox(text="Solda Continua", size=(15,1), default=False, key='-CAMPO2-')],
                             [sg.Checkbox(text="Ambos os lados", size=(15, 1), default=amboslados, key='-CAMPO3-', enable_events=True),sg.Checkbox(text="Intercalado", size=(15,1), default=inter, key='-CAMPO4-', enable_events=True)],
-                            [sg.Checkbox(text="Solda em todo contorno", size=(10,1), default=contorno, key='-CAMPO5-', enable_events=True)],
+                            [sg.Checkbox(text="Solda em todo contorno", size=(10,1), default=contorno, key='-CAMPO5-', enable_events=True),sg.Checkbox(text="Reforço", size=(10,1), default=False, key='-CAMPO6-', enable_events=True)],
+                            [sg.Checkbox(text="DEFINIR", size=(15,1), default=False, key='-CAMPO7-', enable_events=True),sg.Text('Ref=',key='-TREF-',visible=False),sg.InputText('',key='-REF-',size=(5), enable_events=True, visible=False)],
                             [sg.Column([[sg.Text(text='Informações adicionais')],
                                         [sg.Radio('Reto','Inf.', key='-IRETO-', enable_events=True),
                                         sg.Radio('Convexo','Inf.',key='-ICONV-', enable_events=True),
@@ -208,34 +209,67 @@ while True:
         grafico.deletar()
         if values['-FILETE-']:
             id['Base'] = grafico.filete()
- 
+    #-------------------------Reforço---------------------------
+
+    elif event == '-CAMPO6-':
+        if values['-CAMPO6-']:
+            ref = True
+            id['Reforco'] = grafico.reforco()
+        else:
+            ref = False
+            grafico.apagar(id['Reforco'])
+            pass
+        window['-TREF-'].Update(visible=ref)
+        window['-REF-'].Update(visible=ref)
+
     #-------------------------Desenho---------------------------
 
     elif event == '-FILETE-':
-
-        grafico.deletar()
+        if id['Base'] != '':
+            grafico.apagar(id['Base'])
+        else:
+            grafico.deletar()
         id['Base'] = grafico.filete()
         base = 'FILETE'
-            
   
     elif event == '-BISEL-':
 
-        grafico.deletar()
+        if id['Base'] != '':
+            grafico.apagar(id['Base'])
+        else:
+            grafico.deletar()
         grafico.bisel()
         base = 'BISEL'
+
+    elif event == '-BISEL_CURVO-':
+        if id['Base'] != '':
+            grafico.apagar(id['Base'])
+        else:
+            grafico.deletar()
+        grafico.bisel_curvo()
+        base = 'BISEL_CURVO'
     
     elif event == '-V-':
-        grafico.deletar()
+        if id['Base'] != '':
+            grafico.apagar(id['Base'])
+        else:
+            grafico.deletar()
         id['Base'] = grafico.v()
         base = 'V'
 
     elif event == '-V_CURVO-':
-        grafico.deletar()
+        if id['Base'] != '':
+            grafico.apagar(id['Base'])
+        else:
+            grafico.deletar()
         id['Base'] = grafico.v_curvo()
         base = 'V_CURVO'
 
     elif event == '-TOPO-':
-        grafico.deletar()
+        if id['Base'] != '':
+            grafico.apagar(id['Base'])
+        else:
+            grafico.deletar()
         id['Base'] = grafico.topo()
         base = 'TOPO'
 

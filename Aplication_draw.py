@@ -45,7 +45,6 @@ class Draw_Solder:
 
     
     def inserir_bloco(self,tipo, *args):
-
         '''
         Insere o bloco do tipo especificado no autocad em exceção
 
@@ -60,6 +59,9 @@ class Draw_Solder:
         
         #definição ponto de inserção
         print(args[0])
+
+
+
         ponto = self.zw.doc.Utility.GetPoint() if args[0] =='N_att' else args[0]
         ponto = APoint(ponto[0],ponto[1])
 
@@ -82,7 +84,8 @@ class Draw_Solder:
 
         #Modificação dos atributos do bloco
         for attr in Entity.GetAttributes():
-            if attr.TagString == "CORDAO":
+            if attr.TagString in ["CORDAO","REF"]:
+                print(attr.TagString)
                 if len(exp)>1:
                     input = exp[i]
                 else:
@@ -111,7 +114,7 @@ class Solder():
         #dados
         base = ['-FILETE-','-TOPO-','-V-','-V_CURVO-','-BISEL-','-BISEL_CURVO-','-J-']
         ori = ['-OESQ-','-ODIR-']
-        prop = ['-CAMPO5-','-CAMPO1-','-CAMPO3-','-CAMPO4-']
+        prop = ['-CAMPO5-','-CAMPO1-','-CAMPO3-','-CAMPO4-','-CAMPO6-']
         acabamento = ['-IRETO-','-ICONV-','-ISA-']
 
         subs = {
@@ -128,6 +131,7 @@ class Solder():
             '-CAMPO3-':'amboslados',
             '-CAMPO4-':'inter',
             '-CAMPO5-':'contorno',
+            '-CAMPO6-':'Reforco',
             '-IRETO-':'reto',
             '-ICONV-':'convexo',
             '-ISA-':''

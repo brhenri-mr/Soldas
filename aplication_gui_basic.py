@@ -1,3 +1,4 @@
+from optparse import Values
 import PySimpleGUI as sg
 from Aplication_draw import Draw_Solder, Solder
 from Aplication_Att import Visualizar_att
@@ -20,7 +21,8 @@ def main_test():
                             [sg.Text('Acabamentos')],
                             [sg.Checkbox(text= "Solda em campo", size=(15, 1), default=False, key='-CAMPO1-', enable_events=True),sg.Checkbox(text="Solda Continua", size=(15,1), default=False, key='-CAMPO2-')],
                             [sg.Checkbox(text="Ambos os lados", size=(15, 1), default=False, key='-CAMPO3-', enable_events=True),sg.Checkbox(text="Intercalado", size=(15,1), default=False, key='-CAMPO4-', enable_events=True)],
-                            [sg.Checkbox(text="Solda em todo contorno", size=(10,1), default=False, key='-CAMPO5-', enable_events=True)],
+                            [sg.Checkbox(text="Solda em todo contorno", size=(15,1), default=False, key='-CAMPO5-', enable_events=True),sg.Checkbox(text="Reforço", size=(10,1), default=False, key='-CAMPO6-', enable_events=True)],
+                            [sg.Checkbox(text="DEFINIR", size=(15,1), default=False, key='-CAMPO7-', enable_events=True),sg.Text('Ref=',key='-TREF-',visible=False),sg.InputText('',key='-REF-',size=(5), enable_events=True, visible=False)],
                             [sg.Column([[sg.Text(text='Informações adicionais')],
                                         [sg.Radio('Reto','Inf.', key='-IRETO-', enable_events=True),
                                         sg.Radio('Convexo','Inf.',key='-ICONV-', enable_events=True),
@@ -55,12 +57,12 @@ def main_test():
                          ],expand_x=True, element_justification='r') #para o element justificante funcionar precisa do expand element true
                                                     ],
             [sg.Column(layout =filete_propriedades,key="Propriedades"),graph_elem],
-            [sg.Button('Ok'), sg.Button('Cancel'), sg.Button('Reset')]]
+            [sg.Button('Ok'), sg.Button('Reset'), sg.Button('Cancel')]]
     return sg.Window('Soldas',layout, finalize=True, icon=r'C:\Users\breno\Desktop\Projetos\Soldas\soldering_iron-48_46707.ico', titlebar_icon='soldering_iron-48_46707.ico')
 
 
 #dados
-id = {'Base':'','solda_em_campo':'','ambos_os_lados':'','contorno':'','acabamento':'','intercalado':'', 'expA':'','expB':''}
+id = {'Base':'','solda_em_campo':'','ambos_os_lados':'','contorno':'','acabamento':'','intercalado':'', 'expA':'','expB':'','Reforco':''}
 
 
 #Tipo estaticos
@@ -74,6 +76,7 @@ grafico = Pre_visualizacao(janela_um['-GRAPH-'])
 while True:
 
     window,event, values = sg.read_all_windows()
+    print(arquivo_nome.tipo(values))
     
     '''
     toda a vez que um evento é disparado o while roda
@@ -92,6 +95,15 @@ while True:
 
     if event == sg.WIN_CLOSED:
         break
+    #----------------------RESET-----------------------------------
+
+    elif event == 'Reset':
+        [window[i].Update(value=False) for i in [f'-CAMPO{j}-' for j in range(1,8,1)]]
+
+        for key,item in id.items():
+            if key not in ['Base','expA','expB']:
+                grafico.apagar(item)
+
 
     #----------------------evento ok-------------------------------
     elif event == "Ok":
@@ -114,7 +126,7 @@ while True:
         #---------------------------INSERIR---------------------------
         if att.verificar_arquivo(bloco_arquivo):
             bloco_cad.inserir_bloco(bloco_arquivo, ponto)
-            bloco_cad.espessura([values['-ESP_B-'],values['-ESP_A-']])
+            bloco_cad.espessura([values['-REF-'],values['-ESP_B-'],values['-ESP_A-']])
         else:
             sg.popup('Bloco Não Disponível')
         
@@ -143,32 +155,68 @@ while True:
         if values['-FILETE-']:
             id['Base'] = grafico.filete()
  
+    #-------------------------Reforço---------------------------
+
+    elif event == '-CAMPO6-':
+        if values['-CAMPO6-']:
+            ref = True
+            id['Reforco'] = grafico.reforco()
+        else:
+            ref = False
+            grafico.apagar(id['Reforco'])
+            pass
+        window['-TREF-'].Update(visible=ref)
+        window['-REF-'].Update(visible=ref)
+
     #-------------------------Desenho---------------------------
 
-    elif event == '-FILETE-':
 
-        grafico.deletar()
+    elif event == '-FILETE-':
+        if id['Base'] != '':
+            grafico.apagar(id['Base'])
+        else:
+            grafico.deletar()
         id['Base'] = grafico.filete()
         base = 'FILETE'
   
     elif event == '-BISEL-':
 
-        grafico.deletar()
+        if id['Base'] != '':
+            grafico.apagar(id['Base'])
+        else:
+            grafico.deletar()
         grafico.bisel()
         base = 'BISEL'
+
+    elif event == '-BISEL_CURVO-':
+        if id['Base'] != '':
+            grafico.apagar(id['Base'])
+        else:
+            grafico.deletar()
+        grafico.bisel_curvo()
+        base = 'BISEL_CURVO'
     
     elif event == '-V-':
-        grafico.deletar()
+        if id['Base'] != '':
+            grafico.apagar(id['Base'])
+        else:
+            grafico.deletar()
         id['Base'] = grafico.v()
         base = 'V'
 
     elif event == '-V_CURVO-':
-        grafico.deletar()
+        if id['Base'] != '':
+            grafico.apagar(id['Base'])
+        else:
+            grafico.deletar()
         id['Base'] = grafico.v_curvo()
         base = 'V_CURVO'
 
     elif event == '-TOPO-':
-        grafico.deletar()
+        if id['Base'] != '':
+            grafico.apagar(id['Base'])
+        else:
+            grafico.deletar()
         id['Base'] = grafico.topo()
         base = 'TOPO'
 
