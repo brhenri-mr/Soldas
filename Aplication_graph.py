@@ -62,6 +62,13 @@ class Pre_visualizacao():
     
         return [id1,id2]
 
+    def j(self):
+
+        id1 = self.janela.draw_lines([(100,200),(280,200),(190,200),(190,150)], color='red')
+        id2 = self.janela.draw_arc((150,190),(230,110),90,0,style ='arc' ,arc_color='red')
+
+        return [id1,id2]
+
     def acabamento_reto(self,cri):
         '''
         Desenha o acabamento de tipo reto para soldas bisel
@@ -204,6 +211,21 @@ class Pre_visualizacao():
 
         elif base =='Amboslados':
             pontos = [(178-(len(exps[0])-1)*2,175.75),(178-(len(exps[1])-1)*2,224.25)]
+        
+        elif base in ['FILETE','J','BISEL CURVO']:
+            pontos = [(178-(len(exps[0])-1)*2,175.75)]
+
+        elif base == 'TOPO':
+            pontos = [(165-(len(exps[0])-1)*2,175.75)]
+
+        elif base == 'V':
+            pontos = [(165-(len(exps[0])-1)*2,175.75)]
+
+        elif base == 'V CURVO':
+            pontos = [(165-(len(exps[0])-1)*2,175.75)]
+        
+        elif base =='BISEL':
+             pontos = [(212-(len(exps[0])-1)*2,140)]
 
         else:
             pontos = [(178-(len(exps[0])-1)*2,175.75)]

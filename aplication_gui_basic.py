@@ -30,7 +30,7 @@ def main_test():
                                         
                             [sg.Column([[sg.Text(text='Escala')],
                                         [sg.Radio('Manual', 'ESC',enable_events=True, key='-MANUAL-'),sg.Radio('Automatico','ESC',enable_events=True,key='-AUTO-',default=True)],
-                                        [sg.Text(text='x'), sg.InputText('',key='-ESCX-',size=(5), disabled=True)],
+                                        [sg.InputOptionMenu(('Menu Option 1', 'Menu Option 2', 'Menu Option 3'), key='optionmenu'),sg.Text(text='x'), sg.InputText('',key='-ESCX-',size=(5), disabled=True)],
                                         [sg.Text(text='y'), sg.InputText('',key='-ESCY-',size=(5), disabled=True)]
                                         ])]
                             ]
@@ -76,7 +76,6 @@ grafico = Pre_visualizacao(janela_um['-GRAPH-'])
 while True:
 
     window,event, values = sg.read_all_windows()
-    print(arquivo_nome.tipo(values))
     
     '''
     toda a vez que um evento é disparado o while roda
@@ -170,9 +169,8 @@ while True:
 
     #-------------------------Desenho---------------------------
 
-
     elif event == '-FILETE-':
-        if id['Base'] != '':
+        if isinstance(id['Base'],int):
             grafico.apagar(id['Base'])
         else:
             grafico.deletar()
@@ -181,23 +179,23 @@ while True:
   
     elif event == '-BISEL-':
 
-        if id['Base'] != '':
+        if isinstance(id['Base'],int):
             grafico.apagar(id['Base'])
         else:
             grafico.deletar()
-        grafico.bisel()
+        id['base'] = grafico.bisel()
         base = 'BISEL'
 
     elif event == '-BISEL_CURVO-':
-        if id['Base'] != '':
+        if isinstance(id['Base'],int):
             grafico.apagar(id['Base'])
         else:
             grafico.deletar()
-        grafico.bisel_curvo()
+        id['base'] = grafico.bisel_curvo()
         base = 'BISEL_CURVO'
     
     elif event == '-V-':
-        if id['Base'] != '':
+        if isinstance(id['Base'],int):
             grafico.apagar(id['Base'])
         else:
             grafico.deletar()
@@ -205,7 +203,7 @@ while True:
         base = 'V'
 
     elif event == '-V_CURVO-':
-        if id['Base'] != '':
+        if isinstance(id['Base'],int):
             grafico.apagar(id['Base'])
         else:
             grafico.deletar()
@@ -213,13 +211,23 @@ while True:
         base = 'V_CURVO'
 
     elif event == '-TOPO-':
-        if id['Base'] != '':
+        if isinstance(id['Base'],int):
             grafico.apagar(id['Base'])
         else:
             grafico.deletar()
         id['Base'] = grafico.topo()
         base = 'TOPO'
+    
+    elif event == '-J-':
+        if isinstance(id['Base'],int):
+            grafico.apagar(id['Base'])
+        else:
+            grafico.deletar()
+        id['Base'] = grafico.j()
+        base = 'J'
+    
 
+        #---------------------TEXT-------------------------------
     elif event == '-ESP_B-' or event=='-ESP_A-':
         grafico.apagar(id['expB'])
         if values['-CAMPO4-']: #intercalador
@@ -227,7 +235,8 @@ while True:
         elif values['-CAMPO3-']: #anbos os lados
             id['expB'] = grafico.espessura([values['-ESP_B-'],values['-ESP_A-']],'Amboslados')
         else:
-            id['expB'] = grafico.espessura([values['-ESP_B-']],'Filete')
+            id['expB'] = grafico.espessura([values['-ESP_B-']],base)
+        #---------------------------------------------------------
 
     elif event == '-CAMPO1-':
         if values['-CAMPO1-']:
