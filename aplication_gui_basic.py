@@ -8,6 +8,9 @@ from win32com.client import Dispatch
 def main_test():
     #Criterio para ativação das propriedades
     sg.theme('SystemDefaultForReal')
+
+    menu = [['Opções',['Favorito','configurações']]]
+
     graph_elem = sg.Graph(canvas_size=(300, 300),
                                 graph_bottom_left=(0, 0),
                                 graph_top_right=(400, 400),
@@ -15,7 +18,8 @@ def main_test():
                                 key='-GRAPH-',
                                 background_color='lightblue')
                                 
-    filete_propriedades = [ [sg.Text('Orientação')],
+    filete_propriedades = [ 
+                            [sg.Text('Orientação')],
                             [sg.Radio('Direita','Ori.', key='-ODIR-', default=True, enable_events=True), sg.Radio('Esquerda','Ori.', key='-OESQ-',enable_events=True)],
                             [sg.Text('Acabamentos')],
                             [sg.Checkbox(text= "Solda em campo", size=(15, 1), default=False, key='-CAMPO1-', enable_events=True),sg.Checkbox(text="Solda Continua", size=(15,1), default=False, key='-CAMPO2-')],
@@ -34,7 +38,9 @@ def main_test():
                             ]
 
 
-    layout = [  [sg.Text('Tipo de solda', justification='center')],
+    layout = [ 
+            [sg.Menu(menu)],
+            [sg.Text('Tipo de solda', justification='l'),sg.Column([[sg.Image('star_off.png',key='-ESTRELA-',enable_events = True)]],element_justification = 'right',expand_x=True)],
             [sg.Column([[
                 sg.Radio('Filete','Prop.',enable_events=True, key='-FILETE-'),
                 sg.Radio('Topo','Prop.',enable_events=True, key='-TOPO-'), 
@@ -58,6 +64,14 @@ def main_test():
             [sg.Button('Ok'), sg.Button('Reset'), sg.Button('Cancel')]]
     return sg.Window('Soldas',layout, finalize=True, icon=r'C:\Users\breno\Desktop\Projetos\Soldas\soldering_iron-48_46707.ico', titlebar_icon='soldering_iron-48_46707.ico')
 
+def favoritos():
+    sg.theme('SystemDefaultForReal')
+
+    layout=[
+        [sg.Listbox(values=('Listbox 1', 'Listbox 2', 'Listbox 3'), size=(50, 3), key='listbox')],
+        [sg.Text('Nome'),sg.InputText('Insira o nome da solda')]
+        ]
+    return sg.Window('Favoritos',layout, finalize=True)
 
 #dados
 id = {'Base':'','solda_em_campo':'','ambos_os_lados':'','contorno':'','acabamento':'','intercalado':'', 'expA':'','expB':'','Reforco':''}
@@ -70,6 +84,10 @@ zw = ZwCAD()
 acad = Dispatch("ZwCAD.Application")
 arquivo_nome = Solder()
 grafico = Pre_visualizacao(janela_um['-GRAPH-'])
+
+#tipo dinamico 
+j = True #liga e desliga o 
+
 
 while True:
 
@@ -303,6 +321,17 @@ while True:
     #------------------------grafico--------------------------
     elif event == '-GRAPH-':
         pass
+    #------------------------Favorito_estrela--------------------------
+    elif event == '-ESTRELA-':
+        if j:
+            window['-ESTRELA-'].update(source='star_on.png')
+            j = False
+        else:
+            window['-ESTRELA-'].update(source='star_off.png')
+            j = True
+    #------------------------Favorito_TELA--------------------------
+    if event == 'Favorito':
+        janela_dois = favoritos()
     else:
 
         '''
