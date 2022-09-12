@@ -78,18 +78,28 @@ class Draw_Solder:
 
     def espessura(self,exp: int or list, *args):
         
-        i=0
+        i = 0
+        s = []
+
         #Instancia do ultimo objeto adcionado no documento
         Entity = self.acad.ActiveDocument.HandleToObject(args[0] if len(args) != 0 else self.__handle)
+        print(exp)
+        #tratamento do exp
+        for elemento in exp:
+            if elemento == '':
+                pass
+            else:
+                s.append(elemento)
+        
 
         #Modificação dos atributos do bloco
         for attr in Entity.GetAttributes():
             if attr.TagString in ["CORDAO","REF"]:
                 print(attr.TagString)
                 if len(exp)>1:
-                    input = exp[i]
+                    input = s[i]
                 else:
-                    input = exp
+                    input = s[0]
                 attr.TextString = str(input)
                 attr.Update()
                 i +=1

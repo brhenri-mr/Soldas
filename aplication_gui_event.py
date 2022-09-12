@@ -30,8 +30,7 @@ def main_test(filete=False,campo=False, contorno=False,direita=True,esquerda=Fal
                                         
                             [sg.Column([[sg.Text(text='Escala')],
                                         [sg.Radio('Manual', 'ESC',enable_events=True, key='-MANUAL-'),sg.Radio('Automatico','ESC',enable_events=True,key='-AUTO-',default=True)],
-                                        [sg.Text(text='x'), sg.InputText('',key='-ESCX-',size=(5), disabled=True)],
-                                        [sg.Text(text='y'), sg.InputText('',key='-ESCY-',size=(5), disabled=True)]
+                                        [sg.InputOptionMenu(('----','1:5', '1:10', '1:15','1:20','1:25','1:50'), key='-OPESC-'),sg.Text(text='1:'), sg.InputText('',key='-ESCX-',size=(8), disabled=True)],
                                         ])]
                             ]
 
@@ -143,7 +142,6 @@ while True:
     #-------------------Tipo dinamicos-----------------------------
     #bloco_cad = Draw_Solder()
     window['-ESCX-'].Update(disabled=True,value=round(bloco_cad.escala_atual,1))
-    window['-ESCY-'].Update(disabled=True,value=round(bloco_cad.escala_atual,1))
     #--------------------------------------------------------------
 
     print(event)
@@ -164,8 +162,13 @@ while True:
         #---------------------------ESCALA-----------------------------
 
         if values['-AUTO-']:
-            bloco_cad.escala_atual = escala
+            if values['-OPESC-'] not in ['----','']:
+                # tratamento do string escala
+                bloco_cad.escala_atual = int(values['-OPESC-'][-2:]) if len(values['-OPESC-']) == 4 else  int(values['-OPESC-'][-1])
+            else:
+                bloco_cad.escala_atual = escala
         else:
+            
             bloco_cad.escala_atual = values['-ESCX-']
 
         #----------------------------INSERIR-------------------------------
@@ -187,28 +190,28 @@ while True:
         '''
     #-------------------------EScala---------------------------
     
-        #deixou o programa lento essa historia de pegar o valor da escala atual
+
     
     elif event =='-MANUAL-':
         window['-ESCX-'].Update(disabled=False, value='')
-        window['-ESCY-'].Update(disabled=False, value='')
+        
     elif event == '-AUTO-':
-        window['-ESCX-'].Update(disabled=True,value=round(bloco_cad.escala_atual,1))
-        window['-ESCY-'].Update(disabled=True,value=round(bloco_cad.escala_atual,1))
+        if values['-OPESC-'] not in ['----','']:
+            window['-ESCX-'].Update(disabled=True,value=int(values['-OPESC-'][-2:]) if len(values['-OPESC-']) == 4 else  int(values['-OPESC-'][-1]))
+        else:
+            window['-ESCX-'].Update(disabled=True,value=round(bloco_cad.escala_atual,1))
+    
 
     #--------------------------Orientação----------------------
 
     elif event == '-ODIR-':
-        [window[campos].Update(value=False) for campos in ['-CAMPO1-', '-CAMPO2-', '-CAMPO3-', '-CAMPO4-', '-CAMPO5-']]
         grafico.deletar()
-        if values['-FILETE-']:
-            id['Base'] = grafico.filete()
+        id =grafico.solda_desenhada(id,True,base)
 
     elif event == '-OESQ-':
-        [window[campos].Update(value=False) for campos in ['-CAMPO1-', '-CAMPO2-', '-CAMPO3-', '-CAMPO4-', '-CAMPO5-']]
         grafico.deletar()
-        if values['-FILETE-']:
-            id['Base'] = grafico.filete()
+        id = grafico.solda_desenhada(id,False,base)
+        
     #-------------------------Reforço---------------------------
 
     elif event == '-CAMPO6-':
@@ -287,6 +290,7 @@ while True:
             id['solda_em_campo'] = grafico.solda_em_campo(values['-ODIR-'])
         else:
             grafico.apagar(id['solda_em_campo'])
+            id['solda_em_campo'] = ''
             pass
     elif event == '-CAMPO2-':
         pass
@@ -297,6 +301,7 @@ while True:
             id['expB'] = grafico.espessura([values['-ESP_B-'],values['-ESP_A-']],'Amboslados')
         else:
             grafico.apagar(id['ambos_os_lados'])
+            id['ambos_os_lados'] = ''
             grafico.apagar(id['expB'])
             id['expB'] = grafico.espessura([values['-ESP_B-']],'Filete')
 
@@ -318,6 +323,8 @@ while True:
            id['contorno'] = grafico.contorno(values['-ODIR-'])
         else:
             grafico.apagar(id['contorno'])
+            id['contorno'] = ''
+            
     elif event == '-CAMPO6-':
         pass
     elif event == '-CAMPO7-':

@@ -245,7 +245,7 @@ class Pre_visualizacao():
         self.janela.erase()
         self.janela.draw_image(filename='background2.png', location=(0,400))
     
-    def solda_desenhada(self,nome):
+    def solda_desenhada(self,nome, *args):
 
         '''
         Desenha a solda do autocad no programa
@@ -253,23 +253,54 @@ class Pre_visualizacao():
         nome = parametros da solda
         nome: dict
         '''
-     
-        if nome['direita']:
-            ori = True
-        elif nome['esquerda']:
-            ori=False
 
-        if nome['filete']:
-            self.filete()
-            b= 'FILETE'
-        elif nome['bisel']:
-            self.bisel()
-            b='BISEL'
-        if nome['contorno']:
-            self.contorno(ori)
-        if nome['amboslados']:
-            self.solda_ambos_os_lados(b)
-        if nome['campo']:
-            self.solda_em_campo(ori)
+        id = {'Base':'','solda_em_campo':'','ambos_os_lados':'','contorno':'','acabamento':'','intercalado':'', 'expA':'','expB':'','Reforco':''}
+        if len(args) >0:
+            #por padrão é para direita
+            ori = args[0]
+            b = args[1]
+
+            if b =='FILETE':
+                id['Base'] = self.filete()
+            elif b == 'BISEL':
+                id['Base'] = self.bisel()
+            elif b == 'BISEL_CURVO':
+                id['Base'] = self.bisel_curvo()
+            elif b == 'V':
+                id['Base'] = self.v()
+            elif b == 'V_CURVO':
+                id['Base'] = self.v_curvo()
+            elif b == 'TOPO':
+                id['Base'] = self.topo()
+            elif b == 'J':
+                id['Base'] = self.j()
+
+            if nome['contorno']!= '':
+                id['contorno'] = self.contorno(ori)
+            if nome['ambos_os_lados'] != '':
+                id['ambos_os_lados'] = self.solda_ambos_os_lados(b)
+            if nome['solda_em_campo']!= '':
+                id['solda_em_campo'] = self.solda_em_campo(ori)
+
+            return id
+        else:
+            if nome['direita']:
+                ori = True
+            elif nome['esquerda']:
+                ori=False
+
+            if nome['filete']:
+                id['Base'] = self.filete()
+                b= 'FILETE'
+            elif nome['bisel']:
+                id['Base'] = self.bisel()
+                b='BISEL'
+            if nome['contorno']:
+                id['contorno'] = self.contorno(ori)
+            if nome['amboslados']:
+                id['amboslados'] = self.solda_ambos_os_lados(b)
+            if nome['campo']:
+                id['solda_em_campo'] = self.solda_em_campo(ori)
+        
 
     

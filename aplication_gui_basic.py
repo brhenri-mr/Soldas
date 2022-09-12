@@ -1,4 +1,3 @@
-from optparse import Values
 import PySimpleGUI as sg
 from Aplication_draw import Draw_Solder, Solder
 from Aplication_Att import Visualizar_att
@@ -30,8 +29,7 @@ def main_test():
                                         
                             [sg.Column([[sg.Text(text='Escala')],
                                         [sg.Radio('Manual', 'ESC',enable_events=True, key='-MANUAL-'),sg.Radio('Automatico','ESC',enable_events=True,key='-AUTO-',default=True)],
-                                        [sg.InputOptionMenu(('Menu Option 1', 'Menu Option 2', 'Menu Option 3'), key='optionmenu'),sg.Text(text='x'), sg.InputText('',key='-ESCX-',size=(5), disabled=True)],
-                                        [sg.Text(text='y'), sg.InputText('',key='-ESCY-',size=(5), disabled=True)]
+                                        [sg.InputOptionMenu(('----','1:5', '1:10', '1:15','1:20','1:25','1:50'), key='-OPESC-'),sg.Text(text='1:'), sg.InputText('',key='-ESCX-',size=(8), disabled=True)],
                                         ])]
                             ]
 
@@ -76,7 +74,8 @@ grafico = Pre_visualizacao(janela_um['-GRAPH-'])
 while True:
 
     window,event, values = sg.read_all_windows()
-    
+    bloco_arquivo = arquivo_nome.tipo(values)
+    print(event)
     '''
     toda a vez que um evento é disparado o while roda
     '''
@@ -89,7 +88,7 @@ while True:
         break
     
     window['-ESCX-'].Update(disabled=True,value=round(bloco_cad.escala_atual,1))
-    window['-ESCY-'].Update(disabled=True,value=round(bloco_cad.escala_atual,1))
+    
     #--------------------------------------------------------------
 
     if event == sg.WIN_CLOSED:
@@ -107,6 +106,7 @@ while True:
     #----------------------evento ok-------------------------------
     elif event == "Ok":
         bloco_arquivo = arquivo_nome.tipo(values)
+
         #---------------------------ATT----------------------------
         att = Visualizar_att()
         if att.verificar():
@@ -118,8 +118,13 @@ while True:
         #---------------------------ESCALA-----------------------------
 
         if values['-AUTO-']:
-            bloco_cad.escala_atual = escala
+            if values['-OPESC-'] not in ['----','']:
+                # tratamento do string escala
+                bloco_cad.escala_atual = int(values['-OPESC-'][-2:]) if len(values['-OPESC-']) == 4 else  int(values['-OPESC-'][-1])
+            else:
+                bloco_cad.escala_atual = escala
         else:
+            
             bloco_cad.escala_atual = values['-ESCX-']
 
         #---------------------------INSERIR---------------------------
@@ -135,24 +140,25 @@ while True:
     
     elif event =='-MANUAL-':
         window['-ESCX-'].Update(disabled=False, value='')
-        window['-ESCY-'].Update(disabled=False, value='')
+        
     elif event == '-AUTO-':
-        window['-ESCX-'].Update(disabled=True,value=round(bloco_cad.escala_atual,1))
-        window['-ESCY-'].Update(disabled=True,value=round(bloco_cad.escala_atual,1))
+        if values['-OPESC-'] not in ['----','']:
+            window['-ESCX-'].Update(disabled=True,value=int(values['-OPESC-'][-2:]) if len(values['-OPESC-']) == 4 else  int(values['-OPESC-'][-1]))
+        else:
+            window['-ESCX-'].Update(disabled=True,value=round(bloco_cad.escala_atual,1))
+        
 
     #--------------------------Orientação----------------------
 
     elif event == '-ODIR-':
-        [window[campos].Update(value=False) for campos in ['-CAMPO1-', '-CAMPO2-', '-CAMPO3-', '-CAMPO4-', '-CAMPO5-']]
+        
         grafico.deletar()
-        if values['-FILETE-']:
-            id['Base'] = grafico.filete()
+        id =grafico.solda_desenhada(id,True,base)
 
     elif event == '-OESQ-':
-        [window[campos].Update(value=False) for campos in ['-CAMPO1-', '-CAMPO2-', '-CAMPO3-', '-CAMPO4-', '-CAMPO5-']]
+
         grafico.deletar()
-        if values['-FILETE-']:
-            id['Base'] = grafico.filete()
+        id = grafico.solda_desenhada(id,False,base)
  
     #-------------------------Reforço---------------------------
 
@@ -183,7 +189,7 @@ while True:
             grafico.apagar(id['Base'])
         else:
             grafico.deletar()
-        id['base'] = grafico.bisel()
+        id['Base'] = grafico.bisel()
         base = 'BISEL'
 
     elif event == '-BISEL_CURVO-':
@@ -191,7 +197,7 @@ while True:
             grafico.apagar(id['Base'])
         else:
             grafico.deletar()
-        id['base'] = grafico.bisel_curvo()
+        id['Base'] = grafico.bisel_curvo()
         base = 'BISEL_CURVO'
     
     elif event == '-V-':
@@ -243,7 +249,8 @@ while True:
             id['solda_em_campo'] = grafico.solda_em_campo(values['-ODIR-'])
         else:
             grafico.apagar(id['solda_em_campo'])
-            pass
+            id['solda_em_campo'] = ''
+            
     elif event == '-CAMPO2-':
         pass
     elif event == '-CAMPO3-':
@@ -253,6 +260,7 @@ while True:
             id['expB'] = grafico.espessura([values['-ESP_B-'],values['-ESP_A-']],'Amboslados')
         else:
             grafico.apagar(id['ambos_os_lados'])
+            id['ambos_os_lados'] = ''
             grafico.apagar(id['expB'])
             id['expB'] = grafico.espessura([values['-ESP_B-']],'Filete')
 
@@ -274,6 +282,7 @@ while True:
            id['contorno'] = grafico.contorno(values['-ODIR-'])
         else:
             grafico.apagar(id['contorno'])
+            id['contorno'] = ''
     elif event == '-CAMPO6-':
         pass
     elif event == '-CAMPO7-':
