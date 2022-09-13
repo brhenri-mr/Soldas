@@ -108,16 +108,18 @@ class Pre_visualizacao():
         '''
 
         if orientacao:
-            x = 280
-            x_flag = 307
+            
+            #traço vertical
+            id_1 = self.janela.draw_line((280,200),(280,263),color='red')
+            #bandeira
+            id_2 = self.janela.draw_polygon([(280,263),(253,254.93),(280,246.86)],fill_color='red',line_color='red')
         else:
-            x = 100
-            x_flag = 73
+            
+            #traço vertical
+            id_1 = self.janela.draw_line((100,200),(100,263),color='red')
+            #bandeira
+            id_2 = self.janela.draw_polygon([(100,263),(126,254.93),(100,246.86)],fill_color='red',line_color='red')
 
-        #traço vertical
-        id_1 = self.janela.draw_line((x,200),(x,263),color='red')
-        #bandeira
-        id_2 = self.janela.draw_polygon([(x,263),(x_flag,254.93),(x,246.86)],fill_color='red',line_color='red')
 
         return [id_1,id_2]
     
@@ -158,7 +160,24 @@ class Pre_visualizacao():
             id2 = self.janela.draw_arc((85,250),(185,150),-90,90,style ='arc' ,arc_color='red') 
             return [id1,id2]
 
-      
+    
+    def tipico(self,ori=True):
+        '''
+        Desenha a indicação de detalhe típico 
+
+        ori = orientação do detalhe. por padrão é para direita
+        ori:Bool
+        '''
+
+        if ori:
+            id1 = self.janela.draw_lines([(100,200),(70,230),(100,200),(70,170)], color='red')
+            id2 = self.janela.draw_text('(TÍP.)',(60,200), color='yellow',font=2.5)
+        else:
+            id1 = self.janela.draw_lines([(280,200),(310,230),(280,200),(310,170)], color='red')
+            id2 = self.janela.draw_text('(TÍP.)',(320,200), color='yellow',font=2.5)
+        return [id1,id2]
+        
+
     def intercalado(self,id_old):
         '''
         Desenha solda com intercalada
@@ -194,7 +213,7 @@ class Pre_visualizacao():
     def solda_continua(self, orientacao):
         pass
 
-    def espessura(self,exps,base):
+    def espessura(self,exps,base,unidade,*args,**kwargs):
         '''
         Insere no desenho de pré-visualização as espessuras de solda
         
@@ -203,14 +222,29 @@ class Pre_visualizacao():
 
         base = Desenho base no qual se pretender colocar a espessura(bisel, filete)
         base: str
-        '''
 
+        unidade = Parametro que indica se a solda é milimetro ou angulo. Por padrão é milimetro
+        unidade: bool
+
+        *args = Parametro adicional da solda, caso preciso
+        *args:tuple
+        '''
+        
         if base=='Intercalado':
 
             pontos = [(155 - (len(exps[0])-1),175.75),(178- (len(exps[1])-1)*2,224.25)]
 
         elif base =='Amboslados':
-            pontos = [(178-(len(exps[0])-1)*2,175.75),(178-(len(exps[1])-1)*2,224.25)]
+            if len(args)>0:
+                if args[0] == 'BISEL':
+                    if unidade:
+                        pontos = [(212-(len(exps[0])-1)*2,130),(170-(len(exps[1])-1)*2,175.75),(212-(len(exps[0])-1)*2,270),(170-(len(exps[1])-1)*2,224.25)]
+                        exps = exps*2
+                    else:
+                        pontos = [(212-(len(exps[1])-1)*2,130),(212-(len(exps[1])-1)*2,270)]
+                        exps = [exps[0],exps[0]]
+                elif args[0] == 'FILETE':
+                    pontos = [(178-(len(exps[0])-1)*2,175.75),(178-(len(exps[1])-1)*2,224.25)]
         
         elif base in ['FILETE','J','BISEL CURVO']:
             pontos = [(178-(len(exps[0])-1)*2,175.75)]
@@ -225,12 +259,12 @@ class Pre_visualizacao():
             pontos = [(165-(len(exps[0])-1)*2,175.75)]
         
         elif base =='BISEL':
-             pontos = [(212-(len(exps[0])-1)*2,140)]
+             pontos = [(212-(len(exps[0])-1)*2,130),(170-(len(exps[1])-1)*2,175.75)]
 
         else:
             pontos = [(178-(len(exps[0])-1)*2,175.75)]
 
-        return [self.janela.draw_text(exp,ponto, color='yellow',font=2.5) for exp,ponto in zip(exps,pontos)]
+        return [self.janela.draw_text(exp if unidade else str(exp+'°' if exp!= '' else ''),ponto, color='yellow',font=2.5) for exp,ponto in zip(exps,pontos)]
 
     def apagar(self,id):
         '''
@@ -254,12 +288,11 @@ class Pre_visualizacao():
         nome: dict
         '''
 
-        id = {'Base':'','solda_em_campo':'','ambos_os_lados':'','contorno':'','acabamento':'','intercalado':'', 'expA':'','expB':'','Reforco':''}
+        id = {'Base':'','solda_em_campo':'','ambos_os_lados':'','contorno':'','acabamento':'','intercalado':'', 'expA':'','expB':'','Reforco':'','tipico':''}
         if len(args) >0:
             #por padrão é para direita
             ori = args[0]
             b = args[1]
-
             if b =='FILETE':
                 id['Base'] = self.filete()
             elif b == 'BISEL':
@@ -281,6 +314,8 @@ class Pre_visualizacao():
                 id['ambos_os_lados'] = self.solda_ambos_os_lados(b)
             if nome['solda_em_campo']!= '':
                 id['solda_em_campo'] = self.solda_em_campo(ori)
+            if nome['tipico'] !='':
+                id['tipico'] = self.tipico(ori)
 
             return id
         else:

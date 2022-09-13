@@ -22,7 +22,7 @@ def main_test(filete=False,campo=False, contorno=False,direita=True,esquerda=Fal
                             [sg.Checkbox(text= "Solda em campo", size=(15, 1), default=campo, key='-CAMPO1-', enable_events=True),sg.Checkbox(text="Solda Continua", size=(15,1), default=False, key='-CAMPO2-')],
                             [sg.Checkbox(text="Ambos os lados", size=(15, 1), default=amboslados, key='-CAMPO3-', enable_events=True),sg.Checkbox(text="Intercalado", size=(15,1), default=inter, key='-CAMPO4-', enable_events=True)],
                             [sg.Checkbox(text="Solda em todo contorno", size=(10,1), default=contorno, key='-CAMPO5-', enable_events=True),sg.Checkbox(text="Reforço", size=(10,1), default=False, key='-CAMPO6-', enable_events=True)],
-                            [sg.Checkbox(text="DEFINIR", size=(15,1), default=False, key='-CAMPO7-', enable_events=True),sg.Text('Ref=',key='-TREF-',visible=False),sg.InputText('',key='-REF-',size=(5), enable_events=True, visible=False)],
+                            [sg.Checkbox(text="Típico", size=(15,1), default=False, key='-CAMPO7-', enable_events=True),sg.Text('Ref=',key='-TREF-',visible=False),sg.InputText('',key='-REF-',size=(5), enable_events=True, visible=False)],
                             [sg.Column([[sg.Text(text='Informações adicionais')],
                                         [sg.Radio('Reto','Inf.', key='-IRETO-', enable_events=True),
                                         sg.Radio('Convexo','Inf.',key='-ICONV-', enable_events=True),
@@ -30,7 +30,7 @@ def main_test(filete=False,campo=False, contorno=False,direita=True,esquerda=Fal
                                         
                             [sg.Column([[sg.Text(text='Escala')],
                                         [sg.Radio('Manual', 'ESC',enable_events=True, key='-MANUAL-'),sg.Radio('Automatico','ESC',enable_events=True,key='-AUTO-',default=True)],
-                                        [sg.InputOptionMenu(('----','1:5', '1:10', '1:15','1:20','1:25','1:50'), key='-OPESC-'),sg.Text(text='1:'), sg.InputText('',key='-ESCX-',size=(8), disabled=True)],
+                                        [sg.InputOptionMenu(('----','1:7.5', '1:10','1:12.5','1:25','1:50','1:100'), key='-OPESC-'),sg.Text(text='1:'), sg.InputText('',key='-ESCX-',size=(8), disabled=True)],
                                         ])]
                             ]
 
@@ -46,14 +46,11 @@ def main_test(filete=False,campo=False, contorno=False,direita=True,esquerda=Fal
             [
                 sg.Column([
                         [sg.Text('Espessura(mm)')],
+                        [sg.Radio('Milimetros','unid.',key='-MIM-',enable_events=True),sg.Radio('Angulo','unid.',key='-ANG-',enable_events=True)],
                         [sg.Text('a='),sg.InputText('',key='-ESP_A-',size=(20), enable_events=True)],
                         [sg.Text('b='),sg.InputText('', key='-ESP_B-',size=(20),  enable_events=True)]
                         ], 
-                        element_justification='l'),
-                sg.Column([
-                        [sg.Image(r'C:\\Users\\breno\\Desktop\\Projetos\\Soldas\\Imagem1.png', size=(200,102))]
-                         ],expand_x=True, element_justification='r') #para o element justificante funcionar precisa do expand element true
-                                                    ],
+                        element_justification='l')],
             [sg.Column(layout =filete_propriedades,key="Propriedades"),graph_elem],
             [sg.Button('Ok'), sg.Button('Cancel'), sg.Button('Reset')]]
 
@@ -80,7 +77,8 @@ def solda_desenhada(nome):
             'reto':False,
             'convexo':False,
             'inter':False,
-            'topo':False
+            'topo':False,
+            'tipico':False
             }
 
         for key in id.keys():
@@ -103,7 +101,7 @@ att = Visualizar_att()
 tempo_utilizado = '' 
 bloco_obtido = True
 base = 'FILETE'
-id = {'Base':'','solda_em_campo':'','ambos_os_lados':'','contorno':'','acabamento':'','intercalado':'','expB':''}
+id = {'Base':'','solda_em_campo':'','ambos_os_lados':'','contorno':'','acabamento':'','intercalado':'','expB':'','tipico':''}
 
 while True:
 
@@ -164,7 +162,7 @@ while True:
         if values['-AUTO-']:
             if values['-OPESC-'] not in ['----','']:
                 # tratamento do string escala
-                bloco_cad.escala_atual = int(values['-OPESC-'][-2:]) if len(values['-OPESC-']) == 4 else  int(values['-OPESC-'][-1])
+                bloco_cad.escala_atual = float(values['-OPESC-'][2:])
             else:
                 bloco_cad.escala_atual = escala
         else:
@@ -228,7 +226,7 @@ while True:
     #-------------------------Desenho---------------------------
 
     elif event == '-FILETE-':
-        if id['Base'] != '':
+        if isinstance(id['Base'],int):
             grafico.apagar(id['Base'])
         else:
             grafico.deletar()
@@ -237,23 +235,23 @@ while True:
   
     elif event == '-BISEL-':
 
-        if id['Base'] != '':
+        if isinstance(id['Base'],int):
             grafico.apagar(id['Base'])
         else:
             grafico.deletar()
-        grafico.bisel()
+        id['Base'] = grafico.bisel()
         base = 'BISEL'
 
     elif event == '-BISEL_CURVO-':
-        if id['Base'] != '':
+        if isinstance(id['Base'],int):
             grafico.apagar(id['Base'])
         else:
             grafico.deletar()
-        grafico.bisel_curvo()
+        id['Base'] = grafico.bisel_curvo()
         base = 'BISEL_CURVO'
     
     elif event == '-V-':
-        if id['Base'] != '':
+        if isinstance(id['Base'],int):
             grafico.apagar(id['Base'])
         else:
             grafico.deletar()
@@ -261,7 +259,7 @@ while True:
         base = 'V'
 
     elif event == '-V_CURVO-':
-        if id['Base'] != '':
+        if isinstance(id['Base'],int):
             grafico.apagar(id['Base'])
         else:
             grafico.deletar()
@@ -269,21 +267,40 @@ while True:
         base = 'V_CURVO'
 
     elif event == '-TOPO-':
-        if id['Base'] != '':
+        if isinstance(id['Base'],int):
             grafico.apagar(id['Base'])
         else:
             grafico.deletar()
         id['Base'] = grafico.topo()
         base = 'TOPO'
+    
+    elif event == '-J-':
+        if isinstance(id['Base'],int):
+            grafico.apagar(id['Base'])
+        else:
+            grafico.deletar()
+        id['Base'] = grafico.j()
+        base = 'J'
+    
+
+        #---------------------TEXT-------------------------------
+    elif event == '-ANG-':
+        window['-ESP_A-'].Update(disabled=True, value='')
+        window['-TEXTEXPA-'].Update(value='    ')
+    elif event == '-MIM-':
+        window['-ESP_A-'].Update(disabled=False)
+        window['-TEXTEXPA-'].Update(value='a=')
 
     elif event == '-ESP_B-' or event=='-ESP_A-':
         grafico.apagar(id['expB'])
         if values['-CAMPO4-']: #intercalador
-            id['expB'] = grafico.espessura([values['-ESP_B-'],values['-ESP_A-']],'Intercalado')
+            id['expB'] = grafico.espessura([values['-ESP_B-'],values['-ESP_A-']],'Intercalado',values['-MIM-'])
         elif values['-CAMPO3-']: #anbos os lados
-            id['expB'] = grafico.espessura([values['-ESP_B-'],values['-ESP_A-']],'Amboslados')
+            id['expB'] = grafico.espessura([values['-ESP_B-'],values['-ESP_A-']],'Amboslados',values['-MIM-'],base)
         else:
-            id['expB'] = grafico.espessura([values['-ESP_B-']],'Filete')
+            id['expB'] = grafico.espessura([values['-ESP_B-'],values['-ESP_A-']],base,values['-MIM-'])
+   
+    #---------------------------------------------------------
 
     elif event == '-CAMPO1-':
         if values['-CAMPO1-']:
@@ -291,32 +308,32 @@ while True:
         else:
             grafico.apagar(id['solda_em_campo'])
             id['solda_em_campo'] = ''
-            pass
+            
     elif event == '-CAMPO2-':
         pass
     elif event == '-CAMPO3-':
         if values['-CAMPO3-']:
             id['ambos_os_lados'] = grafico.solda_ambos_os_lados(base)
             grafico.apagar(id['expB'])
-            id['expB'] = grafico.espessura([values['-ESP_B-'],values['-ESP_A-']],'Amboslados')
+            id['expB'] = grafico.espessura([values['-ESP_B-'],values['-ESP_A-']],'Amboslados',values['-MIM-'],base)
         else:
             grafico.apagar(id['ambos_os_lados'])
             id['ambos_os_lados'] = ''
             grafico.apagar(id['expB'])
-            id['expB'] = grafico.espessura([values['-ESP_B-']],'Filete')
+            id['expB'] = grafico.espessura([values['-ESP_B-']],'Filete',values['-MIM-'])
 
     elif event == '-CAMPO4-':
         if values['-CAMPO4-']:
             id['intercalado'] = grafico.intercalado(id['Base'])
             #redesenhar as espessuras
             grafico.apagar(id['expB'])
-            id['expB'] = grafico.espessura([values['-ESP_B-'],values['-ESP_A-']],'Intercalado')
+            id['expB'] = grafico.espessura([values['-ESP_B-'],values['-ESP_A-']],'Intercalado',values['-MIM-'])
         else:
             #aparemente não existe bisel intercalado
             grafico.apagar(id['intercalado'])
             id['Base'] = grafico.filete()
             grafico.apagar(id['expB'])
-            id['expB'] = grafico.espessura([values['-ESP_B-'],values['-ESP_A-']],'Filete')
+            id['expB'] = grafico.espessura([values['-ESP_B-'],values['-ESP_A-']],'Filete',values['-MIM-'])
 
     elif event == '-CAMPO5-':
         if values['-CAMPO5-']:
@@ -324,11 +341,14 @@ while True:
         else:
             grafico.apagar(id['contorno'])
             id['contorno'] = ''
-            
-    elif event == '-CAMPO6-':
-        pass
+
+
     elif event == '-CAMPO7-':
-        pass
+        if values['-CAMPO7-']:
+            id['tipico'] = grafico.tipico(values['-ODIR-'])
+        else:
+            grafico.apagar(id['tipico'])
+            id['tipico'] = ''
 
 
     elif event == '-IRETO-' and (base == 'BISEL'or base =='TOPO'):
@@ -341,7 +361,10 @@ while True:
    
     elif event == '-ISA-' and (base == 'BISEL'or base =='TOPO'):
         grafico.apagar(id['acabamento'])
-
+    
+    #------------------------grafico--------------------------
+    elif event == '-GRAPH-':
+        pass
    
  
     else:

@@ -40,7 +40,8 @@ class Draw_Solder:
         
     @escala_atual.setter
     def escala_atual(self,escala_nova):
-        self.__escala_atual = float(escala_nova)
+    
+        self.__escala_atual = float(escala_nova if ',' not in escala_nova else escala_nova.replace(',','.'))
     
 
     
@@ -91,13 +92,15 @@ class Draw_Solder:
             else:
                 s.append(elemento)
         
-
+        print(s)
         #Modificação dos atributos do bloco
         for attr in Entity.GetAttributes():
             if attr.TagString in ["CORDAO","REF"]:
                 print(attr.TagString)
-                if len(exp)>1:
+                if len(s)>1:
                     input = s[i]
+                elif len(s) == 0:
+                    input = 0 
                 else:
                     input = s[0]
                 attr.TextString = str(input)
@@ -107,6 +110,55 @@ class Draw_Solder:
     def apagar_bloco(self, handle):
 
         self.acad.ActiveDocument.HandleToObject(handle).Delete()
+
+    def creat_solder(self,nome):
+        '''
+        Cadastra uma solda que não esta no banco de dados
+        nome = nome do arquivo da solda, o mesmo possui todas as especificações da solda
+        nome:str
+        '''
+        def base(nome_base):
+            if 'filete' in nome_base:
+                pass
+            elif 'bisel' in nome_base:
+                pass
+            elif 'topo' in nome_base:
+                pass
+            elif 'v_curvo' in nome_base:
+                pass
+            elif 'v' in nome_base:
+                pass
+            elif 'u' in nome_base:
+                pass
+            return 1
+
+        def acabamentos(self,nome_acabamento):
+            #Orientação
+            if 'direita' in nome_acabamento:
+                ori = True
+            else:
+                ori = False
+            #Propriedades
+            if 'contorno' in nome_acabamento:
+                pass
+            if 'campo' in nome_acabamento:
+                pass
+            if 'amboslados' in nome_acabamento:
+                pass
+            if 'intercalado' in nome_acabamento:
+                pass
+            #Acabamentos 
+            if 'reto' in nome_acabamento:
+                pass
+            elif 'convexo' in nome_acabamento:
+                pass
+            elif 'sem_acabamento' in  nome_acabamento:
+                pass
+            return 1
+
+
+        acabamentos(nome)
+        base(nome )
 
 
     
@@ -124,7 +176,7 @@ class Solder():
         #dados
         base = ['-FILETE-','-TOPO-','-V-','-V_CURVO-','-BISEL-','-BISEL_CURVO-','-J-']
         ori = ['-OESQ-','-ODIR-']
-        prop = ['-CAMPO5-','-CAMPO1-','-CAMPO3-','-CAMPO4-','-CAMPO6-']
+        prop = ['-CAMPO5-','-CAMPO1-','-CAMPO3-','-CAMPO4-','-CAMPO6-','-CAMPO7-','-CAMPO2-']
         acabamento = ['-IRETO-','-ICONV-','-ISA-']
 
         subs = {
@@ -142,6 +194,8 @@ class Solder():
             '-CAMPO4-':'inter',
             '-CAMPO5-':'contorno',
             '-CAMPO6-':'Reforco',
+            '-CAMPO7-':'tipico',
+            '-CAMPO2-':'descontinua',
             '-IRETO-':'reto',
             '-ICONV-':'convexo',
             '-ISA-':''
@@ -160,4 +214,4 @@ class Solder():
                     if parametro not in parametro:
                         break
         return solda_block
-
+    
