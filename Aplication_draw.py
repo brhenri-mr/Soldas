@@ -117,19 +117,87 @@ class Draw_Solder:
         nome = nome do arquivo da solda, o mesmo possui todas as especificações da solda
         nome:str
         '''
+        def inserir_txt(self,tipo):
+
+            block = self.zw.doc.ActiveLayout.Block
+
+            #definição do local dos blocos
+        
+            Path = join(self.__local_dos_blocos,'.txt_'+tipo +'.dwg')
+            
+            #definição ponto de inserção
+            
+            ponto = APoint(-16.4891,-2.6215,0) if tipo == 'esquerda' else APoint(-11.7967,-6.1968,0)
+
+            #Inserção dos blocos
+    
+            block.InsertBlock(ponto,Path,1,1,1,0)
+            
+            return block.Item(block.count-1).handle
+
         def base(nome_base):
+            txt_base_handle = '1B8'
+            txt_base_posicao = APoint(-16.489137675168433, -2.6215451766809816, 0.0)
             if 'filete' in nome_base:
-                pass
+                #traço reto 
+                p1 = APoint(-10,0,0)
+                p2 = APoint(0,0,0)
+                self.zw.model.AddLine(p1,p2)
+
+                #traço vertical
+                p1 = APoint(-5,0,0)
+                p2 = APoint(-5,-3.25,0)
+                self.zw.model.AddLine(p1,p2)
+
+                #traço inclinado
+                p1 = APoint(-5,-3.25,0)
+                p2 = APoint(-1.75,0,0)
+                self.zw.model.AddLine(p1,p2)
+
             elif 'bisel' in nome_base:
-                pass
+                #traço reto 
+                p1 = APoint(-10,0,0)
+                p2 = APoint(0,0,0)
+                self.zw.model.AddLine(p1,p2)
+
+                #traço vertical
+                p1 = APoint(-5,0,0)
+                p2 = APoint(-5,-3,0)
+                self.zw.model.AddLine(p1,p2)
+
+                #traço inclinado
+                p1 = APoint(-2,-3,0)
+                p2 = APoint(-5,0,0)
+                self.zw.model.AddLine(p1,p2)
+
             elif 'topo' in nome_base:
-                pass
+                #traço reto 
+                p1 = APoint(-10,0,0)
+                p2 = APoint(0,0,0)
+                self.zw.model.AddLine(p1,p2)
+
+                #traço vertical
+                p1 = APoint(-4.0611,0,0)
+                p2 = APoint(-4.0611,-3,0)
+                self.zw.model.AddLine(p1,p2)
+
+                #traço vertical
+                p1 = APoint(-5.9389,-3,0)
+                p2 = APoint(-5.9389,0,0)
+                self.zw.model.AddLine(p1,p2)
+
+                #Correção da texto
+                Entity  = self.acad.ActiveDocument.HandleToObject(txt_base_handle)
+                Entity.TextAlignmentPoint = APoint(-0.46443757968666793, -0.24396846570668096, 0.0)
+
             elif 'v_curvo' in nome_base:
                 pass
             elif 'v' in nome_base:
                 pass
             elif 'u' in nome_base:
                 pass
+            for obj in self.zw.iter_objects(['Line']):
+                    obj.Color = 1
             return 1
 
         def acabamentos(self,nome_acabamento):
