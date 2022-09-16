@@ -151,47 +151,53 @@ class Draw_Solder:
                 else:
                     obj.Erase
 
-        def base(self,nome_base,unidade):
+        def base(self,nome_base,unidade, ori =True):
             '''
             Desenha a solda base
             nome_base = nome da solda
             nome_base:str
             unidade = ang ou milimetro, por padrão True é milimetro
             unidade:Bool
+            ori = orientação da solda, por padrão é direita
             '''
+
+            if ori:
+                i = 1
+            else:
+                i= -1
 
             if 'filete' in nome_base:
                 #traço reto 
-                p1 = APoint(-10,0,0)
+                p1 = APoint(-10,0,0)*-i
                 p2 = APoint(0,0,0)
                 self.zw.model.AddLine(p1,p2)
 
                 #traço vertical
-                p1 = APoint(-5,0,0)
-                p2 = APoint(-5,-3.25,0)
+                p1 = APoint(-5,0,0)*-i
+                p2 = APoint(-5,-3.25,0)*-i
                 self.zw.model.AddLine(p1,p2)
 
                 #traço inclinado
-                p1 = APoint(-5,-3.25,0)
-                p2 = APoint(-1.75,0,0)
+                p1 = APoint(-5,-3.25,0)*-i
+                p2 = APoint(-1.75,0,0)*-i
                 self.zw.model.AddLine(p1,p2)
                 #txt
                 manipulat_txt_cad('esquerda')
 
             elif 'bisel' in nome_base:
                 #traço reto 
-                p1 = APoint(-10,0,0)
+                p1 = APoint(-10,0,0)*-i
                 p2 = APoint(0,0,0)
                 self.zw.model.AddLine(p1,p2)
 
                 #traço vertical
-                p1 = APoint(-5,0,0)
-                p2 = APoint(-5,-3,0)
+                p1 = APoint(-5,0,0)*-i
+                p2 = APoint(-5,-3,0)*-i
                 self.zw.model.AddLine(p1,p2)
 
                 #traço inclinado
-                p1 = APoint(-2,-3,0)
-                p2 = APoint(-5,0,0)
+                p1 = APoint(-2,-3,0)*-i
+                p2 = APoint(-5,0,0)*-i
                 self.zw.model.AddLine(p1,p2)
 
                 #texto
@@ -203,18 +209,18 @@ class Draw_Solder:
 
             elif 'topo' in nome_base:
                 #traço reto 
-                p1 = APoint(-10,0,0)
+                p1 = APoint(-10,0,0)*-i
                 p2 = APoint(0,0,0)
                 self.zw.model.AddLine(p1,p2)
 
                 #traço vertical
-                p1 = APoint(-4.0611,0,0)
-                p2 = APoint(-4.0611,-3,0)
+                p1 = APoint(-4.0611,0,0)*-i
+                p2 = APoint(-4.0611,-3,0)*-i
                 self.zw.model.AddLine(p1,p2)
 
                 #traço vertical
-                p1 = APoint(-5.9389,-3,0)
-                p2 = APoint(-5.9389,0,0)
+                p1 = APoint(-5.9389,-3,0)*-i
+                p2 = APoint(-5.9389,0,0)*-i
                 self.zw.model.AddLine(p1,p2)
 
                 #Correção da texto
@@ -223,16 +229,16 @@ class Draw_Solder:
 
             elif 'v_curvo' in nome_base:
                 #traço reto 
-                p1 = APoint(-10,0,0)
+                p1 = APoint(-10,0,0)*-i
                 p2 = APoint(0,0,0)
                 self.zw.model.AddLine(p1,p2)
 
                 #arco
-                p1 = APoint(-7.5577,-0.442,0) #centro
+                p1 = APoint(-7.5577,-0.442,0)*-i #centro
                 zw.model.AddArc(p1,2.5956400303711344,4.675345394956241,0.1711208686509456)
 
                 #arco
-                p1 = APoint(-1.8456,-0.442,0) #centro
+                p1 = APoint(-1.8456,-0.442,0)*-i #centro
                 zw.model.AddArc(p1,2.5956400303711344,2.9704717849388476,4.749432565813137)
 
                 for obj in zw.iter_objects(['Arc']):
@@ -243,18 +249,18 @@ class Draw_Solder:
 
             elif 'v' in nome_base:
                 #traço reto 
-                p1 = APoint(-10,0,0)
-                p2 = APoint(0,0,0)
+                p1 = APoint(-10,0,0)*-i
+                p2 = APoint(0,0,0)*-i
                 self.zw.model.AddLine(p1,p2)
 
                 #traço inclinado
-                p1 = APoint(-5,0,0)
-                p2 = APoint(-6.7485,-3,0)
+                p1 = APoint(-5,0,0)*-i
+                p2 = APoint(-6.7485,-3,0)*-i
                 self.zw.model.AddLine(p1,p2)
 
                 #traço inclinado
-                p1 = APoint(-3.2471,-3,0)
-                p2 = APoint(-5,0,0)
+                p1 = APoint(-3.2471,-3,0)*-i
+                p2 = APoint(-5,0,0)*-i
                 self.zw.model.AddLine(p1,p2)
 
                 #texto
