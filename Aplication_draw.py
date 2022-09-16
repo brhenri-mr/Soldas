@@ -117,27 +117,37 @@ class Draw_Solder:
         nome = nome do arquivo da solda, o mesmo possui todas as especificações da solda
         nome:str
         '''
-        def inserir_txt(self,tipo):
+        def manipulat_txt_cad(self,criterio):
+            '''
+            Manipula o attribute txt do arquivo template original, o colocando no lugar
+            e escolhendo a solda com a justificy mais adequada
+            criterio = criterio para esclja da justificy
+            criterio:str
+            '''
+            for obj in self.zw.iter_objects(['AcDbAttributeDefinition']):
+                if obj.handle == criterio:
+                    antigo = obj.InsertionPoint
+                    while True:
+                        #Tenta mover o bloco, as vezes nao vai de primeira, por isso o While
+                        obj.Move(APoint(obj.InsertionPoint),text_base_posi_centro)
+                        print(type(antigo))
+                        print(obj.InsertionPoint)
+                        if antigo[0] == obj.InsertionPoint[0]:
+                            pass
+                        else:
+                            break
+                else:
+                    obj.Erase
 
-            block = self.zw.doc.ActiveLayout.Block
+        def base(self,nome_base,unidade):
+            '''
+            Desenha a solda base
+            nome_base = nome da solda
+            nome_base:str
+            unidade = ang ou milimetro, por padrão True é milimetro
+            unidade:Bool
+            '''
 
-            #definição do local dos blocos
-        
-            Path = join(self.__local_dos_blocos,'.txt_'+tipo +'.dwg')
-            
-            #definição ponto de inserção
-            
-            ponto = APoint(-16.4891,-2.6215,0) if tipo == 'esquerda' else APoint(-11.7967,-6.1968,0)
-
-            #Inserção dos blocos
-    
-            block.InsertBlock(ponto,Path,1,1,1,0)
-            
-            return block.Item(block.count-1).handle
-
-        def base(nome_base):
-            txt_base_handle = '1B8'
-            txt_base_posicao = APoint(-16.489137675168433, -2.6215451766809816, 0.0)
             if 'filete' in nome_base:
                 #traço reto 
                 p1 = APoint(-10,0,0)
@@ -153,6 +163,8 @@ class Draw_Solder:
                 p1 = APoint(-5,-3.25,0)
                 p2 = APoint(-1.75,0,0)
                 self.zw.model.AddLine(p1,p2)
+                #txt
+                manipulat_txt_cad('esquerda')
 
             elif 'bisel' in nome_base:
                 #traço reto 
@@ -169,6 +181,13 @@ class Draw_Solder:
                 p1 = APoint(-2,-3,0)
                 p2 = APoint(-5,0,0)
                 self.zw.model.AddLine(p1,p2)
+
+                #texto
+                if unidade:
+                    manipulat_txt_cad('esquerda')
+
+                manipulat_txt_cad('meio')
+
 
             elif 'topo' in nome_base:
                 #traço reto 
@@ -187,13 +206,48 @@ class Draw_Solder:
                 self.zw.model.AddLine(p1,p2)
 
                 #Correção da texto
-                Entity  = self.acad.ActiveDocument.HandleToObject(txt_base_handle)
-                Entity.TextAlignmentPoint = APoint(-0.46443757968666793, -0.24396846570668096, 0.0)
+                #texto
+                manipulat_txt_cad('meio')
 
             elif 'v_curvo' in nome_base:
-                pass
+                #traço reto 
+                p1 = APoint(-10,0,0)
+                p2 = APoint(0,0,0)
+                self.zw.model.AddLine(p1,p2)
+
+                #arco
+                p1 = APoint(-7.5577,-0.442,0) #centro
+                zw.model.AddArc(p1,2.5956400303711344,4.675345394956241,0.1711208686509456)
+
+                #arco
+                p1 = APoint(-1.8456,-0.442,0) #centro
+                zw.model.AddArc(p1,2.5956400303711344,2.9704717849388476,4.749432565813137)
+
+                for obj in zw.iter_objects(['Arc']):
+                    obj.Color = 1
+                
+                #texto
+                manipulat_txt_cad('meio')
+
             elif 'v' in nome_base:
-                pass
+                #traço reto 
+                p1 = APoint(-10,0,0)
+                p2 = APoint(0,0,0)
+                self.zw.model.AddLine(p1,p2)
+
+                #traço inclinado
+                p1 = APoint(-5,0,0)
+                p2 = APoint(-6.7485,-3,0)
+                self.zw.model.AddLine(p1,p2)
+
+                #traço inclinado
+                p1 = APoint(-3.2471,-3,0)
+                p2 = APoint(-5,0,0)
+                self.zw.model.AddLine(p1,p2)
+
+                #texto
+                manipulat_txt_cad('meio')
+
             elif 'u' in nome_base:
                 pass
             for obj in self.zw.iter_objects(['Line']):
@@ -201,6 +255,11 @@ class Draw_Solder:
             return 1
 
         def acabamentos(self,nome_acabamento):
+            '''
+            Desenha os acabamentos da solda
+            nome_acabamento = String do nome da solda
+            nome_acabamento:str
+            '''
             #Orientação
             if 'direita' in nome_acabamento:
                 ori = True
@@ -208,9 +267,24 @@ class Draw_Solder:
                 ori = False
             #Propriedades
             if 'contorno' in nome_acabamento:
-                pass
+
+                p1 = APoint(0,0,0)
+                self.zw.model.AddCircle(p1,0.5517)
+                
             if 'campo' in nome_acabamento:
-                pass
+                block = self.zw.doc.ActiveLayout.Block
+
+                #definição do local dos blocos
+                Path = join(self.__local_dos_blocos,'Interno\Solda_0_(obra)_direita' if ori else 'Interno\Solda_0_(obra)_esquerda'+'.dwg')
+                
+                #definição ponto de inserção
+
+                ponto = APoint(0,0,0)
+
+                #Inserção dos blocos
+        
+                block.InsertBlock(ponto,Path,10,10,1,0)
+        
             if 'amboslados' in nome_acabamento:
                 pass
             if 'intercalado' in nome_acabamento:
@@ -224,9 +298,26 @@ class Draw_Solder:
                 pass
             return 1
 
+        def finalizacao(self, nome):
+            '''
+            Finaliza a operação de criação da solda,isto é, sava o arquivo como outro nome
+            nome = nome que a solda ira receber em seu arquivo
+            nome:str
+            '''
+            self.zw.doc.SaveAs(nome+'.dwg')
+            self.zw.doc.Close
+            return 0
 
+        #Dados base
+        txt_base_handle_esquerda = '1B8'
+        text_base_posi_esquerda = APoint(-16.4891,-2.6215)
+
+        txt_base_handle_centro = '370'
+        text_base_posi_centro = APoint(-10.2714,-6.1968)
+
+        base(nome)
         acabamentos(nome)
-        base(nome )
+        finalizacao(nome)
 
 
     
