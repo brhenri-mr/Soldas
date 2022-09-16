@@ -1,6 +1,7 @@
 
 from pyzwcad.types import APoint
 from os.path import join
+from time import sleep
 
 class Draw_Solder:
 
@@ -117,6 +118,17 @@ class Draw_Solder:
         nome = nome do arquivo da solda, o mesmo possui todas as especificações da solda
         nome:str
         '''
+
+        def inicializacao(self):
+            '''
+            Inicializa o arquivo do template onde será escrita a solda 
+            '''
+            nome_arq = '.Template_esquerda_unico'
+
+            while zw.doc.Name != nome_arq:
+                self.zw.doc.Open(join(self.__local_dos_blocos,'Interno',nome_arq+'.dwg'))
+                sleep(0.4)
+
         def manipulat_txt_cad(self,criterio):
             '''
             Manipula o attribute txt do arquivo template original, o colocando no lugar
@@ -270,6 +282,9 @@ class Draw_Solder:
 
                 p1 = APoint(0,0,0)
                 self.zw.model.AddCircle(p1,0.5517)
+
+                for obj in self.zw.iter_objects(['Circle']):
+                    obj.Color = 1
                 
             if 'campo' in nome_acabamento:
                 block = self.zw.doc.ActiveLayout.Block
@@ -315,6 +330,7 @@ class Draw_Solder:
         txt_base_handle_centro = '370'
         text_base_posi_centro = APoint(-10.2714,-6.1968)
 
+        inicializacao()
         base(nome)
         acabamentos(nome)
         finalizacao(nome)
