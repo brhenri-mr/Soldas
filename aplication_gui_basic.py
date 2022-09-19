@@ -155,6 +155,8 @@ while True:
             bloco_cad.espessura([values['-REF-'],values['-ESP_B-'],values['-ESP_A-']])
         else:
             sg.popup('Bloco Não Disponível')
+            bloco_cad.creat_solder(bloco_arquivo,values['-MIM-'])
+            sg.popup('Bloco cadastradado com sucesso')
         
     #-------------------------EScala---------------------------
     
