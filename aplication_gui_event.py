@@ -18,6 +18,7 @@ def main_test(filete=False,campo=False, contorno=False,direita=True,esquerda=Fal
                                 
     filete_propriedades = [ [sg.Text('Orientação')],
                             [sg.Radio('Direita','Ori.', key='-ODIR-', default=direita, enable_events=True), sg.Radio('Esquerda','Ori.', key='-OESQ-',default=esquerda,enable_events=True)],
+                            [sg.Radio('Superior','Reg.', key='-SUP-', default=True, enable_events=True), sg.Radio('Inferior','Reg.', key='-INF-',enable_events=True)],
                             [sg.Text('Acabamentos')],
                             [sg.Checkbox(text= "Solda em campo", size=(15, 1), default=campo, key='-CAMPO1-', enable_events=True),sg.Checkbox(text="Solda Continua", size=(15,1), default=False, key='-CAMPO2-')],
                             [sg.Checkbox(text="Ambos os lados", size=(15, 1), default=amboslados, key='-CAMPO3-', enable_events=True),sg.Checkbox(text="Intercalado", size=(15,1), default=inter, key='-CAMPO4-', enable_events=True)],
@@ -45,14 +46,14 @@ def main_test(filete=False,campo=False, contorno=False,direita=True,esquerda=Fal
                 sg.Radio('J','Prop.' ,enable_events=True, key='-J-')]])],
             [
                 sg.Column([
-                        [sg.Text('Espessura(mm)')],
-                        [sg.Radio('Milimetros','unid.',key='-MIM-',enable_events=True),sg.Radio('Angulo','unid.',key='-ANG-',enable_events=True)],
-                        [sg.Text('a='),sg.InputText('',key='-ESP_A-',size=(20), enable_events=True)],
-                        [sg.Text('b='),sg.InputText('', key='-ESP_B-',size=(20),  enable_events=True)]
+                        [sg.Text('Espessura(mm)',size=(25)),sg.Text('    '),sg.Text('Reforço',justification='c')],
+                        [sg.Radio('Milimetros','unid.',key='-MIM-',enable_events=True, default=True),sg.Radio('Angulo','unid.',key='-ANG-',enable_events=True),sg.Text('              '),sg.InputCombo(('----','Filete', 'Bisel','Bisel Curvo','Topo','V','V Curvo'), key='-COMI-', enable_events=True),sg.InputCombo(('----','Filete', 'Bisel','Bisel Curvo','Topo','V','V Curvo'), key='-COMS-', enable_events=True)],
+                        [sg.Text('a=',key='-TEXTEXPA-'),sg.InputText('',key='-ESP_A-',size=(20), enable_events=True)],
+                        [sg.Text('b=',key='-TEXTEXPB-'),sg.InputText('', key='-ESP_B-',size=(20), enable_events=True)]
                         ], 
                         element_justification='l')],
             [sg.Column(layout =filete_propriedades,key="Propriedades"),graph_elem],
-            [sg.Button('Ok'), sg.Button('Cancel'), sg.Button('Reset')]]
+            [sg.Button('Ok'), sg.Button('Reset'), sg.Button('Cancel')]]
 
     return sg.Window('Solda duplo click',layout, finalize=True,)
 
@@ -147,6 +148,15 @@ while True:
         window.close()
         bloco_obtido = True
 
+    #----------------------RESET-----------------------------------
+
+    elif event == 'Reset':
+        [window[i].Update(value=False) for i in [f'-CAMPO{j}-' for j in range(1,8,1)]]
+
+        for key,item in id.items():
+            if key not in ['Base','expA','expB','Base_m_i','Base_m_s']:
+                grafico.apagar(item)
+
     #----------------------evento ok-------------------------------
     elif event == "Ok":
         bloco_arquivo = arquivo_nome.tipo(values)
@@ -226,62 +236,136 @@ while True:
     #-------------------------Desenho---------------------------
 
     elif event == '-FILETE-':
+        window['-MIM-'].Update(disabled=False)
+        window['-ANG-'].Update(disabled=True)
+        window['-ESP_A-'].Update(disabled=False)
+        window['-ESP_B-'].Update(disabled=False)
+        window['-CAMPO3-'].Update(disabled=False)
+        window['-COMI-'].Update(disabled=True)
+        window['-COMS-'].Update(disabled=True)
         if isinstance(id['Base'],int):
-            grafico.apagar(id['Base'])
+            [grafico.apagar(id[f'Base{i}']) for i in ['','_m_i','_m_s']]
         else:
             grafico.deletar()
-        id['Base'] = grafico.filete()
+        print(values['-INF-'])
+        id['Base'] = grafico.filete(reg=values['-SUP-'])
         base = 'FILETE'
   
     elif event == '-BISEL-':
-
+        window['-MIM-'].Update(disabled=False)
+        window['-ANG-'].Update(disabled=False)
+        window['-ESP_A-'].Update(disabled=False)
+        window['-ESP_B-'].Update(disabled=False)
+        window['-CAMPO3-'].Update(disabled=False)
+        window['-COMI-'].Update(disabled=True)
+        window['-COMS-'].Update(disabled=True)
         if isinstance(id['Base'],int):
-            grafico.apagar(id['Base'])
+            [grafico.apagar(id[f'Base{i}']) for i in ['','_m_i','_m_s']]
         else:
             grafico.deletar()
-        id['Base'] = grafico.bisel()
+        id['Base'] = grafico.bisel(reg=values['-SUP-'])
         base = 'BISEL'
 
     elif event == '-BISEL_CURVO-':
+        window['-MIM-'].Update(disabled=True)
+        window['-ANG-'].Update(disabled=True)
+        window['-ESP_A-'].Update(disabled=True)
+        window['-ESP_B-'].Update(disabled=True)
+        window['-CAMPO3-'].Update(disabled=False)
+        window['-COMI-'].Update(disabled=True)
+        window['-COMS-'].Update(disabled=True)
         if isinstance(id['Base'],int):
-            grafico.apagar(id['Base'])
+            [grafico.apagar(id[f'Base{i}']) for i in ['','_m_i','_m_s']]
         else:
             grafico.deletar()
         id['Base'] = grafico.bisel_curvo()
         base = 'BISEL_CURVO'
     
     elif event == '-V-':
+        window['-MIM-'].Update(disabled=True)
+        window['-ANG-'].Update(disabled=False)
+        window['-ESP_A-'].Update(disabled=False)
+        window['-ESP_B-'].Update(disabled=False)
+        window['-CAMPO3-'].Update(disabled=False)
+        window['-COMI-'].Update(disabled=True)
+        window['-COMS-'].Update(disabled=True)
         if isinstance(id['Base'],int):
-            grafico.apagar(id['Base'])
+            [grafico.apagar(id[f'Base{i}']) for i in ['','_m_i','_m_s']]
         else:
             grafico.deletar()
         id['Base'] = grafico.v()
         base = 'V'
 
     elif event == '-V_CURVO-':
+        window['-MIM-'].Update(disabled=True)
+        window['-ANG-'].Update(disabled=True)
+        window['-ESP_A-'].Update(disabled=True)
+        window['-ESP_B-'].Update(disabled=True)
+        window['-CAMPO3-'].Update(disabled=False)
+        window['-COMI-'].Update(disabled=True)
+        window['-COMS-'].Update(disabled=True)
         if isinstance(id['Base'],int):
-            grafico.apagar(id['Base'])
+            [grafico.apagar(id[f'Base{i}']) for i in ['','_m_i','_m_s']]
         else:
             grafico.deletar()
         id['Base'] = grafico.v_curvo()
         base = 'V_CURVO'
 
     elif event == '-TOPO-':
+        window['-MIM-'].Update(disabled=True)
+        window['-ANG-'].Update(disabled=False)
+        window['-ESP_A-'].Update(disabled=False)
+        window['-ESP_B-'].Update(disabled=False)
+        window['-CAMPO3-'].Update(disabled=False)
+        window['-COMI-'].Update(disabled=True)
+        window['-COMS-'].Update(disabled=True)
         if isinstance(id['Base'],int):
-            grafico.apagar(id['Base'])
+            [grafico.apagar(id[f'Base{i}']) for i in ['','_m_i','_m_s']]
         else:
             grafico.deletar()
         id['Base'] = grafico.topo()
         base = 'TOPO'
     
     elif event == '-J-':
+        window['-CAMPO3-'].Update(disabled=False)
+        window['-COMI-'].Update(disabled=True)
+        window['-COMS-'].Update(disabled=True)
         if isinstance(id['Base'],int):
-            grafico.apagar(id['Base'])
+            [grafico.apagar(id[f'Base{i}']) for i in ['','_m_i','_m_s']]
         else:
             grafico.deletar()
         id['Base'] = grafico.j()
         base = 'J'
-    
+
+    elif event == '-MISTO-':
+        window['-COMI-'].Update(disabled=False)
+        window['-COMS-'].Update(disabled=False)
+        grafico.apagar(id['Base'])
+        id['Base']= window['-GRAPH-'].draw_lines([(100,200),(280,200)],color='red')
+
+        window['-CAMPO3-'].Update(disabled=True)
+ 
+    elif event == '-COMI-':
+        if values['-MISTO-']:
+
+            if isinstance(id['Base_m_i'],int):
+                grafico.apagar(id['Base_m_i'])
+
+            base = 'MISTO_'+values['-COMI-'].upper() + '_'+ (values['-COMS-'].upper() if values['-COMS-'] != '' else 'NULL')
+            grafico.deletar()
+            id = grafico.solda_desenhada(id,True,base)
+        else:
+            pass
+            
+    elif event == '-COMS-':
+        if values['-MISTO-']:
+            if isinstance(id['Base_m_s'],int):
+                grafico.apagar(id['Base_m_s'])
+            base = 'MISTO_'+ (values['-COMI-'].upper() if values['-COMI-']!='' else 'NULL') + '_'+values['-COMS-'].upper()
+            grafico.deletar()
+            id = grafico.solda_desenhada(id,True,base)
+        else:
+            pass
 
         #---------------------TEXT-------------------------------
     elif event == '-ANG-':

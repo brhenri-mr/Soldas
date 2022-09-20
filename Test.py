@@ -68,15 +68,15 @@ classname = 'Attribute Definition'
 
 
 #Entity  = acad.ActiveDocument.HandleToObject('1B8')
-Entity  = acad.ActiveDocument.HandleToObject('375')
+Entity  = acad.ActiveDocument.HandleToObject('26E')
 
 
-print(Entity.StartAngle)
+print(Entity.Radius)
 
-c = (-4.977110378108507, 0.7777238840614942, 0.0)
-r = 3.5526110509915334
-end = 5.242397665338469
-start = 4.18238029543091
+c = (-1.7500000000000036, -1.7694179454963432e-16, 0.0)
+r = 3.0
+end = 4.71238898038469
+start = 3.141592653589793
 
 '''
 for obj in zw.iter_objects(['Arc']):

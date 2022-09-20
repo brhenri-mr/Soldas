@@ -130,7 +130,8 @@ class Draw_Solder:
             criterio:str
             ori = orientação do desenho
             '''
-
+            
+            apagar = []
 
             #Dados base
             if criterio == 'meio':
@@ -139,6 +140,8 @@ class Draw_Solder:
                     text_base_posi = APoint(-10.2714,-6.1968)
                 else:
                     text_base_posi = APoint(3.3301,-6.1968)
+            elif criterio == 'delete':
+                txt_base_handle = ''
             else:
                 txt_base_handle = '1B8'
                 if ori == 1: #direita
@@ -161,8 +164,8 @@ class Draw_Solder:
                         else:
                             break
                 else:
-                    apagar = obj.handle
-            acad.ActiveDocument.HandleToObject(apagar).Delete()
+                    apagar.append(obj.handle)
+            [acad.ActiveDocument.HandleToObject(j).Delete() for j in apagar]
 
         def base(zw,nome_base,unidade):
             '''
@@ -180,21 +183,42 @@ class Draw_Solder:
             print(f'i={i}',nome_base)
             if 'filete' in nome_base:
                 #traço reto 
-                p1 = APoint(-10,0,0)*-i
+                p1 = APoint(-10,0,0)*i
                 p2 = APoint(0,0,0)
                 zw.model.AddLine(p1,p2)
 
                 #traço vertical
-                p1 = APoint(-5,0,0)*-i
-                p2 = APoint(-5,-3.25,0)*-i
+                p1 = APoint(-5,0,0)*i
+                p2 = APoint(-5,-3.25,0)*i
                 zw.model.AddLine(p1,p2)
 
                 #traço inclinado
-                p1 = APoint(-5,-3.25,0)*-i
-                p2 = APoint(-1.75,0,0)*-i
+                p1 = APoint(-5,-3.25,0)*i
+                p2 = APoint(-1.75,0,0)*i
                 zw.model.AddLine(p1,p2)
                 #txt
                 manipulat_txt_cad(zw,'esquerda',i)
+            
+            elif 'bisel_curvo' in nome_base:
+                #traço reto 
+                p1 = APoint(-10,0,0)*i
+                p2 = APoint(0,0,0)
+                zw.model.AddLine(p1,p2)
+
+                #traço vertical
+                p1 = APoint(-5,0,0)*i
+                p2 = APoint(-5,-3.25,0)*i
+                zw.model.AddLine(p1,p2)
+
+                #arco
+                c = APoint(-1.7500000000000036, -1.7694179454963432e-16, 0.0)
+                r = 3.0
+                end = 4.71238898038469
+                start = 3.141592653589793
+                zw.model.AddArc(c,r,start,end)
+
+                #text
+                manipulat_txt_cad(zw,'delete',i)
 
             elif 'bisel' in nome_base:
                 #traço reto 
@@ -377,7 +401,7 @@ class Solder():
             '-V-':'Solda_v',
             '-V_CURVO-':'Solda_v_curvo',
             '-BISEL-':'Solda_bisel',
-            '-BISEL_CURVO-':'Solda_biel_curvo',
+            '-BISEL_CURVO-':'Solda_bisel_curvo',
             '-J-':'Solda_j',
             '-OESQ-':'esquerda',
             '-ODIR-':'direita',
