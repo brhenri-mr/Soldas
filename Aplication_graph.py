@@ -26,6 +26,9 @@ class Pre_visualizacao():
         return self.janela.draw_lines([(100,200),(280,200),(190,200),(190,200-48.5*i),(190,200-48.5*i),(248.5,200)],color='red')
     
     def bisel(self, reg=True):
+        '''
+        Desenha uma solda bisel básica
+        '''
 
         if reg:
             i = 1
@@ -43,15 +46,20 @@ class Pre_visualizacao():
         id2 = self.janela.draw_arc((195,250),(295,147),90,180,style ='arc' ,arc_color='red')
         return [id1,id2,id3]
 
-    def v(self):
+    def v(self, reg=True):
         '''
         Desenha uma solda v basica
         '''
 
+        if reg:
+            i = 1
+        else:
+            i = -1
+
         return self.janela.draw_lines([  
                                     (100,200),(280,200),
-                                    (190,200),(190+48.5,151.5),
-                                    (190,200),(190-48.5,151.5)], color='red')
+                                    (190,200),(190+48.5,200-48.5*i),
+                                    (190,200),(190-48.5,200-48.5*i)], color='red')
 
 
     def v_curvo(self):
@@ -65,14 +73,17 @@ class Pre_visualizacao():
 
         return [id1,id2,id3]
     
-    def topo(self):
+    def topo(self,reg=True):
         '''
         Desenha uma solda topo básica
         '''
+        if reg:
+            i = 1
+        else:
+            i = -1
 
-
-        id1 = self.janela.draw_lines([(100,200),(280,200),(175,200),(175,151.5)],color='red')
-        id2 = self.janela.draw_line((205,200),(205,151.5),color='red')
+        id1 = self.janela.draw_lines([(100,200),(280,200),(175,200),(175,200-48.5*i)],color='red')
+        id2 = self.janela.draw_line((205,200),(205,200-48.5*i),color='red')
     
         return [id1,id2]
 
@@ -345,11 +356,11 @@ class Pre_visualizacao():
                 elif b == 'BISEL_CURVO':
                     nome[temp] = self.bisel_curvo()
                 elif b == 'V':
-                    nome[temp] = self.v()
+                    nome[temp] = self.v(reg=False if i == 1 else True)
                 elif b == 'V_CURVO':
                     nome[temp] = self.v_curvo()
                 elif b == 'TOPO':
-                    nome[temp] = self.topo()
+                    nome[temp] = self.topo(reg=False if i == 1 else True)
                 elif b == 'J':
                     nome[temp] = self.j()
             

@@ -1,5 +1,6 @@
 
 from pyzwcad.types import APoint
+from os import replace
 from os.path import join
 from time import sleep
 
@@ -369,7 +370,11 @@ class Draw_Solder:
             nome:str
             '''
             zw.doc.SaveAs(nome+'.dwg')
-            zw.doc.Close
+            path = zw.doc.Path
+            zw.doc.Close()
+            if path != self.__local_dos_blocos:
+                replace(join(path,nome+'.dwg'),join(self.__local_dos_blocos,nome+'.dwg'))
+
             return 0
 
 
