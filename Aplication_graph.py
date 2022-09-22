@@ -94,34 +94,53 @@ class Pre_visualizacao():
 
         return [id1,id2]
 
-    def acabamento_reto(self,cri):
+    def acabamento_reto(self,cri,tipo):
         '''
         Desenha o acabamento de tipo reto para soldas bisel
 
-        cri = criterio que especifica se a solda é ambos os lados
+        cri = criterio que especifica se a solda é ambos os lados, True significa
+        solda ambos os lados
         cri: bool
+        tipo = Variavel indica o tipo da solda que vai receber o acabamento
+        tipo: str
+
         '''
-
-        if cri:
-            id1 = self.janela.draw_lines([(185,250.5),(195+48.5,250.5)],color='red')
-        else:
-            id1= ''
-        id2 = self.janela.draw_lines([(185,148.5),(195+48.5,148.5)],color='red')
-
+        if tipo == 'BISEL':
+            if cri:
+                id1 = self.janela.draw_lines([(185,250.5),(195+48.5,250.5)],color='red')
+            else:
+                id1= ''
+            id2 = self.janela.draw_lines([(185,148.5),(195+48.5,148.5)],color='red')
+        elif tipo == 'TOPO':
+            if cri:
+                id1 = self.janela.draw_lines([(162.5,250.5),(172.5+48.5,250.5)],color='red')
+            else:
+                id1= ''
+            id2 = self.janela.draw_lines([(162.5,148.5),(172.5+48.5,148.5)],color='red')
         return [id1,id2]
 
-    def acabamento_convexo(self,cri):
+    def acabamento_convexo(self,cri,tipo):
         '''
         Desenha o acabamento de tipo Convexo para soldas bisel
 
         cri = criterio que especifica se a solda é ambos os lados
         cri: bool
+        tipo = Variavel indica o tipo da solda que vai receber o acabamento
+        tipo: str
         '''
-        if cri:
-           id1 = self.janela.draw_arc((135,259),(225+48.5,151),70,50,style='arc',arc_color='red')
-        else:
-            id1 = ''
-        id2 = self.janela.draw_arc((135,195),(225+48.5,143.5),70,245,style='arc',arc_color='red')
+        if tipo == "BISEL":
+            if cri:
+                id1 = self.janela.draw_arc((135,259),(225+48.5,151),70,50,style='arc',arc_color='red')
+            else:
+                id1 = ''
+            id2 = self.janela.draw_arc((135,195),(225+48.5,143.5),70,245,style='arc',arc_color='red')
+        elif tipo == 'TOPO':
+            if cri:
+                id1 = self.janela.draw_arc((115,259),(215+48.5,143.5),80,55,style='arc',arc_color='red')
+            else:
+                id1 = ''
+            id2 = self.janela.draw_arc((115,195),(205+48.5,143.5),80,235,style='arc',arc_color='red')
+
 
         return [id1,id2]
 
@@ -266,35 +285,40 @@ class Pre_visualizacao():
                     else:
                         pontos = [(212-(len(exps[1])-1)*2,130),(212-(len(exps[1])-1)*2,270)]
                         exps = [exps[0],exps[0]]
+                elif base == 'TOPO':
+                    pontos = [(185.5-(len(exps[1])-1)*2,130),((185.5-(len(exps[1])-1)*2,270))]
+                    exps = [exps[0],exps[0]]
+                elif base == 'FILETE':
+                    pontos = [(170-(len(exps[0])-1)*2,175.75),(170-(len(exps[0])-1)*2,224.25)]
+                    
         else:
             # base continua sendo base
-            pass
-                
-        if base=='Intercalado':
-            pontos = [(155 - (len(exps[0])-1),175.75),(178- (len(exps[1])-1)*2,224.25)]
 
-        elif base in ['FILETE','J','BISEL CURVO']:
-            pontos = [(178-(len(exps[0])-1)*2,175.75)]
+            if base=='Intercalado':
+                pontos = [(155 - (len(exps[0])-1),175.75),(178- (len(exps[1])-1)*2,224.25)]
 
-        elif base == 'TOPO':
-            pontos = [(165-(len(exps[0])-1)*2,175.75)]
+            elif base in ['FILETE','J']:
+                pontos = [(170-(len(exps[0])-1)*2,175.75)]
 
-        elif base == 'V':
-            pontos = [(165-(len(exps[0])-1)*2,175.75)]
+            elif base == 'TOPO':
+                pontos = [(185.5-(len(exps[1])-1)*2,130)]
 
-        elif base == 'V CURVO':
-            pontos = [(165-(len(exps[0])-1)*2,175.75)]
-        
-        elif base =='BISEL':
-            if unidade:
-                pontos = [(212-(len(exps[0])-1)*2,130),(170-(len(exps[1])-1)*2,175.75),(212-(len(exps[0])-1)*2,270),(170-(len(exps[1])-1)*2,224.25)]
-                exps = exps*2
+            elif base == 'V':
+                pontos = [(212-(len(exps[0])-1)*2,175.75)]
+
+            elif base == 'V CURVO':
+                pass
+            
+            elif base =='BISEL':
+                if unidade:
+                    pontos = [(212-(len(exps[0])-1)*2,130),(170-(len(exps[1])-1)*2,175.75)]
+                    exps = exps*2
+                else:
+                    pontos = [(212-(len(exps[1])-1)*2,130)]
+                    exps = exps
+
             else:
-                pontos = [(212-(len(exps[1])-1)*2,130),(212-(len(exps[1])-1)*2,270)]
-                exps = [exps[0],exps[0]]
-
-        else:
-            pontos = [(178-(len(exps[0])-1)*2,175.75)]
+                pontos = [(178-(len(exps[0])-1)*2,175.75)]
         return [self.janela.draw_text(exp if unidade else str(exp+'°' if exp!= '' else ''),ponto, color='yellow',font=2.5) for exp,ponto in zip(exps,pontos)]
 
     def apagar(self,id):

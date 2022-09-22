@@ -123,47 +123,59 @@ class Draw_Solder:
                 zw.doc.Open(local_path)
                 sleep(1)
 
-        def manipulat_txt_cad(zw,criterio,ori,acad = self.acad):
+        def manipulat_txt_cad(zw,criterio,ori,amboslados,acad = self.acad):
             '''
             Manipula o attribute txt do arquivo template original, o colocando no lugar
             e escolhendo a solda com a justificy mais adequada
             criterio = criterio para esclja da justificy
             criterio:str
             ori = orientação do desenho
+            amboslados = sinaliza ao programa que a solda a ser inserida é ambos os lados
+            amboslados: int
             '''
-            
+            #Dados base
+            erro = 0
             apagar = []
 
-            #Dados base
+            if amboslados == -1:
+                incremento = -1.8
+            else:
+                incremento = 0 
+
+            #Posição do txt
             if criterio == 'meio':
                 txt_base_handle = '370'
                 if ori == 1:
-                    text_base_posi = APoint(-10.2714,-6.1968)
+                    text_base_posi = APoint(-10.2714,-6.1968*amboslados+incremento)
                 else:
-                    text_base_posi = APoint(3.3301,-6.1968)
+                    text_base_posi = APoint(-0.2714,-6.1968*amboslados+incremento)
             elif criterio == 'delete':
                 txt_base_handle = ''
             else:
                 txt_base_handle = '1B8'
                 if ori == 1: #direita
-                    text_base_posi = APoint(-16.4891,-2.6215)
+                    text_base_posi = APoint(-16.4891,-2.6215*amboslados+incremento)
                 else: #esquerda
-                    text_base_posi = APoint(-7.0816,-2.6215)
-                
+                    text_base_posi = APoint(-7.0816,-2.6215*amboslados+incremento)
+
 
 
             for obj in zw.iter_objects(['AcDbAttributeDefinition']):
                 if obj.handle == txt_base_handle:
+                    if amboslados == -1:
+                        obj.Copy()
                     antigo = obj.InsertionPoint
-                    while True:
+                    for _ in range(50):
                         #Tenta mover o bloco, as vezes nao vai de primeira, por isso o While
                         obj.Move(APoint(obj.InsertionPoint),text_base_posi)
-                        print(type(antigo))
-                        print(obj.InsertionPoint)
+                        print(erro)
                         if antigo[0] == obj.InsertionPoint[0]:
-                            pass
+                            erro += 1
+                        elif erro == 20:
+                            break
                         else:
                             break
+
                 else:
                     apagar.append(obj.handle)
             [acad.ActiveDocument.HandleToObject(j).Delete() for j in apagar]
@@ -181,127 +193,146 @@ class Draw_Solder:
                 i = 1
             else:
                 i = -1
-            print(f'i={i}',nome_base)
-            if 'filete' in nome_base:
-                #traço reto 
-                p1 = APoint(-10,0,0)*i
-                p2 = APoint(0,0,0)
-                zw.model.AddLine(p1,p2)
 
-                #traço vertical
-                p1 = APoint(-5,0,0)*i
-                p2 = APoint(-5,-3.25,0)*i
-                zw.model.AddLine(p1,p2)
+            if 'amboslados' in nome_base:
+                vezes = [1,-1]
+            else:
+                vezes = [1]
 
-                #traço inclinado
-                p1 = APoint(-5,-3.25,0)*i
-                p2 = APoint(-1.75,0,0)*i
-                zw.model.AddLine(p1,p2)
-                #txt
-                manipulat_txt_cad(zw,'esquerda',i)
-            
-            elif 'bisel_curvo' in nome_base:
-                #traço reto 
-                p1 = APoint(-10,0,0)*i
-                p2 = APoint(0,0,0)
-                zw.model.AddLine(p1,p2)
+            for vez in vezes:
+                if 'filete' in nome_base:
+                    #traço reto 
+                    p1 = APoint(-10,0,0)*i
+                    p2 = APoint(0,0,0)
+                    zw.model.AddLine(p1,p2)
 
-                #traço vertical
-                p1 = APoint(-5,0,0)*i
-                p2 = APoint(-5,-3.25,0)*i
-                zw.model.AddLine(p1,p2)
+                    #traço vertical
+                    p1 = APoint(-5,0,0)*i
+                    p2 = APoint(-5*i,-3.25*vez,0)
+                    zw.model.AddLine(p1,p2)
 
-                #arco
-                c = APoint(-1.7500000000000036, -1.7694179454963432e-16, 0.0)
-                r = 3.0
-                end = 4.71238898038469
-                start = 3.141592653589793
-                zw.model.AddArc(c,r,start,end)
+                    #traço inclinado
+                    p1 = APoint(-5*i,-3.25*vez,0)
+                    p2 = APoint(-1.75*i,0,0)
+                    zw.model.AddLine(p1,p2)
+                    #txt
+                    manipulat_txt_cad(zw,'esquerda',i,vez)
+                
+                elif 'bisel_curvo' in nome_base:
+                    #traço reto 
+                    p1 = APoint(-10,0,0)*i
+                    p2 = APoint(0,0,0)
+                    zw.model.AddLine(p1,p2)
 
-                #text
-                manipulat_txt_cad(zw,'delete',i)
+                    #traço vertical
+                    p1 = APoint(-5,0,0)*i
+                    p2 = APoint(-5*i,-3.25,0)
+                    zw.model.AddLine(p1,p2)
 
-            elif 'bisel' in nome_base:
-                #traço reto 
-                p1 = APoint(-10,0,0)*i
-                p2 = APoint(0,0,0)
-                zw.model.AddLine(p1,p2)
+                    #arco
+                    c = APoint(-1.7500000000000036, -1.7694179454963432e-16, 0.0)
+                    r = 3.0
+                    end = 4.71238898038469
+                    start = 3.141592653589793
+                    zw.model.AddArc(c,r,start,end)
 
-                #traço vertical
-                p1 = APoint(-5,0,0)*i
-                p2 = APoint(-5,-3,0)*i
-                zw.model.AddLine(p1,p2)
+                    #text
+                    manipulat_txt_cad(zw,'delete',i,vez)
 
-                #traço inclinado
-                p1 = APoint(-2,-3,0)*i
-                p2 = APoint(-5,0,0)*i
-                zw.model.AddLine(p1,p2)
+                elif 'bisel' in nome_base:
+                    #traço reto 
+                    p1 = APoint(-10,0,0)*i
+                    p2 = APoint(0,0,0)
+                    zw.model.AddLine(p1,p2)
 
-                #texto
-                if unidade:
-                    manipulat_txt_cad(zw,'esquerda',i)
+                    #traço vertical
+                    p1 = APoint(-5,0,0)*i
+                    p2 = APoint(-5*i,-3*vez,0)
+                    zw.model.AddLine(p1,p2)
 
-                manipulat_txt_cad(zw,'meio',i)
+                    #traço inclinado
+                    p1 = APoint(-2*i,-3*vez,0)
+                    p2 = APoint(-5,0,0)*i
+                    zw.model.AddLine(p1,p2)
+
+                    #texto
+                    if unidade:
+                        manipulat_txt_cad(zw,'esquerda',i,vez)
+
+                    manipulat_txt_cad(zw,'meio',i,vez)
 
 
-            elif 'topo' in nome_base:
-                #traço reto 
-                p1 = APoint(-10,0,0)*i
-                p2 = APoint(0,0,0)
-                zw.model.AddLine(p1,p2)
+                elif 'topo' in nome_base:
+                    #traço reto 
+                    p1 = APoint(-10,0,0)*i
+                    p2 = APoint(0,0,0)
+                    zw.model.AddLine(p1,p2)
 
-                #traço vertical
-                p1 = APoint(-4.0611,0,0)*i
-                p2 = APoint(-4.0611*i,-3,0)
-                zw.model.AddLine(p1,p2)
+                    #traço vertical
+                    p1 = APoint(-4.0611,0,0)*i
+                    p2 = APoint(-4.0611*i,-3*vez,0)
+                    zw.model.AddLine(p1,p2)
 
-                #traço vertical
-                p1 = APoint(-5.9389*i,-3,0)
-                p2 = APoint(-5.9389*i,0,0)
-                zw.model.AddLine(p1,p2)
+                    #traço vertical
+                    p1 = APoint(-5.9389*i,-3*vez,0)
+                    p2 = APoint(-5.9389*i,0,0)
+                    zw.model.AddLine(p1,p2)
 
-                #Correção da texto
-                #texto
-                manipulat_txt_cad(zw,'meio',i)
+                    #Correção da texto
+                    manipulat_txt_cad(zw,'meio',i,vez)
 
-            elif 'v_curvo' in nome_base:
-                #traço reto 
-                p1 = APoint(-10,0,0)*i
-                p2 = APoint(0,0,0)
-                zw.model.AddLine(p1,p2)
+                elif 'v_curvo' in nome_base:
+                    #traço reto 
+                    p1 = APoint(-10,0,0)*i
+                    p2 = APoint(0,0,0)
+                    zw.model.AddLine(p1,p2)
 
-                #arco
-                p1 = APoint(-7.5577,-0.442,0)*i #centro
-                zw.model.AddArc(p1,2.5956400303711344,4.675345394956241,0.1711208686509456)
+                    #arco
+                    p1 = APoint(-7.5577,-0.442,0)*i #centro
+                    zw.model.AddArc(p1,2.5956400303711344,4.675345394956241,0.1711208686509456)
 
-                #arco
-                p1 = APoint(-1.8456,-0.442,0)*i #centro
-                zw.model.AddArc(p1,2.5956400303711344,2.9704717849388476,4.749432565813137)
+                    #arco
+                    p1 = APoint(-1.8456,-0.442,0)*i #centro
+                    zw.model.AddArc(p1,2.5956400303711344,2.9704717849388476,4.749432565813137)
 
-                #texto
-                manipulat_txt_cad(zw,'meio',i)
+                elif 'v' in nome_base:
+                    #traço reto 
+                    p1 = APoint(-10,0,0)*i
+                    p2 = APoint(0,0,0)*i
+                    zw.model.AddLine(p1,p2)
 
-            elif 'v' in nome_base:
-                #traço reto 
-                p1 = APoint(-10,0,0)*i
-                p2 = APoint(0,0,0)*i
-                zw.model.AddLine(p1,p2)
+                    #traço inclinado
+                    p1 = APoint(-5,0,0)*i
+                    p2 = APoint(-6.7485*i,-3*vez,0)
+                    zw.model.AddLine(p1,p2)
 
-                #traço inclinado
-                p1 = APoint(-5,0,0)*i
-                p2 = APoint(-6.7485,-3,0)*i
-                zw.model.AddLine(p1,p2)
+                    #traço inclinado
+                    p1 = APoint(-3.2471*i,-3*vez,0)
+                    p2 = APoint(-5,0,0)*i
+                    zw.model.AddLine(p1,p2)
 
-                #traço inclinado
-                p1 = APoint(-3.2471,-3,0)*i
-                p2 = APoint(-5,0,0)*-i
-                zw.model.AddLine(p1,p2)
+                    #texto
+                    manipulat_txt_cad(zw,'meio',i,vez)
 
-                #texto
-                manipulat_txt_cad(zw,'meio',i)
+                elif 'u' in nome_base:
+                    pass
+               
+                #Acabamentos 
+                if 'reto' in nome_base:
+                    #linha reta
+                    p1 = APoint((-5+1.5)*i,-3.27*vez,0)
+                    p2 = APoint((-5-1.5)*i,-3.27*vez,0)
+                    zw.model.AddLine(p1,p2)
 
-            elif 'u' in nome_base:
-                pass
+                elif 'convexo' in nome_base:
+                    c = APoint(-4.977110378108507, -0.11062264899499308, 0.0)
+                    r = 3.5526110509915334
+                    end = 5.242397665338469
+                    start = 4.18238029543091
+                    zw.model.AddArc(c,r,start,end)
+                    
+                elif 'sem_acabamento' in nome_base:
+                    pass
 
         def acabamentos(zw,nome_acabamento):
             '''
@@ -336,27 +367,6 @@ class Draw_Solder:
 
                 #Inserção dos blocos
                 block.InsertBlock(ponto,Path,0.6,0.6,1,0)
-        
-            if 'amboslados' in nome_acabamento:
-                pass
-            if 'intercalado' in nome_acabamento:
-                pass
-            #Acabamentos 
-            if 'reto' in nome_acabamento:
-                #linha reta
-                p1 = APoint((-5+1.5)*i,-3.27,0)
-                p2 = APoint((-5-1.5)*i,-3.27,0)
-                zw.model.AddLine(p1,p2)
-
-            elif 'convexo' in nome_acabamento:
-                c = APoint(-4.977110378108507, -0.11062264899499308, 0.0)
-                r = 3.5526110509915334
-                end = 5.242397665338469
-                start = 4.18238029543091
-                zw.model.AddArc(c,r,start,end)
-                
-            elif 'sem_acabamento' in  nome_acabamento:
-                pass
 
             for obj in zw.iter_objects(['Line','Arc']):
                     obj.Color = 1
@@ -388,7 +398,7 @@ class Solder():
     def __init__(self) -> None:
         pass
 
-    def tipo(self,v):
+    def tipo(self,v) -> str:
         '''
         Faz a codificação do nome da solda pelo tipo de dados inserido pelo usuário
         values = dicionario dos valores inseridos no gui

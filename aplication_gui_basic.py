@@ -4,6 +4,9 @@ from Aplication_Att import Visualizar_att
 from Aplication_graph import Pre_visualizacao
 from pyzwcad import ZwCAD
 from win32com.client import Dispatch
+import os 
+
+print(os.getcwd())
 
 def main_test():
     #Criterio para ativação das propriedades
@@ -23,13 +26,13 @@ def main_test():
                             [sg.Radio('Direita','Ori.', key='-ODIR-', default=True, enable_events=True), sg.Radio('Esquerda','Ori.', key='-OESQ-',enable_events=True)],
                             [sg.Radio('Superior','Reg.', key='-SUP-', default=True, enable_events=True), sg.Radio('Inferior','Reg.', key='-INF-',enable_events=True)],
                             [sg.Text('Acabamentos')],
-                            [sg.Checkbox(text= "Solda em campo", size=(15, 1), default=False, key='-CAMPO1-', enable_events=True),sg.Checkbox(text="Descontinua", size=(15,1), default=False, key='-CAMPO2-')],
-                            [sg.Checkbox(text="Ambos os lados", size=(15, 1), default=False, key='-CAMPO3-', enable_events=True),sg.Checkbox(text="Intercalado", size=(15,1), default=False, key='-CAMPO4-', enable_events=True)],
-                            [sg.Checkbox(text="Todo contorno", size=(15,1), default=False, key='-CAMPO5-', enable_events=True),sg.Checkbox(text="Reforço", size=(10,1), default=False, key='-CAMPO6-', enable_events=True)],
+                            [sg.Checkbox(text= "Solda em campo", size=(12, 1), default=False, key='-CAMPO1-', enable_events=True),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\pixilart-drawing (3) (1).png'),sg.Checkbox(text="Descontinua", size=(15,1), default=False, key='-CAMPO2-')],
+                            [sg.Checkbox(text="Ambos os lados", size=(12, 1), default=False, key='-CAMPO3-', enable_events=True),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\amboslados.png'),sg.Checkbox(text="Intercalado", default=False, key='-CAMPO4-', enable_events=True),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\intercalado.png')],
+                            [sg.Checkbox(text="Todo contorno", size=(12,1), default=False, key='-CAMPO5-', enable_events=True),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\pixilart-drawing (4) (1) (2).png'),sg.Checkbox(text="Reforço", size=(10,1), default=False, key='-CAMPO6-', enable_events=True),],
                             [sg.Checkbox(text="Típico", size=(15,1), default=False, key='-CAMPO7-', enable_events=True),sg.Text('ESP=',key='-TREF-',visible=False),sg.InputText('',key='-REF-',size=(5), enable_events=True, visible=False)],
                             [sg.Column([[sg.Text(text='Informações adicionais')],
-                                        [sg.Radio('Reto','Inf.', key='-IRETO-', enable_events=True),
-                                        sg.Radio('Convexo','Inf.',key='-ICONV-', enable_events=True),
+                                        [sg.Radio('Reto','Inf.', key='-IRETO-', enable_events=True),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\reto.png'),
+                                        sg.Radio('Convexo','Inf.',key='-ICONV-', enable_events=True),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\convexo.png'),
                                         sg.Radio('Sem Acabamento', 'Inf.',key='-ISA-', enable_events=True)]])],
                                         
                             [sg.Column([[sg.Text(text='Escala')],
@@ -128,7 +131,6 @@ while True:
 
     #----------------------evento ok-------------------------------
     elif event == "Ok":
-        bloco_arquivo = arquivo_nome.tipo(values)
 
         #---------------------------ATT----------------------------
         att = Visualizar_att()
@@ -400,14 +402,14 @@ while True:
             grafico.apagar(id['tipico'])
             id['tipico'] = ''
 
-
+    #-------------------------ACABAMENTOS-------------------------
     elif event == '-IRETO-' and (base == 'BISEL'or base =='TOPO'):
         grafico.apagar(id['acabamento'])
-        id['acabamento'] = grafico.acabamento_reto(values['-CAMPO3-'])
+        id['acabamento'] = grafico.acabamento_reto(values['-CAMPO3-'],base)
 
     elif event == '-ICONV-' and (base == 'BISEL'or base =='TOPO'):
         grafico.apagar(id['acabamento'])
-        id['acabamento'] = grafico.acabamento_convexo(values['-CAMPO3-'])
+        id['acabamento'] = grafico.acabamento_convexo(values['-CAMPO3-'],base)
    
     elif event == '-ISA-' and (base == 'BISEL'or base =='TOPO'):
         grafico.apagar(id['acabamento'])

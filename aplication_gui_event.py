@@ -435,17 +435,17 @@ while True:
             id['tipico'] = ''
 
 
+    #-------------------------ACABAMENTOS-------------------------
     elif event == '-IRETO-' and (base == 'BISEL'or base =='TOPO'):
         grafico.apagar(id['acabamento'])
-        id['acabamento'] = grafico.acabamento_reto(values['-CAMPO3-'])
+        id['acabamento'] = grafico.acabamento_reto(values['-CAMPO3-'],base)
 
     elif event == '-ICONV-' and (base == 'BISEL'or base =='TOPO'):
         grafico.apagar(id['acabamento'])
-        id['acabamento'] = grafico.acabamento_convexo(values['-CAMPO3-'])
+        id['acabamento'] = grafico.acabamento_convexo(values['-CAMPO3-'],base)
    
     elif event == '-ISA-' and (base == 'BISEL'or base =='TOPO'):
         grafico.apagar(id['acabamento'])
-    
     #------------------------grafico--------------------------
     elif event == '-GRAPH-':
         pass
