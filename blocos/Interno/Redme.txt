@@ -1,0 +1,11 @@
+'''
+Padrões internos do programa para que ele possa cadastrar qualquer tipo de solda disponivel para
+inicialização do usúario
+
+.Template = arquivo com os padrões
+
+Solda_0_(obra)_ = bloco do tipo solda em campo/obra
+
+Solda_0_(descontinua) = bloco do tipo solda descontinua
+
+'''

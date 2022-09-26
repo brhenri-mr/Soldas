@@ -28,6 +28,8 @@ class Pre_visualizacao():
     def bisel(self, reg=True):
         '''
         Desenha uma solda bisel básica
+        reg = Parametro que permite alterar a posição da solda: cima ou em baixo, por padrão é em cima 
+        reg: bool
         '''
 
         if reg:
@@ -37,18 +39,27 @@ class Pre_visualizacao():
 
         return self.janela.draw_lines([(100,200),(280,200),(190,200),(190,200-48.5*i),(190,200),(190+48.5,200-48.5*i)], color='red')
     
-    def bisel_curvo(self):
+    def bisel_curvo(self, reg=True):
         '''
         Desenha uma solda bisel curava básica
+        reg = Parametro que permite alterar a posição da solda: cima ou em baixo, por padrão é em cima 
+        reg: bool
         '''
-        id1 = self.janela.draw_lines([(100,200),(280,200),(190,200),(190,151.5)], color='red')
-        id3 =  self.janela.draw_lines([(190,200),(190,151.5)], color='red')
-        id2 = self.janela.draw_arc((195,250),(295,147),90,180,style ='arc' ,arc_color='red')
+        if reg:
+            i = 1
+        else:
+            i = -1
+
+        id1 = self.janela.draw_lines([(100,200),(280,200),(190,200),(190,200 - 48.5*i)], color='red')
+        id3 =  self.janela.draw_lines([(190,200),(190,200 - 48.5*i)], color='red')
+        id2 = self.janela.draw_arc((195,250),(295,147),90 if reg else -90,180,style ='arc' ,arc_color='red')
         return [id1,id2,id3]
 
     def v(self, reg=True):
         '''
         Desenha uma solda v basica
+        reg = Parametro que permite alterar a posição da solda: cima ou em baixo, por padrão é em cima 
+        reg: bool
         '''
 
         if reg:
@@ -62,13 +73,15 @@ class Pre_visualizacao():
                                     (190,200),(190-48.5,200-48.5*i)], color='red')
 
 
-    def v_curvo(self):
+    def v_curvo(self,reg=True):
         '''
         Desenha uma solda v curva basica
+        reg = Parametro que permite alterar a posição da solda: cima ou em baixo, por padrão é em cima 
+        reg: bool
         '''
-        
-        id1 = self.janela.draw_arc((195,247),(295,147),90,180,style ='arc' ,arc_color='red')
-        id2 = self.janela.draw_arc((85,250),(185,150),-90,0,style ='arc' ,arc_color='red')
+
+        id1 = self.janela.draw_arc((195,247),(295,147),90 if reg else-90,180,style ='arc' ,arc_color='red')
+        id2 = self.janela.draw_arc((85,250),(185,150),-90 if reg else 90 ,0,style ='arc' ,arc_color='red')
         id3 = self.janela.draw_lines([(100,200),(280,200)], color='red')
 
         return [id1,id2,id3]
@@ -167,11 +180,18 @@ class Pre_visualizacao():
 
         return [id_1,id_2]
     
-    def reforco(self):
+    def reforco(self,direcao=True):
         '''
         Desenha o detalhe de reforco tipo cordao
+        direcao = controla a direção para que vai estar o desenho, cima ou embaixo
+        direcao:Bool
         '''
-        return self.janela.draw_lines([(190,200),(190,74),(190+48.5,74+48.5),(190,74+48.5)],color='red')
+        if direcao:
+            i = 1
+        else:
+            i = -1
+
+        return self.janela.draw_lines([(190,200),(190,200-126*i),(190+48.5,200-126*i+48.5*i),(190,200-126*i+48.5*i)],color='red')
 
     def solda_continua(self, orientacao):
         pass
@@ -184,7 +204,7 @@ class Pre_visualizacao():
         nome = nome do tipo base da solda
         nome: str
         '''
-        
+
         if nome == 'FILETE':
             return  self.janela.draw_lines([(190,200),(190,248.5),(190,248.5),(248.5,200)], color='red')
         elif nome == 'BISEL':
@@ -221,6 +241,22 @@ class Pre_visualizacao():
             id2 = self.janela.draw_text('(TÍP.)',(320,200), color='yellow',font=2.5)
         return [id1,id2]
         
+    def descontinuo(self,passo,ori=True):
+        '''
+        Desenha a informação adicional típica na prévisuzalição
+        retorno -> um desenho 
+
+        passo = valor a ser escrito no desenho
+        passo:str
+        ori = orientação do detalhe. por padrão é para direita
+        ori:Bool
+        '''
+        if ori:
+            id = self.janela.draw_text('('+passo+')',(130,215), color='yellow',font=1.5)
+        else:
+            id = self.janela.draw_text('('+passo+')',(270,215), color='yellow',font=1.5)
+        return id
+
 
     def intercalado(self,id_old):
         '''
@@ -290,7 +326,11 @@ class Pre_visualizacao():
                     exps = [exps[0],exps[0]]
                 elif base == 'FILETE':
                     pontos = [(170-(len(exps[0])-1)*2,175.75),(170-(len(exps[0])-1)*2,224.25)]
-                    
+                elif base =='V':
+                    pontos = [(190.5-(len(exps[1])-1)*2,130),((190.5-(len(exps[1])-1)*2,270))]
+                    exps = [exps[0],exps[0]]
+                else:
+                    return ''
         else:
             # base continua sendo base
 
@@ -301,13 +341,13 @@ class Pre_visualizacao():
                 pontos = [(170-(len(exps[0])-1)*2,175.75)]
 
             elif base == 'TOPO':
-                pontos = [(185.5-(len(exps[1])-1)*2,130)]
+                pontos = [(190.5-(len(exps[1])-1)*2,130)]
 
             elif base == 'V':
-                pontos = [(212-(len(exps[0])-1)*2,175.75)]
+                pontos = [(190.5-(len(exps[1])-1)*2,130)]
 
             elif base == 'V CURVO':
-                pass
+                return ''
             
             elif base =='BISEL':
                 if unidade:
@@ -316,9 +356,9 @@ class Pre_visualizacao():
                 else:
                     pontos = [(212-(len(exps[1])-1)*2,130)]
                     exps = exps
-
             else:
-                pontos = [(178-(len(exps[0])-1)*2,175.75)]
+                return ''
+
         return [self.janela.draw_text(exp if unidade else str(exp+'°' if exp!= '' else ''),ponto, color='yellow',font=2.5) for exp,ponto in zip(exps,pontos)]
 
     def apagar(self,id):
@@ -351,7 +391,24 @@ class Pre_visualizacao():
         nome: dict
         '''
 
-        id = {'Base':'','solda_em_campo':'','ambos_os_lados':'','contorno':'','acabamento':'','intercalado':'', 'expA':'','expB':'','Reforco':'','tipico':'','Base_m_s':'','Base_m_i':''}
+        id = {
+        'Base':'',
+        'solda_em_campo':'',
+        'ambos_os_lados':'',
+        'contorno':'',
+        'acabamento':'',
+        'intercalado':'', 
+        'expA':'',
+        'expB':'',
+        'Reforco':'',
+        'tipico':'',
+        'Base_m_i':'',
+        'Base_m_s':'',
+        'm_reforco_s':'',
+        'm_reforco_i':'',
+        'Descontinuo':''
+        }
+        
         if len(args) >0:
             #por padrão é para direita
             ori = args[0]
@@ -378,11 +435,11 @@ class Pre_visualizacao():
                 elif b == 'BISEL':
                     nome[temp] = self.bisel(reg=False if i == 1 else True)
                 elif b == 'BISEL_CURVO':
-                    nome[temp] = self.bisel_curvo()
+                    nome[temp] = self.bisel_curvo(reg=False if i == 1 else True)
                 elif b == 'V':
                     nome[temp] = self.v(reg=False if i == 1 else True)
                 elif b == 'V_CURVO':
-                    nome[temp] = self.v_curvo()
+                    nome[temp] = self.v_curvo(reg=False if i == 1 else True)
                 elif b == 'TOPO':
                     nome[temp] = self.topo(reg=False if i == 1 else True)
                 elif b == 'J':
@@ -396,6 +453,12 @@ class Pre_visualizacao():
                 nome['solda_em_campo'] = self.solda_em_campo(ori)
             if nome['tipico'] !='':
                 nome['tipico'] = self.tipico(ori)
+            if nome['m_reforco_s'] !='':
+                nome['m_reforco_s'] = self.reforco(direcao=False)
+            if nome['m_reforco_i'] !='':
+                nome['m_reforco_i'] = self.reforco()
+            if nome['Descontinuo'] !='':
+                nome['Descontinuo'] = self.descontinuo('PASSO',ori=ori)
             return nome
 
         else:

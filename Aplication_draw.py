@@ -68,6 +68,19 @@ class Draw_Solder:
         
         self.__handle = block.Item(block.count-1).handle
         
+    def descontinua(self,passo: int or list):
+        '''
+        Permite insere o passo passado pelo usuário a solda. Retorna a escrita no desenho 
+
+        passo = infoirmacao dada pelo usuário para colocar no desenho
+        '''
+        Entity = self.acad.ActiveDocument.HandleToObject(self.__handle)
+
+        for attr in Entity.GetAttributes():
+            if attr.TagString in ['PASSO']:
+                attr.TextString = str(passo)
+                attr.Update()
+
 
     def espessura(self,exp: int or list, *args):
         
@@ -177,9 +190,10 @@ class Draw_Solder:
                             break
 
                 else:
+                    pass
                     apagar.append(obj.handle)
             [acad.ActiveDocument.HandleToObject(j).Delete() for j in apagar]
-
+        
         def base(zw,nome_base,unidade):
             '''
             Desenha a solda base
@@ -194,12 +208,17 @@ class Draw_Solder:
             else:
                 i = -1
 
-            if 'amboslados' in nome_base:
+            if 'amboslados' in nome_base or '%' in nome_base:
                 vezes = [1,-1]
+                if '%' in nome_base:
+                    pos_barra = nome_base.index('%')
+                    nome_base_parte_2 =nome_base[pos_barra+1:] 
+                    nome_base = nome_base[:pos_barra+1]
             else:
                 vezes = [1]
 
             for vez in vezes:
+                print(vez)
                 if 'filete' in nome_base:
                     #traço reto 
                     p1 = APoint(-10,0,0)*i
@@ -217,6 +236,10 @@ class Draw_Solder:
                     zw.model.AddLine(p1,p2)
                     #txt
                     manipulat_txt_cad(zw,'esquerda',i,vez)
+
+                    #Alterar nome_base (caso seja o misto)
+                    if '%' in nome_base:
+                        nome_base = nome_base_parte_2
                 
                 elif 'bisel_curvo' in nome_base:
                     #traço reto 
@@ -238,6 +261,10 @@ class Draw_Solder:
 
                     #text
                     manipulat_txt_cad(zw,'delete',i,vez)
+
+                    #Alterar nome_base (caso seja o misto)
+                    if '%' in nome_base:
+                        nome_base = nome_base_parte_2
 
                 elif 'bisel' in nome_base:
                     #traço reto 
@@ -261,6 +288,9 @@ class Draw_Solder:
 
                     manipulat_txt_cad(zw,'meio',i,vez)
 
+                    #Alterar nome_base (caso seja o misto)
+                    if '%' in nome_base:
+                        nome_base = nome_base_parte_2
 
                 elif 'topo' in nome_base:
                     #traço reto 
@@ -281,6 +311,10 @@ class Draw_Solder:
                     #Correção da texto
                     manipulat_txt_cad(zw,'meio',i,vez)
 
+                    #Alterar nome_base (caso seja o misto)
+                    if '%' in nome_base:
+                        nome_base = nome_base_parte_2
+
                 elif 'v_curvo' in nome_base:
                     #traço reto 
                     p1 = APoint(-10,0,0)*i
@@ -294,6 +328,10 @@ class Draw_Solder:
                     #arco
                     p1 = APoint(-1.8456,-0.442,0)*i #centro
                     zw.model.AddArc(p1,2.5956400303711344,2.9704717849388476,4.749432565813137)
+
+                    #Alterar nome_base (caso seja o misto)
+                    if '%' in nome_base:
+                        nome_base = nome_base_parte_2
 
                 elif 'v' in nome_base:
                     #traço reto 
@@ -313,6 +351,10 @@ class Draw_Solder:
 
                     #texto
                     manipulat_txt_cad(zw,'meio',i,vez)
+
+                    #Alterar nome_base (caso seja o misto)
+                    if '%' in nome_base:
+                        nome_base = nome_base_parte_2
 
                 elif 'u' in nome_base:
                     pass
@@ -367,6 +409,32 @@ class Draw_Solder:
 
                 #Inserção dos blocos
                 block.InsertBlock(ponto,Path,0.6,0.6,1,0)
+            if 'descontinua' in nome_acabamento:
+                block = zw.doc.ActiveLayout.Block
+
+                #definição do local dos blocos
+                Path = join(self.__local_dos_blocos,'Solda_0_(descontinua)_direita.dwg' if ori else 'Solda_0_(descontinua)_esquerda.dwg')
+                
+                #definição ponto de inserção
+                ponto = APoint(-10 if ori else 10,0,0)
+
+                #Inserção dos blocos
+                block.InsertBlock(ponto,Path,0.6,0.6,1,0)
+                
+            if 'tipico' in nome_acabamento:
+                block = zw.doc.ActiveLayout.Block
+
+                #definição do local dos blocos
+                Path = join(self.__local_dos_blocos,'Tipico_direita.dwg' if ori else 'Tipico_esquerda.dwg')
+                
+                #definição ponto de inserção
+                if 'descontinua' in nome_acabamento:
+                    ponto = APoint(-14.2425-10 if ori else 10+14.2425,0,0)
+                else:
+                    ponto = APoint(-10 if ori else 10,0,0)
+
+                #Inserção dos blocos
+                block.InsertBlock(ponto,Path,1,1,1,0)
 
             for obj in zw.iter_objects(['Line','Arc']):
                     obj.Color = 1
@@ -379,6 +447,7 @@ class Draw_Solder:
             nome = nome que a solda ira receber em seu arquivo
             nome:str
             '''
+            print(nome)
             zw.doc.SaveAs(nome+'.dwg')
             path = zw.doc.Path
             zw.doc.Close()
@@ -405,9 +474,9 @@ class Solder():
         valeus: dict
         '''
         #dados
-        base = ['-FILETE-','-TOPO-','-V-','-V_CURVO-','-BISEL-','-BISEL_CURVO-','-J-']
+        base = ['-FILETE-','-TOPO-','-V-','-V_CURVO-','-BISEL-','-BISEL_CURVO-','-J-','-COMI-','-COMS-']
         ori = ['-OESQ-','-ODIR-']
-        prop = ['-CAMPO5-','-CAMPO1-','-CAMPO3-','-CAMPO4-','-CAMPO6-','-CAMPO7-','-CAMPO2-']
+        prop = ['-CAMPO5-','-CAMPO1-','-CAMPO3-','-CAMPO4-','-CAMPO6-','-COMICHECKREF-','-COMSCHECKREF-','-CAMPO7-','-CAMPO2-']
         acabamento = ['-IRETO-','-ICONV-','-ISA-']
 
         subs = {
@@ -418,6 +487,8 @@ class Solder():
             '-BISEL-':'Solda_bisel',
             '-BISEL_CURVO-':'Solda_bisel_curvo',
             '-J-':'Solda_j',
+            '-COMI-':f"Solda_{v['-COMI-'].lower()}%",
+            '-COMS-':f"{v['-COMS-'].lower()}",
             '-OESQ-':'esquerda',
             '-ODIR-':'direita',
             '-CAMPO1-':'campo',
@@ -425,6 +496,8 @@ class Solder():
             '-CAMPO4-':'inter',
             '-CAMPO5-':'contorno',
             '-CAMPO6-':'Reforco',
+            '-COMSCHECKREF-':'Reforco',
+            '-COMICHECKREF-':'Reforco#',
             '-CAMPO7-':'tipico',
             '-CAMPO2-':'descontinua',
             '-IRETO-':'reto',
@@ -443,8 +516,48 @@ class Solder():
                     elif parametro == '-ISA-':
                         pass
                     else:
-                        solda_block = solda_block + subs[parametro]+'_'
+                        solda_block = solda_block + subs[parametro]+('_' if parametro not in ['-COMI-','-COMICHECKREF-'] else '')
                     if parametro not in parametro:
                         break
         return solda_block
+    
+    def solda_desenhada(nome):
+
+        '''
+        Desenha a solda do autocad no programa
+        '''
+        id = {
+            'filete':False,
+            'Misto':False,
+            'contorno':False,
+            'amboslados':False,
+            'campo':False,
+            'direita':False,
+            'esquerda':False,
+            'bisel':False,
+            'reto':False,
+            'convexo':False,
+            'inter':False,
+            'topo':False,
+            'tipico':False,
+            'reforco':False,
+            'reforco%':False
+            }
+    
+        for key in id.keys():
+            if key == 'reforco%':
+                id['Misto'] =True
+            else:
+                if key in nome:
+                    if '%' in nome:
+                        pos  = nome.index('%')
+                        for parte in [nome[:pos],nome[pos:]]:
+                            if 'reforco%' in parte:
+                                id['reforco%'] =True
+                            else:
+                                id[key] = True
+                    else:
+                        id[key] =True
+
+        return id
     

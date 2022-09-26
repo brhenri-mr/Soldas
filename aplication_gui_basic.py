@@ -4,15 +4,14 @@ from Aplication_Att import Visualizar_att
 from Aplication_graph import Pre_visualizacao
 from pyzwcad import ZwCAD
 from win32com.client import Dispatch
-import os 
 
-print(os.getcwd())
+
 
 def main_test():
     #Criterio para ativação das propriedades
     sg.theme('SystemDefaultForReal')
 
-    menu = [['Opções',['Favorito','configurações']]]
+    menu = [['Opções',['Favorito','configurações','Ajuda',['Tutorial']]]]
 
     graph_elem = sg.Graph(canvas_size=(300, 300),
                                 graph_bottom_left=(0, 0),
@@ -24,16 +23,17 @@ def main_test():
     filete_propriedades = [ 
                             [sg.Text('Orientação')],
                             [sg.Radio('Direita','Ori.', key='-ODIR-', default=True, enable_events=True), sg.Radio('Esquerda','Ori.', key='-OESQ-',enable_events=True)],
-                            [sg.Radio('Superior','Reg.', key='-SUP-', default=True, enable_events=True), sg.Radio('Inferior','Reg.', key='-INF-',enable_events=True)],
+                            [sg.Radio('Superior','Reg.', key='-SUP-', default=False, enable_events=True), sg.Radio('Inferior','Reg.', key='-INF-',enable_events=True, default=True)],
                             [sg.Text('Acabamentos')],
-                            [sg.Checkbox(text= "Solda em campo", size=(12, 1), default=False, key='-CAMPO1-', enable_events=True),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\pixilart-drawing (3) (1).png'),sg.Checkbox(text="Descontinua", size=(15,1), default=False, key='-CAMPO2-')],
-                            [sg.Checkbox(text="Ambos os lados", size=(12, 1), default=False, key='-CAMPO3-', enable_events=True),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\amboslados.png'),sg.Checkbox(text="Intercalado", default=False, key='-CAMPO4-', enable_events=True),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\intercalado.png')],
-                            [sg.Checkbox(text="Todo contorno", size=(12,1), default=False, key='-CAMPO5-', enable_events=True),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\pixilart-drawing (4) (1) (2).png'),sg.Checkbox(text="Reforço", size=(10,1), default=False, key='-CAMPO6-', enable_events=True),],
-                            [sg.Checkbox(text="Típico", size=(15,1), default=False, key='-CAMPO7-', enable_events=True),sg.Text('ESP=',key='-TREF-',visible=False),sg.InputText('',key='-REF-',size=(5), enable_events=True, visible=False)],
+                             [sg.Radio('Reto','Inf.', key='-IRETO-', enable_events=True),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\reto.png'),
+                            sg.Radio('Convexo','Inf.',key='-ICONV-', enable_events=True),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\convexo.png'),
+                            sg.Radio('None', 'Inf.',key='-ISA-', enable_events=True)],
+                            [sg.Checkbox(text= "Solda em campo", size=(12, 1), default=False, key='-CAMPO1-', enable_events=True),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\solda_campo.png'),sg.Checkbox(text="Ambos os lados", size=(12, 1), default=False, key='-CAMPO3-', enable_events=True),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\amboslados.png')],
+                            [sg.Checkbox(text="Intercalado",size=(12, 1), default=False, key='-CAMPO4-', enable_events=True),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\intercalado.png'),sg.Checkbox(text="Todo contorno", size=(12,1), default=False, key='-CAMPO5-', enable_events=True),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\contorno.png'),],
+                            [sg.Checkbox(text="Reforço", size=(10,1), default=False, key='-CAMPO6-', enable_events=True),sg.Text('espessura reforço=',key='-TREF-',visible=False),sg.InputText('',key='-REF-',size=(5), enable_events=True, visible=False)],
                             [sg.Column([[sg.Text(text='Informações adicionais')],
-                                        [sg.Radio('Reto','Inf.', key='-IRETO-', enable_events=True),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\reto.png'),
-                                        sg.Radio('Convexo','Inf.',key='-ICONV-', enable_events=True),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\convexo.png'),
-                                        sg.Radio('Sem Acabamento', 'Inf.',key='-ISA-', enable_events=True)]])],
+                                        [sg.Checkbox(text="Descontinua", size=(10,1), default=False, key='-CAMPO2-',enable_events=True),sg.Text('Passo',key='-TXTCAMPO2-'),sg.InputText('',size =(15,1),key='-INPUTTXTCAMPO2-',enable_events = True, disabled=True)],
+                                        [sg.Checkbox(text="Típico", size=(15,1), default=False, key='-CAMPO7-', enable_events=True)]])],
                                         
                             [sg.Column([[sg.Text(text='Escala')],
                                         [sg.Radio('Manual', 'ESC',enable_events=True, key='-MANUAL-'),sg.Radio('Automatico','ESC',enable_events=True,key='-AUTO-',default=True)],
@@ -46,19 +46,25 @@ def main_test():
             [sg.Menu(menu)],
             [sg.Text('Tipo de solda', justification='l'),sg.Column([[sg.Image('star_off.png',key='-ESTRELA-',enable_events = True)]],element_justification = 'right',expand_x=True)],
             [sg.Column([[
-                sg.Radio('Filete','Prop.',enable_events=True, key='-FILETE-'),
-                sg.Radio('Topo','Prop.',enable_events=True, key='-TOPO-'), 
-                sg.Radio('V','Prop.' ,enable_events=True, key='-V-'),
-                sg.Radio('V Curvo','Prop.' ,enable_events=True, key='-V_CURVO-'),
-                sg.Radio('Bisel','Prop.' ,enable_events=True, key='-BISEL-'),
-                sg.Radio('Bisel Curvo','Prop.' ,enable_events=True, key='-BISEL_CURVO-'),
+                sg.Radio('Filete','Prop.',enable_events=True, key='-FILETE-'),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\filete_preto.png', key='-IMFILETE-',enable_events=True),
+                sg.Radio('Topo','Prop.',enable_events=True, key='-TOPO-'), sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\topo.png', key='-IMTOPO-',enable_events=True),
+                sg.Radio('V','Prop.' ,enable_events=True, key='-V-'),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\v.png', key='-IMV-',enable_events=True),
+                sg.Radio('V Curvo','Prop.' ,enable_events=True, key='-V_CURVO-'),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\v_curvo.png', key='-IMV_CURVO-',enable_events=True),
+                sg.Radio('Bisel','Prop.' ,enable_events=True, key='-BISEL-'),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\bisel_curvo.png', key='-IMBISEL-',enable_events=True),
+                sg.Radio('Bisel Curvo','Prop.' ,enable_events=True, key='-BISEL_CURVO-'),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\bisel.png', key='-IMBISEL_CURVO-',enable_events=True),
                 sg.Radio('J','Prop.' ,enable_events=True, key='-J-'),
                 sg.Radio('Misto','Prop.' ,enable_events=True, key='-MISTO-')]])],
             [
                 sg.Column([
                         [sg.Text('Espessura(mm)',size=(25)),sg.Text('    '),sg.Text('Misto',justification='c')],
-                        [sg.Radio('Milimetros','unid.',key='-MIM-',enable_events=True, default=True),sg.Radio('Angulo','unid.',key='-ANG-',enable_events=True),sg.Text('              '),sg.InputCombo(('----','Filete', 'Bisel','Bisel Curvo','Topo','V','V Curvo'), key='-COMI-', enable_events=True, disabled=True),sg.InputCombo(('----','Filete', 'Bisel','Bisel Curvo','Topo','V','V Curvo'), key='-COMS-', enable_events=True, disabled=True)],
-                        [sg.Text('a=',key='-TEXTEXPA-'),sg.InputText('',key='-ESP_A-',size=(20), enable_events=True)],
+                        [sg.Radio('Milimetros','unid.',key='-MIM-',enable_events=True, default=True),sg.Radio('Angulo','unid.',key='-ANG-',enable_events=True),sg.Text('              '),
+                        sg.InputCombo(('----','Filete', 'Bisel','Bisel Curvo','Topo','V','V Curvo'), key='-COMS-', enable_events=True, disabled=True),
+                        sg.Checkbox('Reforço',key='-COMSCHECKREF-',enable_events=True),sg.InputText('',key='-COMSREF-',size=(5), enable_events=True, visible=False)],
+
+                        [sg.Text('a=',key='-TEXTEXPA-'),sg.InputText('',key='-ESP_A-',size=(20), enable_events=True),sg.Text('            '),
+                        sg.InputCombo(('----','Filete', 'Bisel','Bisel Curvo','Topo','V','V Curvo'), key='-COMI-', enable_events=True, disabled=True),
+                        sg.Checkbox('Reforço',key='-COMICHECKREF-',enable_events=True),sg.InputText('',key='-COMIREF-',size=(5), enable_events=True, visible=False)],
+
                         [sg.Text('b=',key='-TEXTEXPB-'),sg.InputText('', key='-ESP_B-',size=(20), enable_events=True)]
                         ], 
                         element_justification='l')],
@@ -75,8 +81,30 @@ def favoritos():
         ]
     return sg.Window('Favoritos',layout, finalize=True)
 
+def tutorial():
+    pass
+
+def configuracoes():
+    pass
+
+
 #dados
-id = {'Base':'','solda_em_campo':'','ambos_os_lados':'','contorno':'','acabamento':'','intercalado':'', 'expA':'','expB':'','Reforco':'','tipico':'','Base_m_i':'','Base_m_s':''}
+id = {
+    'Base':'',
+    'solda_em_campo':'',
+    'ambos_os_lados':'',
+    'contorno':'',
+    'acabamento':'',
+    'intercalado':'', 
+    'expA':'','expB':'',
+    'Reforco':'',
+    'tipico':'',
+    'Base_m_i':'',
+    'Base_m_s':'',
+    'm_reforco_s':'',
+    'm_reforco_i':'',
+    'Descontinuo':''
+    }
 
 
 #Tipo estaticos
@@ -102,6 +130,7 @@ while True:
 
     window,event, values = sg.read_all_windows()
     bloco_arquivo = arquivo_nome.tipo(values)
+    print(bloco_arquivo)
     '''
     toda a vez que um evento é disparado o while roda
     '''
@@ -119,6 +148,10 @@ while True:
 
     if event == sg.WIN_CLOSED:
         break
+     #----------------Alternativa de click--------------------------
+    elif event in ['-IMFILETE-','-IMTOPO-','-IMV-','-IMBISEL-','-IMBISEL_CURVO-','-IMV_CURVO-']:
+        window[event.replace('IM','')].Update(value=True)
+    
     #----------------------RESET-----------------------------------
 
     elif event == 'Reset':
@@ -156,6 +189,8 @@ while True:
         if att.verificar_arquivo(bloco_arquivo):
             bloco_cad.inserir_bloco(bloco_arquivo, ponto)
             bloco_cad.espessura([values['-REF-'],values['-ESP_B-'],values['-ESP_A-']])
+            if values['-CAMPO2-']:
+                bloco_cad.descontinua(values['-CAMPO2-'])
         else:
             sg.popup('Bloco Não Disponível')
             bloco_cad.creat_solder(bloco_arquivo,values['-MIM-'])
@@ -192,13 +227,33 @@ while True:
     elif event == '-CAMPO6-':
         if values['-CAMPO6-']:
             ref = True
-            id['Reforco'] = grafico.reforco()
+            id['Reforco'] = grafico.reforco(direcao=values['-INF-'])
         else:
             ref = False
             grafico.apagar(id['Reforco'])
             pass
         window['-TREF-'].Update(visible=ref)
         window['-REF-'].Update(visible=ref)
+
+    elif event == '-COMSCHECKREF-':
+        if values['-COMSCHECKREF-']:
+            ref = True
+            id['m_reforco_s'] = grafico.reforco(direcao=False)
+        else:
+            ref = False
+            grafico.apagar(id['m_reforco_s'])
+            pass
+        window['-COMSREF-'].Update(visible=ref)
+
+    elif event == '-COMICHECKREF-':
+        if values['-COMICHECKREF-']:
+            ref = True
+            id['m_reforco_i'] = grafico.reforco()
+        else:
+            ref = False
+            grafico.apagar(id['m_reforco_i'])
+            pass
+        window['-COMIREF-'].Update(visible=ref)
 
     #-------------------------Desenho---------------------------
 
@@ -208,29 +263,46 @@ while True:
         window['-ESP_A-'].Update(disabled=False)
         window['-ESP_B-'].Update(disabled=False)
         window['-CAMPO3-'].Update(disabled=False)
+        window['-CAMPO4-'].Update(disabled=False)
+        window['-CAMPO6-'].Update(disabled=False, value = False)
         window['-COMI-'].Update(disabled=True)
         window['-COMS-'].Update(disabled=True)
-        if isinstance(id['Base'],int):
+        window['-COMICHECKREF-'].Update(disabled=True)
+        window['-COMSCHECKREF-'].Update(disabled=True)
+        window['-COMIREF-'].Update(disabled=True)
+        window['-COMSREF-'].Update(disabled=True)
+        if isinstance(id['Base'],int) or isinstance(id['Base'],list):
             [grafico.apagar(id[f'Base{i}']) for i in ['','_m_i','_m_s']]
+            if values['-CAMPO3-']:
+                grafico.apagar(id['ambos_os_lados'])
+                id['ambos_os_lados'] = grafico.solda_ambos_os_lados('FILETE')
         else:
             grafico.deletar()
-        print(values['-INF-'])
-        id['Base'] = grafico.filete(reg=values['-SUP-'])
+        id['Base'] = grafico.filete(reg=values['-INF-'])
         base = 'FILETE'
   
     elif event == '-BISEL-':
-        window['-MIM-'].Update(disabled=False)
+        window['-MIM-'].Update(disabled=False, value=True)
         window['-ANG-'].Update(disabled=False)
         window['-ESP_A-'].Update(disabled=False)
         window['-ESP_B-'].Update(disabled=False)
         window['-CAMPO3-'].Update(disabled=False)
+        window['-CAMPO4-'].Update(disabled=True)
+        window['-CAMPO6-'].Update(disabled=False, value = False)
         window['-COMI-'].Update(disabled=True)
         window['-COMS-'].Update(disabled=True)
-        if isinstance(id['Base'],int):
+        window['-COMICHECKREF-'].Update(disabled=True)
+        window['-COMSCHECKREF-'].Update(disabled=True)
+        window['-COMIREF-'].Update(disabled=True)
+        window['-COMSREF-'].Update(disabled=True)
+        if isinstance(id['Base'],int) or isinstance(id['Base'],list):
             [grafico.apagar(id[f'Base{i}']) for i in ['','_m_i','_m_s']]
+            if values['-CAMPO3-']:
+                grafico.apagar(id['ambos_os_lados'])
+                id['ambos_os_lados'] = grafico.solda_ambos_os_lados('BISEL')
         else:
             grafico.deletar()
-        id['Base'] = grafico.bisel(reg=values['-SUP-'])
+        id['Base'] = grafico.bisel(reg=values['-INF-'])
         base = 'BISEL'
 
     elif event == '-BISEL_CURVO-':
@@ -239,10 +311,19 @@ while True:
         window['-ESP_A-'].Update(disabled=True)
         window['-ESP_B-'].Update(disabled=True)
         window['-CAMPO3-'].Update(disabled=False)
+        window['-CAMPO4-'].Update(disabled=True)
+        window['-CAMPO6-'].Update(disabled=False, value = False)
         window['-COMI-'].Update(disabled=True)
         window['-COMS-'].Update(disabled=True)
-        if isinstance(id['Base'],int):
+        window['-COMICHECKREF-'].Update(disabled=True)
+        window['-COMSCHECKREF-'].Update(disabled=True)
+        window['-COMIREF-'].Update(disabled=True)
+        window['-COMSREF-'].Update(disabled=True)
+        if isinstance(id['Base'],int) or isinstance(id['Base'],list):
             [grafico.apagar(id[f'Base{i}']) for i in ['','_m_i','_m_s']]
+            if values['-CAMPO3-']:
+                grafico.apagar(id['ambos_os_lados'])
+                id['ambos_os_lados'] = grafico.solda_ambos_os_lados('BISEL_CURVO')
         else:
             grafico.deletar()
         id['Base'] = grafico.bisel_curvo()
@@ -250,14 +331,23 @@ while True:
     
     elif event == '-V-':
         window['-MIM-'].Update(disabled=True)
-        window['-ANG-'].Update(disabled=False)
+        window['-ANG-'].Update(disabled=False, value=True)
         window['-ESP_A-'].Update(disabled=False)
         window['-ESP_B-'].Update(disabled=False)
         window['-CAMPO3-'].Update(disabled=False)
+        window['-CAMPO4-'].Update(disabled=True)
+        window['-CAMPO6-'].Update(disabled=False, value = False)
         window['-COMI-'].Update(disabled=True)
         window['-COMS-'].Update(disabled=True)
-        if isinstance(id['Base'],int):
+        window['-COMICHECKREF-'].Update(disabled=True)
+        window['-COMSCHECKREF-'].Update(disabled=True)
+        window['-COMIREF-'].Update(disabled=True)
+        window['-COMSREF-'].Update(disabled=True)
+        if isinstance(id['Base'],int) or isinstance(id['Base'],list):
             [grafico.apagar(id[f'Base{i}']) for i in ['','_m_i','_m_s']]
+            if values['-CAMPO3-']:
+                grafico.apagar(id['ambos_os_lados'])
+                id['ambos_os_lados'] = grafico.solda_ambos_os_lados('V')
         else:
             grafico.deletar()
         id['Base'] = grafico.v()
@@ -269,10 +359,19 @@ while True:
         window['-ESP_A-'].Update(disabled=True)
         window['-ESP_B-'].Update(disabled=True)
         window['-CAMPO3-'].Update(disabled=False)
+        window['-CAMPO4-'].Update(disabled=True)
+        window['-CAMPO6-'].Update(disabled=False, value = False)
         window['-COMI-'].Update(disabled=True)
         window['-COMS-'].Update(disabled=True)
-        if isinstance(id['Base'],int):
+        window['-COMICHECKREF-'].Update(disabled=True)
+        window['-COMSCHECKREF-'].Update(disabled=True)
+        window['-COMIREF-'].Update(disabled=True)
+        window['-COMSREF-'].Update(disabled=True)
+        if isinstance(id['Base'],int) or isinstance(id['Base'],list):
             [grafico.apagar(id[f'Base{i}']) for i in ['','_m_i','_m_s']]
+            if values['-CAMPO3-']:
+                grafico.apagar(id['ambos_os_lados'])
+                id['ambos_os_lados'] = grafico.solda_ambos_os_lados('V_CURVO')
         else:
             grafico.deletar()
         id['Base'] = grafico.v_curvo()
@@ -280,14 +379,23 @@ while True:
 
     elif event == '-TOPO-':
         window['-MIM-'].Update(disabled=True)
-        window['-ANG-'].Update(disabled=False)
+        window['-ANG-'].Update(disabled=False, value = True)
         window['-ESP_A-'].Update(disabled=False)
         window['-ESP_B-'].Update(disabled=False)
         window['-CAMPO3-'].Update(disabled=False)
+        window['-CAMPO4-'].Update(disabled=True)
+        window['-CAMPO6-'].Update(disabled=False, value = False)
         window['-COMI-'].Update(disabled=True)
         window['-COMS-'].Update(disabled=True)
-        if isinstance(id['Base'],int):
+        window['-COMICHECKREF-'].Update(disabled=True)
+        window['-COMSCHECKREF-'].Update(disabled=True)
+        window['-COMIREF-'].Update(disabled=True)
+        window['-COMSREF-'].Update(disabled=True)
+        if isinstance(id['Base'],int) or isinstance(id['Base'],list):
             [grafico.apagar(id[f'Base{i}']) for i in ['','_m_i','_m_s']]
+            if values['-CAMPO3-']:
+                grafico.apagar(id['ambos_os_lados'])
+                id['ambos_os_lados'] = grafico.solda_ambos_os_lados('TOPO')
         else:
             grafico.deletar()
         id['Base'] = grafico.topo()
@@ -295,27 +403,39 @@ while True:
     
     elif event == '-J-':
         window['-CAMPO3-'].Update(disabled=False)
+        window['-CAMPO6-'].Update(disabled=False, value = False)
         window['-COMI-'].Update(disabled=True)
         window['-COMS-'].Update(disabled=True)
-        if isinstance(id['Base'],int):
+        window['-COMICHECKREF-'].Update(disabled=True)
+        window['-COMSCHECKREF-'].Update(disabled=True)
+        window['-COMIREF-'].Update(disabled=True)
+        window['-COMSREF-'].Update(disabled=True)
+        if isinstance(id['Base'],int) or isinstance(id['Base'],list):
             [grafico.apagar(id[f'Base{i}']) for i in ['','_m_i','_m_s']]
+            if values['-CAMPO3-']:
+                grafico.apagar(id['ambos_os_lados'])
+                id['ambos_os_lados'] = grafico.solda_ambos_os_lados('J')
         else:
             grafico.deletar()
         id['Base'] = grafico.j()
         base = 'J'
 
     elif event == '-MISTO-':
+        window['-CAMPO6-'].Update(disabled=True, value = False)
         window['-COMI-'].Update(disabled=False)
         window['-COMS-'].Update(disabled=False)
-        grafico.apagar(id['Base'])
+        window['-COMICHECKREF-'].Update(disabled=False)
+        window['-COMSCHECKREF-'].Update(disabled=False)
+        window['-COMIREF-'].Update(disabled=False)
+        window['-COMSREF-'].Update(disabled=False)
+        [grafico.apagar(id[i]) for i in ['Base','ambos_os_lados']]
         id['Base']= window['-GRAPH-'].draw_lines([(100,200),(280,200)],color='red')
 
         window['-CAMPO3-'].Update(disabled=True)
  
     elif event == '-COMI-':
         if values['-MISTO-']:
-
-            if isinstance(id['Base_m_i'],int):
+            if isinstance(id['Base'],int) or isinstance(id['Base'],list):
                 grafico.apagar(id['Base_m_i'])
 
             base = 'MISTO_'+values['-COMI-'].upper() + '_'+ (values['-COMS-'].upper() if values['-COMS-'] != '' else 'NULL')
@@ -326,7 +446,7 @@ while True:
             
     elif event == '-COMS-':
         if values['-MISTO-']:
-            if isinstance(id['Base_m_s'],int):
+            if isinstance(id['Base'],int) or isinstance(id['Base'],list):
                 grafico.apagar(id['Base_m_s'])
             base = 'MISTO_'+ (values['-COMI-'].upper() if values['-COMI-']!='' else 'NULL') + '_'+values['-COMS-'].upper()
             grafico.deletar()
@@ -360,7 +480,15 @@ while True:
             id['solda_em_campo'] = ''
             
     elif event == '-CAMPO2-':
-        pass
+        if values['-CAMPO2-']:
+            window['-INPUTTXTCAMPO2-'].Update(disabled=False)
+        else:
+            window['-INPUTTXTCAMPO2-'].Update(disabled=True)
+
+    elif event == '-INPUTTXTCAMPO2-':
+        grafico.apagar(id['Descontinuo'])
+        id['Descontinuo'] =  grafico.descontinuo(values['-INPUTTXTCAMPO2-'],ori=values['-ODIR-'])
+
     elif event == '-CAMPO3-':
         if values['-CAMPO3-']:
             id['ambos_os_lados'] = grafico.solda_ambos_os_lados(base)
@@ -426,8 +554,10 @@ while True:
             window['-ESTRELA-'].update(source='star_off.png')
             j = True
     #------------------------Favorito_TELA--------------------------
-    if event == 'Favorito':
+    elif event == 'Favorito':
         janela_dois = favoritos()
+    elif event == 'Tutorial':
+        pass
     else:
 
         '''

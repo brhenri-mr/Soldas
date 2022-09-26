@@ -3,6 +3,12 @@ from win32com.client import getevents, Dispatch
 from Aplication_Att import Visualizar_att
 from pyautogui import press
 
+'''
+Do nada para de funcionar sem o menor motivo, e quando escreve mais linhas
+como alternativas para o funcionamento da funciona e se retorna ao padrão originalmente
+problemático, o erro e solucinado.
+Verificar isso aqui
+'''
 
 class ZwCADEvents(getevents("ZwCAD.Application")):
     
