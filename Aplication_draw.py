@@ -58,8 +58,6 @@ class Draw_Solder:
         Path = join(self.__local_dos_blocos,tipo +'.dwg')
         
         #definição ponto de inserção
-        print(args[0])
-
         ponto = self.zw.doc.Utility.GetPoint() if args[0] =='N_att' else args[0]
         ponto = APoint(ponto[0],ponto[1])
 
@@ -136,59 +134,78 @@ class Draw_Solder:
                 zw.doc.Open(local_path)
                 sleep(1)
 
-        def manipulat_txt_cad(zw,criterio,ori,amboslados,acad = self.acad):
+        def manipulat_txt_cad(zw,criterio,ori,amboslados,nome,acad = self.acad):
             '''
             Manipula o attribute txt do arquivo template original, o colocando no lugar
             e escolhendo a solda com a justificy mais adequada
             criterio = criterio para esclja da justificy
-            criterio:str
+            criterio:list
             ori = orientação do desenho
+            ori:int
             amboslados = sinaliza ao programa que a solda a ser inserida é ambos os lados
             amboslados: int
             '''
             #Dados base
             erro = 0
             apagar = []
+            text_base_handle = []
+            text_base_posi = []
+
+
+            #tramento do criterio
+            if 'descontinua' in nome:
+                criterio = [criterio,'descontinua']
+            else:
+                criterio = [criterio]
 
             if amboslados == -1:
                 incremento = -1.8
             else:
                 incremento = 0 
+            
 
             #Posição do txt
-            if criterio == 'meio':
-                txt_base_handle = '370'
+            if 'meio' in criterio:
+                text_base_handle.append('370')
                 if ori == 1:
-                    text_base_posi = APoint(-10.2714,-6.1968*amboslados+incremento)
+                    text_base_posi.appned(APoint(-10.2714,-6.1968*amboslados+incremento))
                 else:
-                    text_base_posi = APoint(-0.2714,-6.1968*amboslados+incremento)
-            elif criterio == 'delete':
-                txt_base_handle = ''
+                    text_base_posi.append(APoint(-0.2714,-6.1968*amboslados+incremento))
+            elif 'delete' in criterio:
+                text_base_handle.append('')
             else:
-                txt_base_handle = '1B8'
+                text_base_handle.append('1B8')
                 if ori == 1: #direita
-                    text_base_posi = APoint(-16.4891,-2.6215*amboslados+incremento)
+                    text_base_posi.append(APoint(-16.4891,-2.6215*amboslados+incremento))
                 else: #esquerda
-                    text_base_posi = APoint(-7.0816,-2.6215*amboslados+incremento)
+                    text_base_posi.append(APoint(-7.0816,-2.6215*amboslados+incremento))
 
-
+            if  'descontinua' in criterio:
+                text_base_handle.append('39F')
+                if ori:
+                    text_base_posi.append(APoint(-22.7385,0.5703,0))
+                else:
+                    text_base_posi.append(APoint(22.7385,0.5703,0))
 
             for obj in zw.iter_objects(['AcDbAttributeDefinition']):
-                if obj.handle == txt_base_handle:
-                    if amboslados == -1:
+
+                if obj.handle in text_base_handle:
+                    local_analise  = text_base_handle.index(obj.handle)
+
+                    if amboslados == -1 and obj.handle !='39F':
                         obj.Copy()
+
                     antigo = obj.InsertionPoint
-                    for _ in range(50):
+                    print(antigo)
+
+                    while True:
                         #Tenta mover o bloco, as vezes nao vai de primeira, por isso o While
-                        obj.Move(APoint(obj.InsertionPoint),text_base_posi)
-                        print(erro)
-                        if antigo[0] == obj.InsertionPoint[0]:
-                            erro += 1
-                        elif erro == 20:
-                            break
+                        obj.Move(APoint(obj.InsertionPoint),text_base_posi[local_analise])
+                        print(antigo == obj.InsertionPoint)
+                        if antigo == obj.InsertionPoint:
+                            pass
                         else:
                             break
-
                 else:
                     pass
                     apagar.append(obj.handle)
@@ -218,7 +235,6 @@ class Draw_Solder:
                 vezes = [1]
 
             for vez in vezes:
-                print(vez)
                 if 'filete' in nome_base:
                     #traço reto 
                     p1 = APoint(-10,0,0)*i
@@ -235,7 +251,7 @@ class Draw_Solder:
                     p2 = APoint(-1.75*i,0,0)
                     zw.model.AddLine(p1,p2)
                     #txt
-                    manipulat_txt_cad(zw,'esquerda',i,vez)
+                    manipulat_txt_cad(zw,'esquerda',i,vez,nome_base)
 
                     #Alterar nome_base (caso seja o misto)
                     if '%' in nome_base:
@@ -260,7 +276,7 @@ class Draw_Solder:
                     zw.model.AddArc(c,r,start,end)
 
                     #text
-                    manipulat_txt_cad(zw,'delete',i,vez)
+                    manipulat_txt_cad(zw,'delete',i,vez,nome_base)
 
                     #Alterar nome_base (caso seja o misto)
                     if '%' in nome_base:
@@ -286,7 +302,7 @@ class Draw_Solder:
                     if unidade:
                         manipulat_txt_cad(zw,'esquerda',i,vez)
 
-                    manipulat_txt_cad(zw,'meio',i,vez)
+                    manipulat_txt_cad(zw,'meio',i,vez,nome_base)
 
                     #Alterar nome_base (caso seja o misto)
                     if '%' in nome_base:
@@ -309,7 +325,7 @@ class Draw_Solder:
                     zw.model.AddLine(p1,p2)
 
                     #Correção da texto
-                    manipulat_txt_cad(zw,'meio',i,vez)
+                    manipulat_txt_cad(zw,'meio',i,vez,nome_base)
 
                     #Alterar nome_base (caso seja o misto)
                     if '%' in nome_base:
@@ -350,7 +366,7 @@ class Draw_Solder:
                     zw.model.AddLine(p1,p2)
 
                     #texto
-                    manipulat_txt_cad(zw,'meio',i,vez)
+                    manipulat_txt_cad(zw,'meio',i,vez,nome_base)
 
                     #Alterar nome_base (caso seja o misto)
                     if '%' in nome_base:
@@ -409,32 +425,31 @@ class Draw_Solder:
 
                 #Inserção dos blocos
                 block.InsertBlock(ponto,Path,0.6,0.6,1,0)
+            
             if 'descontinua' in nome_acabamento:
-                block = zw.doc.ActiveLayout.Block
+                #traço reto 
+                p1 = APoint(-10,0,0)*i
+                p2 = APoint(-24.2425,0,0)*i
+                zw.model.AddLine(p1,p2)
 
-                #definição do local dos blocos
-                Path = join(self.__local_dos_blocos,'Solda_0_(descontinua)_direita.dwg' if ori else 'Solda_0_(descontinua)_esquerda.dwg')
-                
-                #definição ponto de inserção
-                ponto = APoint(-10 if ori else 10,0,0)
-
-                #Inserção dos blocos
-                block.InsertBlock(ponto,Path,0.6,0.6,1,0)
                 
             if 'tipico' in nome_acabamento:
                 block = zw.doc.ActiveLayout.Block
 
                 #definição do local dos blocos
-                Path = join(self.__local_dos_blocos,'Tipico_direita.dwg' if ori else 'Tipico_esquerda.dwg')
-                
+                Path = join(self.__local_dos_blocos,'Interno\Tipico_direita.dwg' if ori else 'Interno\Tipico_esquerda.dwg')
+
                 #definição ponto de inserção
                 if 'descontinua' in nome_acabamento:
                     ponto = APoint(-14.2425-10 if ori else 10+14.2425,0,0)
                 else:
-                    ponto = APoint(-10 if ori else 10,0,0)
+                    ponto = APoint(-10*i,0,0)
 
                 #Inserção dos blocos
-                block.InsertBlock(ponto,Path,1,1,1,0)
+                block.InsertBlock(ponto,Path,0.1,0.1,0.1,0)
+            
+            if 'reforco' in nome_acabamento:
+                pass
 
             for obj in zw.iter_objects(['Line','Arc']):
                     obj.Color = 1
@@ -447,7 +462,6 @@ class Draw_Solder:
             nome = nome que a solda ira receber em seu arquivo
             nome:str
             '''
-            print(nome)
             zw.doc.SaveAs(nome+'.dwg')
             path = zw.doc.Path
             zw.doc.Close()
