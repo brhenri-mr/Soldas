@@ -7,7 +7,7 @@ from win32com.client import Dispatch
 from datetime import datetime
 
 def main_test(filete=False,campo=False, contorno=False,direita=True,esquerda=False,amboslados=False,inter=False,bisel=False,topo=False,
-                misto=False,v=False,v_curvo=False,bisel_curvo=False,reforco=False,descontinua=False,tipico=False,reto=False,none=True,
+                misto=False,reforco=False,reforco_S=False,v=False,v_curvo=False,bisel_curvo=False,descontinua=False,tipico=False,reto=False,none=True,
                 convexo=False):
     #Criterio para ativação das propriedades
     sg.theme('SystemDefaultForReal')
@@ -18,12 +18,12 @@ def main_test(filete=False,campo=False, contorno=False,direita=True,esquerda=Fal
                                 key='-GRAPH-',
                                 background_color='lightblue')
                                 
-   filete_propriedades = [ 
+    filete_propriedades = [ 
                             [sg.Text('Orientação')],
                             [sg.Radio('Direita','Ori.', key='-ODIR-', default=True, enable_events=True), sg.Radio('Esquerda','Ori.', key='-OESQ-',enable_events=True)],
                             [sg.Radio('Superior','Reg.', key='-SUP-', default=False, enable_events=True), sg.Radio('Inferior','Reg.', key='-INF-',enable_events=True, default=True)],
                             [sg.Text('Acabamentos')],
-                             [sg.Radio('Reto','Inf.', key='-IRETO-', enable_events=True,default=reto),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\reto.png'),
+                            [sg.Radio('Reto','Inf.', key='-IRETO-', enable_events=True,default=reto),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\reto.png'),
                             sg.Radio('Convexo','Inf.',key='-ICONV-', enable_events=True,default=convexo),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\convexo.png'),
                             sg.Radio('None', 'Inf.',key='-ISA-', enable_events=True,default=none)],
                             [sg.Checkbox(text= "Solda em campo", size=(12, 1), default=campo, key='-CAMPO1-', enable_events=True),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\solda_campo.png'),sg.Checkbox(text="Ambos os lados", size=(12, 1), default=amboslados, key='-CAMPO3-', enable_events=True),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\amboslados.png')],
@@ -44,7 +44,7 @@ def main_test(filete=False,campo=False, contorno=False,direita=True,esquerda=Fal
                 sg.Radio('Filete','Prop.',enable_events=True, key='-FILETE-', default=filete),
                 sg.Radio('Topo','Prop.',enable_events=True, key='-TOPO-',default=topo), 
                 sg.Radio('V','Prop.' ,enable_events=True, key='-V-',default=v),
-                sg.Radio('V Curvo','Prop.' ,enable_events=True, key='-V_CURVO-',default=v_Curvo),
+                sg.Radio('V Curvo','Prop.' ,enable_events=True, key='-V_CURVO-',default=v_curvo),
                 sg.Radio('Bisel','Prop.' ,enable_events=True, key='-BISEL-', default=bisel),
                 sg.Radio('Bisel Curvo','Prop.' ,enable_events=True, key='-BISEL_CURVO-',default=bisel_curvo),
                 sg.Radio('J','Prop.' ,enable_events=True, key='-J-'),
@@ -54,11 +54,11 @@ def main_test(filete=False,campo=False, contorno=False,direita=True,esquerda=Fal
                         [sg.Text('Espessura(mm)',size=(25)),sg.Text('    '),sg.Text('Misto',justification='c')],
                         [sg.Radio('Milimetros','unid.',key='-MIM-',enable_events=True, default=True),sg.Radio('Angulo','unid.',key='-ANG-',enable_events=True),sg.Text('              '),
                         sg.InputCombo(('----','Filete', 'Bisel','Bisel Curvo','Topo','V','V Curvo'), key='-COMS-', enable_events=True, disabled=True),
-                        sg.Checkbox('Reforço',key='-COMSCHECKREF-',enable_events=True),sg.InputText('',key='-COMSREF-',size=(5), enable_events=True, visible=False)],
+                        sg.Checkbox('Reforço',key='-COMSCHECKREF-',enable_events=True,default=reforco_S),sg.InputText('',key='-COMSREF-',size=(5), enable_events=True, visible=False)],
 
                         [sg.Text('a=',key='-TEXTEXPA-'),sg.InputText('',key='-ESP_A-',size=(20), enable_events=True),sg.Text('            '),
                         sg.InputCombo(('----','Filete', 'Bisel','Bisel Curvo','Topo','V','V Curvo'), key='-COMI-', enable_events=True, disabled=True),
-                        sg.Checkbox('Reforço',key='-COMICHECKREF-',enable_events=True),sg.InputText('',key='-COMIREF-',size=(5), enable_events=True, visible=False)],
+                        sg.Checkbox('Reforço',key='-COMICHECKREF-',enable_events=True,default=reforco),sg.InputText('',key='-COMIREF-',size=(5), enable_events=True, visible=False)],
 
                         [sg.Text('b=',key='-TEXTEXPB-'),sg.InputText('', key='-ESP_B-',size=(20), enable_events=True)]
                         ], 
@@ -101,7 +101,8 @@ id = {
     'Base_m_i':'',
     'Base_m_s':'',
     'm_reforco_s':'',
-    'm_reforco_i':''
+    'm_reforco_i':'',
+    'Descontinuo':''
     }
 
 while True:
@@ -112,7 +113,7 @@ while True:
             if (datetime.now()-parametros['time']).total_seconds() <=0.4 :
                 if parametros['time'] != tempo_utilizado:
                     #inicializando a janela
-                    codigo = bloco_cad.solda_desenhada(parametros['nome'])
+                    codigo = arquivo_nome.solda_desenhada(parametros['nome'])
                     janela_um = main_test(
                         filete=codigo['filete'],
                         bisel=codigo['bisel'],
@@ -121,7 +122,10 @@ while True:
                         direita=codigo['direita'],
                         esquerda=codigo['esquerda'],
                         amboslados=codigo['amboslados'],
-                        inter=codigo['inter']
+                        inter=codigo['inter'],
+                        descontinua=codigo['descontinua'],
+                        reforco=codigo['Reforco'],
+                        reforco_S=codigo['Reforco%']
                     )
                     grafico = Pre_visualizacao(janela_um.Element("-GRAPH-"))
                     #parametros
@@ -183,7 +187,10 @@ while True:
         if att.verificar_arquivo(bloco_arquivo):
             bloco_cad.apagar_bloco(handle)
             bloco_cad.inserir_bloco(bloco_arquivo, ponto)
-            bloco_cad.espessura(values['-ESP_B-'],bloco_cad.handle)
+            bloco_cad.espessura({'REF':values['-REF-'],'CORDAO':[values['-ESP_B-'],values['-ESP_A-']]},bloco_cad.handle)
+            if values['-CAMPO2-']:
+                bloco_cad.descontinua(values['-INPUTTXTCAMPO2-'])
+                
             #finalizar a janela
             window.close()
             bloco_obtido = True
@@ -486,6 +493,12 @@ while True:
 
     elif event == '-INPUTTXTCAMPO2-':
         grafico.apagar(id['Descontinuo'])
+        if len(values['-INPUTTXTCAMPO2-'])>1:
+            if '-' in values['-INPUTTXTCAMPO2-']:
+                pass
+            else:
+                window['-INPUTTXTCAMPO2-'].Update(value=f"{values['-INPUTTXTCAMPO2-']}-")
+
         id['Descontinuo'] =  grafico.descontinuo(values['-INPUTTXTCAMPO2-'],ori=values['-ODIR-'])
     elif event == '-CAMPO3-':
         if values['-CAMPO3-']:

@@ -3,6 +3,7 @@ from Aplication_draw import Draw_Solder, Solder
 from Aplication_Att import Visualizar_att
 from Aplication_graph import Pre_visualizacao
 from pyzwcad import ZwCAD
+import time
 from win32com.client import Dispatch
 
 
@@ -188,11 +189,12 @@ while True:
         #---------------------------INSERIR---------------------------
         if att.verificar_arquivo(bloco_arquivo):
             bloco_cad.inserir_bloco(bloco_arquivo, ponto)
-            bloco_cad.espessura([values['-REF-'],values['-ESP_B-'],values['-ESP_A-']])
+            bloco_cad.espessura({'REF':values['-REF-'],'CORDAO':[values['-ESP_B-'],values['-ESP_A-']]})
             if values['-CAMPO2-']:
-                bloco_cad.descontinua(values['-CAMPO2-'])
+                bloco_cad.descontinua(values['-INPUTTXTCAMPO2-'])
         else:
             sg.popup('Bloco Não Disponível')
+            time.sleep(1)
             bloco_cad.creat_solder(bloco_arquivo,values['-MIM-'])
             sg.popup('Bloco cadastradado com sucesso')
         
@@ -487,6 +489,12 @@ while True:
 
     elif event == '-INPUTTXTCAMPO2-':
         grafico.apagar(id['Descontinuo'])
+        if len(values['-INPUTTXTCAMPO2-'])>1:
+            if '-' in values['-INPUTTXTCAMPO2-']:
+                pass
+            else:
+                window['-INPUTTXTCAMPO2-'].Update(value=f"{values['-INPUTTXTCAMPO2-']}-")
+
         id['Descontinuo'] =  grafico.descontinuo(values['-INPUTTXTCAMPO2-'],ori=values['-ODIR-'])
 
     elif event == '-CAMPO3-':

@@ -42,7 +42,10 @@ class Draw_Solder:
         
     @escala_atual.setter
     def escala_atual(self,escala_nova):
-        self.__escala_atual = float(escala_nova if ',' not in escala_nova else escala_nova.replace(',','.'))
+        if isinstance(escala_nova,float):
+             self.__escala_atual = escala_nova
+        else:
+            self.__escala_atual = float(escala_nova if ',' not in escala_nova else escala_nova.replace(',','.'))
     
     def inserir_bloco(self,tipo, *args):
         '''
@@ -73,42 +76,39 @@ class Draw_Solder:
         passo = infoirmacao dada pelo usuário para colocar no desenho
         '''
         Entity = self.acad.ActiveDocument.HandleToObject(self.__handle)
-
+        passo = f'({passo})'
+        
         for attr in Entity.GetAttributes():
-            if attr.TagString in ['PASSO']:
+            if '(' in attr.TagString or '-' in attr.TagString or 'PASSO' == attr.TagString:
                 attr.TextString = str(passo)
                 attr.Update()
 
 
-    def espessura(self,exp: int or list, *args):
-        
+    def espessura(self,exp: dict, *args):
+        '''
+        Insere o valor da solda no bloco desenhado no zwcad
+        exp = dicionario com os valores de cada entrada do usuario que corresponde
+        ao valor da solda
+        exp: dict
+        '''
+        #Dados 
         i = 0
-        s = []
 
         #Instancia do ultimo objeto adcionado no documento
         Entity = self.acad.ActiveDocument.HandleToObject(args[0] if len(args) != 0 else self.__handle)
-        print(exp)
+
         #tratamento do exp
-        for elemento in exp:
-            if elemento == '':
-                pass
-            else:
-                s.append(elemento)
-        
-        print(s)
         #Modificação dos atributos do bloco
         for attr in Entity.GetAttributes():
             if attr.TagString in ["CORDAO","REF"]:
-                print(attr.TagString)
-                if len(s)>1:
-                    input = s[i]
-                elif len(s) == 0:
-                    input = 0 
+                if attr.TagString == 'REF':
+                    input = str(exp[attr.TagString])
                 else:
-                    input = s[0]
-                attr.TextString = str(input)
+                    input = str(exp[attr.TagString][i])
+                attr.TextString = input
                 attr.Update()
-                i +=1
+                i += 1
+
     
     def apagar_bloco(self, handle):
 
@@ -128,7 +128,6 @@ class Draw_Solder:
             nome_arq = '.Template.dwg'
 
             local_path = join(self.__local_dos_blocos,'Interno',nome_arq)
-            print(local_path)
 
             while zw.doc.Name != nome_arq:
                 zw.doc.Open(local_path)
@@ -138,7 +137,7 @@ class Draw_Solder:
             '''
             Manipula o attribute txt do arquivo template original, o colocando no lugar
             e escolhendo a solda com a justificy mais adequada
-            criterio = criterio para esclja da justificy
+            criterio = criterio para escala da justificy
             criterio:list
             ori = orientação do desenho
             ori:int
@@ -146,7 +145,6 @@ class Draw_Solder:
             amboslados: int
             '''
             #Dados base
-            erro = 0
             apagar = []
             text_base_handle = []
             text_base_posi = []
@@ -168,7 +166,7 @@ class Draw_Solder:
             if 'meio' in criterio:
                 text_base_handle.append('370')
                 if ori == 1:
-                    text_base_posi.appned(APoint(-10.2714,-6.1968*amboslados+incremento))
+                    text_base_posi.append(APoint(-10.2714,-6.1968*amboslados+incremento))
                 else:
                     text_base_posi.append(APoint(-0.2714,-6.1968*amboslados+incremento))
             elif 'delete' in criterio:
@@ -179,13 +177,12 @@ class Draw_Solder:
                     text_base_posi.append(APoint(-16.4891,-2.6215*amboslados+incremento))
                 else: #esquerda
                     text_base_posi.append(APoint(-7.0816,-2.6215*amboslados+incremento))
-
             if  'descontinua' in criterio:
                 text_base_handle.append('39F')
                 if ori:
-                    text_base_posi.append(APoint(-22.7385,0.5703,0))
+                    text_base_posi.append(APoint(-23.1849,0.8891,0))
                 else:
-                    text_base_posi.append(APoint(22.7385,0.5703,0))
+                    text_base_posi.append(APoint(22.7385,0.8891,0))
 
             for obj in zw.iter_objects(['AcDbAttributeDefinition']):
 
@@ -196,21 +193,68 @@ class Draw_Solder:
                         obj.Copy()
 
                     antigo = obj.InsertionPoint
-                    print(antigo)
 
-                    while True:
+                    for _ in range(50):
                         #Tenta mover o bloco, as vezes nao vai de primeira, por isso o While
-                        obj.Move(APoint(obj.InsertionPoint),text_base_posi[local_analise])
-                        print(antigo == obj.InsertionPoint)
+                        obj.Move(APoint(obj.InsertionPoint),APoint(text_base_posi[local_analise]))
+                        if antigo == obj.InsertionPoint:
+                            print('falha')
+                        else:
+                            print('sucesso')
+                            break
+                else:
+                    if obj.handle == '3A1':
+                        pass
+                    else:
+                        apagar.append(obj.handle)
+            [acad.ActiveDocument.HandleToObject(j).Delete() for j in apagar]
+        
+        def manipular_txt_reforco(zw,ori=True,ori_S=True,vezes=0):
+            '''
+            Manipula o texto especifico da solda, seu motivo de existencia se justifica
+            pela excessiva complexidade do manipula texto de lidar com criterios adicionais
+
+            zw = aplicação do ZwCAD
+            zw: ZwCAD()
+            ori = orientação do desenho, direita ou esquerda. Por padrão adota-se como True
+            para esquerda
+            ori:Bool
+            ori_S = orientação do desenho, superior ou inferior. POr padrão adota-se como True
+            para baixo
+            ori:Bool
+            vezes = quantidades de manipulações a serem feitas no total, parametro serve para 
+            informar a funcao da necessidade ou nao de copiar o txt base. O valor padrão 
+            estabelecido foi um qualquer
+            vezes: int
+            '''
+            #Dados estáticos
+            txt_handle = '3A1'
+
+            #orientacao superior ou inferior
+            if ori_S:
+                i = 1
+            else:
+                i = -1
+
+            #orientacao direita e esquerda
+            text_base_posi = APoint(-10.6035,-10.1243*i,0) if ori else APoint(5.8661,-7.4663*i,0)
+
+            for obj in zw.iter_objects(['AcDbAttributeDefinition']):
+                if obj.handle == txt_handle:
+                    antigo = obj.InsertionPoint
+                    #caso de ter duas soldas de reforço 
+                    if vezes==2 and i==-1:
+                        obj.Copy()
+
+                    for _ in range(50):
+                        sleep(0.5)
+                        obj.Move(APoint(obj.InsertionPoint),text_base_posi)
                         if antigo == obj.InsertionPoint:
                             pass
                         else:
                             break
-                else:
-                    pass
-                    apagar.append(obj.handle)
-            [acad.ActiveDocument.HandleToObject(j).Delete() for j in apagar]
-        
+            
+
         def base(zw,nome_base,unidade):
             '''
             Desenha a solda base
@@ -300,7 +344,7 @@ class Draw_Solder:
 
                     #texto
                     if unidade:
-                        manipulat_txt_cad(zw,'esquerda',i,vez)
+                        manipulat_txt_cad(zw,'esquerda',i,vez,nome_base)
 
                     manipulat_txt_cad(zw,'meio',i,vez,nome_base)
 
@@ -448,8 +492,37 @@ class Draw_Solder:
                 #Inserção dos blocos
                 block.InsertBlock(ponto,Path,0.1,0.1,0.1,0)
             
-            if 'reforco' in nome_acabamento:
-                pass
+            if 'Reforco' in nome_acabamento:
+
+                if '#' in nome_acabamento:
+                    vec = [1,-1]
+                else:
+                    if '%' in nome_acabamento or 'superior' in nome_acabamento:
+                        vec = [-1]
+                    else:
+                        vec = [1]
+
+                for j in vec:
+                    #traço reto 
+                    p1 = APoint(-5*i,0,0)
+                    p2 = APoint(-5*i,-10.8139*j,0)
+                    zw.model.AddLine(p1,p2)
+
+                    #traço inclinado 
+                    p1 = APoint(-5*i,-10.8139*j,0)
+                    p2 = APoint(-1.75*i,-7.5572*j,0)
+                    zw.model.AddLine(p1,p2)
+
+                    #traço horizontal
+                    p1 = APoint(-5*i,-7.5572*j,0)
+                    p2 = APoint(-1.75*i,-7.5572*j,0)
+                    zw.model.AddLine(p1,p2)
+
+                    #txt
+                    manipular_txt_reforco(self.zw,ori=ori, ori_S=True if j==1 else False,vezes=len(vec))
+            else:
+                self.acad.ActiveDocument.HandleToObject('3A1').Delete()
+
 
             for obj in zw.iter_objects(['Line','Arc']):
                     obj.Color = 1
@@ -535,7 +608,7 @@ class Solder():
                         break
         return solda_block
     
-    def solda_desenhada(nome):
+    def solda_desenhada(self,nome):
 
         '''
         Desenha a solda do autocad no programa
@@ -554,8 +627,9 @@ class Solder():
             'inter':False,
             'topo':False,
             'tipico':False,
-            'reforco':False,
-            'reforco%':False
+            'Reforco':False,
+            'Reforco%':False,
+            'descontinua':False
             }
     
         for key in id.keys():
