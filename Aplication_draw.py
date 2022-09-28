@@ -231,15 +231,15 @@ class Draw_Solder:
                 #construcao dos pontos
                 if 'meio' == cri:
                     if ori:
-                         obj_existe_handle['370'].append(APoint(-0.2714,-6.1968*amboslados+incremento))
-                    else:
                         obj_existe_handle['370'].append(APoint(-10.2714,-6.1968*amboslados+incremento))
+                    else:
+                        obj_existe_handle['370'].append(APoint(-0.2714,-6.1968*amboslados+incremento))
 
                 elif  'descontinua' == cri:
                     if ori:
-                        obj_existe_handle['39F'].append(APoint(22.7385,0.8891,0))
-                    else:
                         obj_existe_handle['39F'].append(APoint(-23.1849,0.8891,0))
+                    else:
+                        obj_existe_handle['39F'].append(APoint(22.7385,0.8891,0))
                 elif 'Reforco' == cri:
                     if ori:
                         obj_existe_handle['3A1'].append(APoint(5.8661,-7.4663*refoco_incremento,0))
@@ -267,7 +267,10 @@ class Draw_Solder:
                             else: 
                                 print('erro ao mover')
                                 pass
-            #[acad.ActiveDocument.HandleToObject(j).Delete() for j in obj_par_manipulacao.keys()]
+            try:
+                [acad.ActiveDocument.HandleToObject(j).Delete() for j in obj_existe_handle.keys()]
+            except:
+                print('ocorreu um erro ao tentar deletar os txt base')
             
         def base(zw,nome_base):
             '''
@@ -423,7 +426,7 @@ class Draw_Solder:
                     zw.model.AddLine(p1,p2)
 
                 elif 'convexo' in nome_base:
-                    c = APoint(-4.977110378108507, -0.11062264899499308, 0.0)
+                    c = APoint(-4.977110378108507*i, -0.11062264899499308, 0.0)
                     r = 3.5526110509915334
                     end = 5.242397665338469
                     start = 4.18238029543091
@@ -513,10 +516,6 @@ class Draw_Solder:
                     p1 = APoint(-5*i,-7.5572*j,0)
                     p2 = APoint(-1.75*i,-7.5572*j,0)
                     zw.model.AddLine(p1,p2)
-
-            else:
-                self.acad.ActiveDocument.HandleToObject('3A1').Delete()
-
 
             for obj in zw.iter_objects(['Line','Arc']):
                     obj.Color = 1
