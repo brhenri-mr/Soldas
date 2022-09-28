@@ -97,7 +97,11 @@ id = {
     'contorno':'',
     'acabamento':'',
     'intercalado':'', 
-    'expA':'','expB':'',
+    'expA':'',
+    'expB':'',
+    'expREF':'',
+    'expCOMS':'',
+    'expCOMI':'',
     'Reforco':'',
     'tipico':'',
     'Base_m_i':'',
@@ -189,7 +193,7 @@ while True:
         #---------------------------INSERIR---------------------------
         if att.verificar_arquivo(bloco_arquivo):
             bloco_cad.inserir_bloco(bloco_arquivo, ponto)
-            bloco_cad.espessura({'REF':values['-REF-'],'CORDAO':[values['-ESP_B-'],values['-ESP_A-']]})
+            bloco_cad.espessura({'REF':[values['-REF-'],values['-COMSREF-'],values['-COMIREF-']],'CORDAO':[values['-ESP_B-'],values['-ESP_A-']]})
             if values['-CAMPO2-']:
                 bloco_cad.descontinua(values['-INPUTTXTCAMPO2-'])
         else:
@@ -237,6 +241,10 @@ while True:
         window['-TREF-'].Update(visible=ref)
         window['-REF-'].Update(visible=ref)
 
+    elif event == '-REF-':
+        grafico.apagar(id['expREF'])
+        id['expREF'] = grafico.espessura([values['-REF-']],'Reforco',True,direcao=True)
+
     elif event == '-COMSCHECKREF-':
         if values['-COMSCHECKREF-']:
             ref = True
@@ -244,7 +252,6 @@ while True:
         else:
             ref = False
             grafico.apagar(id['m_reforco_s'])
-            pass
         window['-COMSREF-'].Update(visible=ref)
 
     elif event == '-COMICHECKREF-':
@@ -256,6 +263,14 @@ while True:
             grafico.apagar(id['m_reforco_i'])
             pass
         window['-COMIREF-'].Update(visible=ref)
+    
+    elif event == '-COMSREF-':
+        grafico.apagar(id['expCOMS'])
+        id['expCOMS'] = grafico.espessura([values['-COMSREF-']],'Reforco',True,direcao=False)
+
+    elif event == '-COMIREF-':
+        grafico.apagar(id['expCOMI'])
+        id['expCOMI'] = grafico.espessura([values['-COMIREF-']],'Reforco',True,direcao=True)
 
     #-------------------------Desenho---------------------------
 

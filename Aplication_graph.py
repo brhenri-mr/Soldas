@@ -72,7 +72,6 @@ class Pre_visualizacao():
                                     (190,200),(190+48.5,200-48.5*i),
                                     (190,200),(190-48.5,200-48.5*i)], color='red')
 
-
     def v_curvo(self,reg=True):
         '''
         Desenha uma solda v curva basica
@@ -193,9 +192,6 @@ class Pre_visualizacao():
 
         return self.janela.draw_lines([(190,200),(190,200-126*i),(190+48.5,200-126*i+48.5*i),(190,200-126*i+48.5*i)],color='red')
 
-    def solda_continua(self, orientacao):
-        pass
-
     def solda_ambos_os_lados(self,nome):
 
         '''
@@ -223,7 +219,6 @@ class Pre_visualizacao():
             id1 = self.janela.draw_arc((195,247),(295,147),90,90,style ='arc' ,arc_color='red')
             id2 = self.janela.draw_arc((85,250),(185,150),-90,90,style ='arc' ,arc_color='red') 
             return [id1,id2]
-
     
     def tipico(self,ori=True):
         '''
@@ -257,7 +252,6 @@ class Pre_visualizacao():
             id = self.janela.draw_text('('+passo+')',(270,215), color='yellow',font=1.5)
         return id
 
-
     def intercalado(self,id_old):
         '''
         Desenha solda com intercalada
@@ -290,10 +284,7 @@ class Pre_visualizacao():
 
         return self.janela.draw_circle(c, 17.5 ,line_color='red')
 
-    def solda_continua(self, orientacao):
-        pass
-
-    def espessura(self,exps,base,unidade,*args,**kwargs):
+    def espessura(self,exps,base,unidade,direcao=True,*args,**kwargs):
         '''
         Insere no desenho de pré-visualização as espessuras de solda, há dois tipos de funcionamento:
         inserção da base como criterio, quando se clica em ambos os lados.
@@ -307,9 +298,17 @@ class Pre_visualizacao():
         unidade = Parametro que indica se a solda é milimetro ou angulo. Por padrão é milimetro
         unidade: bool
 
+        direcao = Orientcao do txt da espessura, cima ou embaixo.Por padrao é para baixo, ou seja,
+        True
+
         *args = Parametro adicional da solda, caso preciso
         *args:tuple
         '''
+
+        if direcao:
+            correcao_direcao = 1
+        else:
+            correcao_direcao = 2.92
 
         if base =='Amboslados':
             if len(args)>0:
@@ -331,6 +330,7 @@ class Pre_visualizacao():
                     exps = [exps[0],exps[0]]
                 else:
                     return ''
+
         else:
             # base continua sendo base
 
@@ -338,24 +338,26 @@ class Pre_visualizacao():
                 pontos = [(155 - (len(exps[0])-1),175.75),(178- (len(exps[1])-1)*2,224.25)]
 
             elif base in ['FILETE','J']:
-                pontos = [(170-(len(exps[0])-1)*2,175.75)]
+                pontos = [(170-(len(exps[0])-1)*2,175.75*correcao_direcao)]
 
             elif base == 'TOPO':
-                pontos = [(190.5-(len(exps[1])-1)*2,130)]
+                pontos = [(190.5-(len(exps[1])-1)*2,130*correcao_direcao)]
 
             elif base == 'V':
-                pontos = [(190.5-(len(exps[1])-1)*2,130)]
+                pontos = [(190.5-(len(exps[1])-1)*2,130*correcao_direcao)]
 
             elif base == 'V CURVO':
                 return ''
             
             elif base =='BISEL':
                 if unidade:
-                    pontos = [(212-(len(exps[0])-1)*2,130),(170-(len(exps[1])-1)*2,175.75)]
+                    pontos = [(212-(len(exps[0])-1)*2,130),(170-(len(exps[1])-1)*2,175.75)*correcao_direcao]
                     exps = exps*2
                 else:
-                    pontos = [(212-(len(exps[1])-1)*2,130)]
+                    pontos = [(212-(len(exps[1])-1)*2,130)*correcao_direcao]
                     exps = exps
+            elif base == 'Reforco':
+                pontos = [(170-(len(exps[0])-1)*2,102.5*correcao_direcao)]
             else:
                 return ''
 

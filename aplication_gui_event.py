@@ -227,7 +227,7 @@ while True:
         grafico.deletar()
         id = grafico.solda_desenhada(id,False,base)
         
-    #-------------------------Reforço---------------------------
+     #-------------------------Reforço---------------------------
 
     elif event == '-CAMPO6-':
         if values['-CAMPO6-']:
@@ -240,6 +240,10 @@ while True:
         window['-TREF-'].Update(visible=ref)
         window['-REF-'].Update(visible=ref)
 
+    elif event == '-REF-':
+        grafico.apagar(id['expREF'])
+        id['expREF'] = grafico.espessura([values['-REF-']],'Reforco',True,direcao=True)
+
     elif event == '-COMSCHECKREF-':
         if values['-COMSCHECKREF-']:
             ref = True
@@ -247,7 +251,6 @@ while True:
         else:
             ref = False
             grafico.apagar(id['m_reforco_s'])
-            pass
         window['-COMSREF-'].Update(visible=ref)
 
     elif event == '-COMICHECKREF-':
@@ -259,6 +262,14 @@ while True:
             grafico.apagar(id['m_reforco_i'])
             pass
         window['-COMIREF-'].Update(visible=ref)
+    
+    elif event == '-COMSREF-':
+        grafico.apagar(id['expCOMS'])
+        id['expCOMS'] = grafico.espessura([values['-COMSREF-']],'Reforco',True,direcao=False)
+
+    elif event == '-COMIREF-':
+        grafico.apagar(id['expCOMI'])
+        id['expCOMI'] = grafico.espessura([values['-COMIREF-']],'Reforco',True,direcao=True)
 
     #-------------------------Desenho---------------------------
 

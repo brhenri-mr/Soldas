@@ -1,4 +1,3 @@
-
 from pyzwcad.types import APoint
 from os import replace
 from os.path import join
@@ -92,7 +91,8 @@ class Draw_Solder:
         exp: dict
         '''
         #Dados 
-        i = 0
+        i = -1
+        j = -1
 
         #Instancia do ultimo objeto adcionado no documento
         Entity = self.acad.ActiveDocument.HandleToObject(args[0] if len(args) != 0 else self.__handle)
@@ -102,12 +102,13 @@ class Draw_Solder:
         for attr in Entity.GetAttributes():
             if attr.TagString in ["CORDAO","REF"]:
                 if attr.TagString == 'REF':
+                    j +=1
                     input = str(exp[attr.TagString])
                 else:
+                    i +=1
                     input = str(exp[attr.TagString][i])
                 attr.TextString = input
                 attr.Update()
-                i += 1
 
     
     def apagar_bloco(self, handle):
@@ -119,6 +120,8 @@ class Draw_Solder:
         Cadastra uma solda que não esta no banco de dados
         nome = nome do arquivo da solda, o mesmo possui todas as especificações da solda
         nome:str
+        unidade = unidade escolhida pelo usuario: milimetros ou angulo. Usado para bisel
+        unidade: Bool
         '''
 
         def inicializacao(zw):
@@ -133,135 +136,144 @@ class Draw_Solder:
                 zw.doc.Open(local_path)
                 sleep(1)
 
-        def manipulat_txt_cad(zw,criterio,ori,amboslados,nome,acad = self.acad):
+        def manipulat_txt_cad(zw,nome,unidade,acad=self.acad):
             '''
             Manipula o attribute txt do arquivo template original, o colocando no lugar
-            e escolhendo a solda com a justificy mais adequada
-            criterio = criterio para escala da justificy
-            criterio:list
-            ori = orientação do desenho
-            ori:int
-            amboslados = sinaliza ao programa que a solda a ser inserida é ambos os lados
-            amboslados: int
+            e escolhendo a solda com a justificy mais adequada. Não abarca a manipualcao
+            do texto especifico pasa reforco
+
+            nome = string do nome da solda
+            nome:str
+            unidade = Valor boolenano que indica qual unidade será usada no desenho. Por
+            padrão adota-se True para milimetros
+            unidade:bool
             '''
+
+            def criterio_de_desenho(nome,unidade):
+
+                nomes = []
+                saida_nomes = []
+                ori_S = []
+                subs = {
+                    'filete':'esquerda',
+                    'v_curvo':'meio',
+                    '_v_':'meio',
+                    'bisel':'meio',
+                    'bisel_curvo':'',
+                    'topo':'meio',
+                    'descontinua':'descontinua',
+                    'Reforco':'Reforco'
+                }
+
+                #criacao do vec nomes
+                if '%' in nome:
+                    pos_misto  = nome.index('%')
+                    nomes.append(nome[:pos_misto])
+                    if '#' in nome[pos_misto:]:
+                        #dados aulixares
+                        pos_ref = nome.index('#')
+                        ref_sup = nome[:pos_ref]
+                        ref_inf = nome[pos_misto:]
+                        #criacao vec orientacao reforco
+                        ori_S.append('Reforco' in ref_sup)
+                        ori_S.append('Reforco' in ref_inf)
+                        #criacao vec nomes 
+                        nomes.append(ref_sup)
+                        nomes.append(nome[pos_ref:])
+                    else:
+                        nomes.append(nome[pos_misto:])
+                else:
+                    nomes.append(nome)
+                for key in subs.keys():
+                    for n in nomes:
+                        if key in n:
+                            if key not in ['Reforco','descontinua']:
+                                for _ in range(2 if 'amboslados' in n else 1):
+                                    if key =='bisel' and unidade:
+                                        saida_nomes.append('esquerda')
+                                    saida_nomes.append(subs[key])
+                            else:
+                                saida_nomes.append(subs[key])
+                return saida_nomes, 'direita' in nome,ori_S
+
             #Dados base
-            apagar = []
-            text_base_handle = []
-            text_base_posi = []
+            refoco_incremento = 0
+            usado = []
+            obj_existe_handle = {
+                '39F':[],
+                '370':[],
+                '1B8':[],
+                '3A1':[]
+                }
 
-
-            #tramento do criterio
-            if 'descontinua' in nome:
-                criterio = [criterio,'descontinua']
-            else:
-                criterio = [criterio]
-
-            if amboslados == -1:
-                incremento = -1.8
-            else:
-                incremento = 0 
-            
+            criterio,ori,ori_S = criterio_de_desenho(nome,unidade)
 
             #Posição do txt
-            if 'meio' in criterio:
-                text_base_handle.append('370')
-                if ori == 1:
-                    text_base_posi.append(APoint(-10.2714,-6.1968*amboslados+incremento))
+            for cri in criterio:
+                #condicao de amboslados
+                if cri in usado:
+                    amboslados = -1
+                    incremento = -1.8
                 else:
-                    text_base_posi.append(APoint(-0.2714,-6.1968*amboslados+incremento))
-            elif 'delete' in criterio:
-                text_base_handle.append('')
-            else:
-                text_base_handle.append('1B8')
-                if ori == 1: #direita
-                    text_base_posi.append(APoint(-16.4891,-2.6215*amboslados+incremento))
-                else: #esquerda
-                    text_base_posi.append(APoint(-7.0816,-2.6215*amboslados+incremento))
-            if  'descontinua' in criterio:
-                text_base_handle.append('39F')
-                if ori:
-                    text_base_posi.append(APoint(-23.1849,0.8891,0))
-                else:
-                    text_base_posi.append(APoint(22.7385,0.8891,0))
-
-            for obj in zw.iter_objects(['AcDbAttributeDefinition']):
-
-                if obj.handle in text_base_handle:
-                    local_analise  = text_base_handle.index(obj.handle)
-
-                    if amboslados == -1 and obj.handle !='39F':
-                        obj.Copy()
-
-                    antigo = obj.InsertionPoint
-
-                    for _ in range(50):
-                        #Tenta mover o bloco, as vezes nao vai de primeira, por isso o While
-                        obj.Move(APoint(obj.InsertionPoint),APoint(text_base_posi[local_analise]))
-                        if antigo == obj.InsertionPoint:
-                            print('falha')
-                        else:
-                            print('sucesso')
-                            break
-                else:
-                    if obj.handle == '3A1':
-                        pass
+                    amboslados = 1
+                    incremento = 0
+                #condicao de reforco
+                if len(ori_S)>0:
+                    if refoco_incremento != 0: #significa que ja foi usada uma direcao
+                        refoco_incremento= 1 if refoco_incremento == -0.8 else -0.8
                     else:
-                        apagar.append(obj.handle)
-            [acad.ActiveDocument.HandleToObject(j).Delete() for j in apagar]
-        
-        def manipular_txt_reforco(zw,ori=True,ori_S=True,vezes=0):
-            '''
-            Manipula o texto especifico da solda, seu motivo de existencia se justifica
-            pela excessiva complexidade do manipula texto de lidar com criterios adicionais
+                        if ori_S[1]:
+                            refoco_incremento = -0.8
+                        elif ori_S[0]:
+                            refoco_incremento = 1
+                else:
+                    refoco_incremento = 1
+                #construcao dos pontos
+                if 'meio' == cri:
+                    if ori:
+                         obj_existe_handle['370'].append(APoint(-0.2714,-6.1968*amboslados+incremento))
+                    else:
+                        obj_existe_handle['370'].append(APoint(-10.2714,-6.1968*amboslados+incremento))
 
-            zw = aplicação do ZwCAD
-            zw: ZwCAD()
-            ori = orientação do desenho, direita ou esquerda. Por padrão adota-se como True
-            para esquerda
-            ori:Bool
-            ori_S = orientação do desenho, superior ou inferior. POr padrão adota-se como True
-            para baixo
-            ori:Bool
-            vezes = quantidades de manipulações a serem feitas no total, parametro serve para 
-            informar a funcao da necessidade ou nao de copiar o txt base. O valor padrão 
-            estabelecido foi um qualquer
-            vezes: int
-            '''
-            #Dados estáticos
-            txt_handle = '3A1'
-
-            #orientacao superior ou inferior
-            if ori_S:
-                i = 1
-            else:
-                i = -1
-
-            #orientacao direita e esquerda
-            text_base_posi = APoint(-10.6035,-10.1243*i,0) if ori else APoint(5.8661,-7.4663*i,0)
-
+                elif  'descontinua' == cri:
+                    if ori:
+                        obj_existe_handle['39F'].append(APoint(22.7385,0.8891,0))
+                    else:
+                        obj_existe_handle['39F'].append(APoint(-23.1849,0.8891,0))
+                elif 'Reforco' == cri:
+                    if ori:
+                        obj_existe_handle['3A1'].append(APoint(5.8661,-7.4663*refoco_incremento,0))
+                    else:
+                        obj_existe_handle['3A1'].append(APoint(-10.6035,-10.1243*refoco_incremento,0))
+                else:
+                    if ori: #direita
+                        obj_existe_handle['1B8'].append(APoint(-7.0816,-2.6215*amboslados+incremento))
+                    else: #esquerda
+                        obj_existe_handle['1B8'].append(APoint(-16.4891,-2.6215*amboslados+incremento))
+                usado.append(cri)
+            print(criterio)
+            sleep(0.4)
+            #movimentacao dos textos
             for obj in zw.iter_objects(['AcDbAttributeDefinition']):
-                if obj.handle == txt_handle:
-                    antigo = obj.InsertionPoint
-                    #caso de ter duas soldas de reforço 
-                    if vezes==2 and i==-1:
-                        obj.Copy()
-
-                    for _ in range(50):
-                        sleep(0.5)
-                        obj.Move(APoint(obj.InsertionPoint),text_base_posi)
-                        if antigo == obj.InsertionPoint:
-                            pass
-                        else:
-                            break
+                if obj.handle in obj_existe_handle.keys():
+                    for ponto in obj_existe_handle[obj.handle]:
+                        obj_par_manipulacao = obj.Copy()
+                        while True:
+                            obj_par_manipulacao.Move(APoint(obj_par_manipulacao.InsertionPoint),ponto)
+                            sleep(0.4)
+                            if obj.InsertionPoint != obj_par_manipulacao.InsertionPoint: 
+                                print('sucesso')
+                                break
+                            else: 
+                                print('erro ao mover')
+                                pass
+            #[acad.ActiveDocument.HandleToObject(j).Delete() for j in obj_par_manipulacao.keys()]
             
-
-        def base(zw,nome_base,unidade):
+        def base(zw,nome_base):
             '''
             Desenha a solda base
             nome_base = nome da solda
             nome_base:str
-            unidade = ang ou milimetro, por padrão True é milimetro
-            unidade:Bool
             '''
 
             if 'direita' in nome_base:
@@ -294,8 +306,6 @@ class Draw_Solder:
                     p1 = APoint(-5*i,-3.25*vez,0)
                     p2 = APoint(-1.75*i,0,0)
                     zw.model.AddLine(p1,p2)
-                    #txt
-                    manipulat_txt_cad(zw,'esquerda',i,vez,nome_base)
 
                     #Alterar nome_base (caso seja o misto)
                     if '%' in nome_base:
@@ -319,9 +329,6 @@ class Draw_Solder:
                     start = 3.141592653589793
                     zw.model.AddArc(c,r,start,end)
 
-                    #text
-                    manipulat_txt_cad(zw,'delete',i,vez,nome_base)
-
                     #Alterar nome_base (caso seja o misto)
                     if '%' in nome_base:
                         nome_base = nome_base_parte_2
@@ -341,12 +348,6 @@ class Draw_Solder:
                     p1 = APoint(-2*i,-3*vez,0)
                     p2 = APoint(-5,0,0)*i
                     zw.model.AddLine(p1,p2)
-
-                    #texto
-                    if unidade:
-                        manipulat_txt_cad(zw,'esquerda',i,vez,nome_base)
-
-                    manipulat_txt_cad(zw,'meio',i,vez,nome_base)
 
                     #Alterar nome_base (caso seja o misto)
                     if '%' in nome_base:
@@ -368,8 +369,6 @@ class Draw_Solder:
                     p2 = APoint(-5.9389*i,0,0)
                     zw.model.AddLine(p1,p2)
 
-                    #Correção da texto
-                    manipulat_txt_cad(zw,'meio',i,vez,nome_base)
 
                     #Alterar nome_base (caso seja o misto)
                     if '%' in nome_base:
@@ -408,9 +407,6 @@ class Draw_Solder:
                     p1 = APoint(-3.2471*i,-3*vez,0)
                     p2 = APoint(-5,0,0)*i
                     zw.model.AddLine(p1,p2)
-
-                    #texto
-                    manipulat_txt_cad(zw,'meio',i,vez,nome_base)
 
                     #Alterar nome_base (caso seja o misto)
                     if '%' in nome_base:
@@ -518,8 +514,6 @@ class Draw_Solder:
                     p2 = APoint(-1.75*i,-7.5572*j,0)
                     zw.model.AddLine(p1,p2)
 
-                    #txt
-                    manipular_txt_reforco(self.zw,ori=ori, ori_S=True if j==1 else False,vezes=len(vec))
             else:
                 self.acad.ActiveDocument.HandleToObject('3A1').Delete()
 
@@ -545,8 +539,9 @@ class Draw_Solder:
 
 
         inicializacao(self.zw)
-        base(self.zw,nome,unidade)
+        base(self.zw,nome)
         acabamentos(self.zw,nome)
+        manipulat_txt_cad(self.zw,nome,unidade)
         finalizacao(self.zw,nome)
 
 class Solder():
@@ -556,7 +551,8 @@ class Solder():
 
     def tipo(self,v) -> str:
         '''
-        Faz a codificação do nome da solda pelo tipo de dados inserido pelo usuário
+        Faz a codificação do nome da solda pelo tipo de dados inserido pelo usuário.Retorna
+        uma str com o nome da solda
         values = dicionario dos valores inseridos no gui
         valeus: dict
         '''
@@ -583,8 +579,8 @@ class Solder():
             '-CAMPO4-':'inter',
             '-CAMPO5-':'contorno',
             '-CAMPO6-':'Reforco',
-            '-COMSCHECKREF-':'Reforco',
-            '-COMICHECKREF-':'Reforco#',
+            '-COMSCHECKREF-':'Reforco#',
+            '-COMICHECKREF-':'Reforco',
             '-CAMPO7-':'tipico',
             '-CAMPO2-':'descontinua',
             '-IRETO-':'reto',
@@ -608,11 +604,17 @@ class Solder():
                         break
         return solda_block
     
-    def solda_desenhada(self,nome):
+    def solda_desenhada(self,nome)->dict:
 
         '''
-        Desenha a solda do autocad no programa
+        Desenha a solda do autocad no programa.Retorna um id contendo valores boleanos para 
+        cada caracteristica da solda. Essa informacao é usada para pre-configurar a janela 
+        do duplo click.Exemplo: se for filete, no id tera um filete True
+
+        nome = Nome da solda gerada pelo programa
+        nome:str
         '''
+        nomes = []
         id = {
             'filete':False,
             'Misto':False,
@@ -628,24 +630,33 @@ class Solder():
             'topo':False,
             'tipico':False,
             'Reforco':False,
-            'Reforco%':False,
+            'Reforco#':False,
             'descontinua':False
             }
-    
+
+        if '%' in nome or '#' in nome:
+            id['Misto'] =True
+
         for key in id.keys():
-            if key == 'reforco%':
-                id['Misto'] =True
-            else:
-                if key in nome:
+  
+            if key in nome:
+                if '#' in nome:
+                    pos  = nome.index('#')
+                    nomes.append(nome[:pos])
                     if '%' in nome:
-                        pos  = nome.index('%')
-                        for parte in [nome[:pos],nome[pos:]]:
-                            if 'reforco%' in parte:
-                                id['reforco%'] =True
+                        pos_base = nome.index('%')
+                        nomes.append(nome[pos_base:])
+                        nomes.append(nome[:pos_base])
+                    else:
+                        nomes.append(nome[pos:])
+                    for parte in nomes:
+                        if 'Reforco#' in parte:
+                                id['Reforco#'] =True
+                        elif key in parte:
+                            if id[key]:
+                                id['amboslados'] = True
                             else:
                                 id[key] = True
-                    else:
-                        id[key] =True
-
+                else:
+                    id[key] =True
         return id
-    
