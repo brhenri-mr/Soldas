@@ -124,8 +124,7 @@ while True:
                         amboslados=codigo['amboslados'],
                         inter=codigo['inter'],
                         descontinua=codigo['descontinua'],
-                        reforco=codigo['Reforco'],
-                        reforco_S=codigo['Reforco%']
+                        reforco=codigo['Reforco']
                     )
                     grafico = Pre_visualizacao(janela_um.Element("-GRAPH-"))
                     #parametros

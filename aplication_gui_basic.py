@@ -5,6 +5,7 @@ from Aplication_graph import Pre_visualizacao
 from pyzwcad import ZwCAD
 import time
 from win32com.client import Dispatch
+from os.path import join
 
 
 
@@ -24,7 +25,7 @@ def main_test():
     filete_propriedades = [ 
                             [sg.Text('Orientação')],
                             [sg.Radio('Direita','Ori.', key='-ODIR-', default=True, enable_events=True), sg.Radio('Esquerda','Ori.', key='-OESQ-',enable_events=True)],
-                            [sg.Radio('Superior','Reg.', key='-SUP-', default=False, enable_events=True), sg.Radio('Inferior','Reg.', key='-INF-',enable_events=True, default=True)],
+                            [sg.Radio('Superior','Reg.', key='-SUP-', default=False, enable_events=True,disabled=True), sg.Radio('Inferior','Reg.', key='-INF-',enable_events=True, default=True,disabled=True)],
                             [sg.Text('Acabamentos')],
                              [sg.Radio('Reto','Inf.', key='-IRETO-', enable_events=True),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\reto.png'),
                             sg.Radio('Convexo','Inf.',key='-ICONV-', enable_events=True),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\convexo.png'),
@@ -54,7 +55,7 @@ def main_test():
                 sg.Radio('Bisel','Prop.' ,enable_events=True, key='-BISEL-'),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\bisel_curvo.png', key='-IMBISEL-',enable_events=True),
                 sg.Radio('Bisel Curvo','Prop.' ,enable_events=True, key='-BISEL_CURVO-'),sg.Image(source=r'C:\Users\breno\Desktop\Projetos\Soldas\imagens\bisel.png', key='-IMBISEL_CURVO-',enable_events=True),
                 sg.Radio('J','Prop.' ,enable_events=True, key='-J-'),
-                sg.Radio('Misto','Prop.' ,enable_events=True, key='-MISTO-')]])],
+                sg.Radio('Misto','Prop.' ,enable_events=True, key='-MISTO-',disabled=True)]])],
             [
                 sg.Column([
                         [sg.Text('Espessura(mm)',size=(25)),sg.Text('    '),sg.Text('Misto',justification='c')],
@@ -71,7 +72,7 @@ def main_test():
                         element_justification='l')],
             [sg.Column(layout =filete_propriedades,key="Propriedades"),graph_elem],
             [sg.Button('Ok'), sg.Button('Reset'), sg.Button('Cancel')]]
-    return sg.Window('Soldas',layout, finalize=True, icon=r'C:\Users\breno\Desktop\Projetos\Soldas\soldering_iron-48_46707.ico', titlebar_icon='soldering_iron-48_46707.ico')
+    return sg.Window('Soldas',layout, finalize=True, icon=r'C:\Users\breno\Desktop\Projetos\Soldas\soldering_iron-48_46707.ico', titlebar_icon='soldering_iron-48_46707.ico',return_keyboard_events=True,use_default_focus=False)
 
 def favoritos():
     sg.theme('SystemDefaultForReal')
@@ -111,6 +112,17 @@ id = {
     'Descontinuo':''
     }
 
+teclas_codigo = {
+    'F':'Solda_filete_',
+    'D':'direita_',
+    'E':'esquerda_',
+    'T':'Solda_topo_',
+    'A':'amboslados_',
+    'O':'campo_',
+    'C':'contorno_'
+    }
+
+teclas_clicadas = []
 
 #Tipo estaticos
 base = 'FILETE' #variavel para auxiliar no desenho
@@ -134,8 +146,23 @@ while True:
 while True:
 
     window,event, values = sg.read_all_windows()
+
+    #-----------------------NOME ARQUIVO-----------------
     bloco_arquivo = arquivo_nome.tipo(values)
-    print(bloco_arquivo)
+    print(event)
+    if event in ['F','Shift_L:16','T','A','C','O','D','E']:
+        '''
+        F = filete
+        T = topo
+        A = amboslados
+        C = Contorno 
+        O = Solda em Obra
+        D = Direita 
+        E = Esquerda
+        '''
+        print(type(event))
+        if len(teclas_clicadas)>=2:
+            pass 
     '''
     toda a vez que um evento é disparado o while roda
     '''
@@ -275,7 +302,7 @@ while True:
     #-------------------------Desenho---------------------------
 
     elif event == '-FILETE-':
-        window['-MIM-'].Update(disabled=False)
+        window['-MIM-'].Update(disabled=False,value=True)
         window['-ANG-'].Update(disabled=True)
         window['-ESP_A-'].Update(disabled=False)
         window['-ESP_B-'].Update(disabled=False)

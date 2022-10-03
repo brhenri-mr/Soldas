@@ -284,7 +284,7 @@ class Pre_visualizacao():
 
         return self.janela.draw_circle(c, 17.5 ,line_color='red')
 
-    def espessura(self,exps,base,unidade,direcao=True,*args,**kwargs):
+    def espessura(self,exps,base,unidade,*args,direcao=True):
         '''
         Insere no desenho de pré-visualização as espessuras de solda, há dois tipos de funcionamento:
         inserção da base como criterio, quando se clica em ambos os lados.
@@ -309,8 +309,8 @@ class Pre_visualizacao():
             correcao_direcao = 1
         else:
             correcao_direcao = 2.92
-
         if base =='Amboslados':
+            print(exps,base,unidade,direcao,args)
             if len(args)>0:
                 base = args[0]
                 if args[0] == 'BISEL':

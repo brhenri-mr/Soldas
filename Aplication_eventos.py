@@ -2,6 +2,8 @@
 from win32com.client import getevents, Dispatch
 from Aplication_Att import Visualizar_att
 from pyautogui import press
+import pythoncom
+from time import sleep
 
 '''
 Do nada para de funcionar sem o menor motivo, e quando escreve mais linhas
@@ -25,6 +27,8 @@ class ZwCADEvents(getevents("ZwCAD.Application")):
             self.ok = False
     
 
+ok =    ZwCADEvents()
+'''
 ok = ZwCADEvents(Dispatch('ZwCAD.Application'))
 
 def verificar_duplo_click():
@@ -36,3 +40,7 @@ def verificar_duplo_click():
         return False
     except:
         return False
+'''
+while True:
+    pythoncom.PumpWaitingMessages()
+    sleep(0.1)

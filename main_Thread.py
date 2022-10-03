@@ -4,6 +4,7 @@ from subprocess import call
 from sys import executable
 from Aplication_Att import Visualizar_att
 from Aplication_eventos import verificar_duplo_click
+from time import sleep
 
 def inicia_programa(nome_arquivo):
     call([executable, f'{nome_arquivo}'])
@@ -34,4 +35,5 @@ if __name__ == "__main__":
 
         if not processos[0].is_alive():
             break
+        sleep(0.1)
 
