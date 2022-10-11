@@ -1,7 +1,8 @@
 from pyzwcad.types import APoint
-from os import replace
+from os import replace, getcwd
 from os.path import join
 from time import sleep
+import shutil
 
 class Draw_Solder:
 
@@ -11,7 +12,7 @@ class Draw_Solder:
         self.zw = zw
 
         #local dos blocos
-        self.__local_dos_blocos = r'C:\Users\breno\Desktop\Projetos\Soldas\blocos'
+        self.__local_dos_blocos = join(getcwd(),'blocos')
         #Número padrão para o calculo da escala automatica
         self.__escala_padrao = 41.681469640756404
         #Escala automatica
@@ -247,9 +248,9 @@ class Draw_Solder:
                         obj_existe_handle['3A1'].append(APoint(-10.6035,-10.1243*refoco_incremento,0))
                 else:
                     if ori: #direita
-                        obj_existe_handle['1B8'].append(APoint(-7.0816,-2.6215*amboslados+incremento))
-                    else: #esquerda
                         obj_existe_handle['1B8'].append(APoint(-16.4891,-2.6215*amboslados+incremento))
+                    else: #esquerda
+                        obj_existe_handle['1B8'].append(APoint(-7.0816,-2.6215*amboslados+incremento))
                 usado.append(cri)
             print(criterio)
             sleep(0.4)
@@ -532,7 +533,7 @@ class Draw_Solder:
             path = zw.doc.Path
             zw.doc.Close()
             if path != self.__local_dos_blocos:
-                replace(join(path,nome+'.dwg'),join(self.__local_dos_blocos,nome+'.dwg'))
+                shutil.move(join(path,nome+'.dwg'),join(self.__local_dos_blocos,nome+'.dwg'))
 
             return 0
 
