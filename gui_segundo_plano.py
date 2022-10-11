@@ -104,6 +104,14 @@ while True:
             grafico.topo()
             teclas_clicadas.append('t')
 
+    elif keyboard.is_pressed('v'):
+        print('sucesso')
+        if 'v' in teclas_clicadas:
+            pass
+        else:
+            grafico.v()
+            teclas_clicadas.append('t')
+
     elif keyboard.is_pressed('f'):
         print('sucesso')
         if 'f' in teclas_clicadas:
@@ -174,8 +182,10 @@ while True:
         if 'shift' in teclas_clicadas:
             nome = decodificar(teclas_clicadas)
             print(nome)
-
-            blocos.inserir_bloco(nome,'N_att')
+            try:
+                blocos.inserir_bloco(nome,'N_att')
+            except:
+                sg.popup('Solda não disponível')
 
     if event == sg.WIN_CLOSED:
         break
